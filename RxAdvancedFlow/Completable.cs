@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RxAdvancedFlow.internals.completable;
+using RxAdvancedFlow.disposables;
+using System.Threading;
 
 namespace RxAdvancedFlow
 {
@@ -63,6 +65,52 @@ namespace RxAdvancedFlow
                 SubscriberToCompletableSubscriber<T> stcs = new SubscriberToCompletableSubscriber<T>(cs);
 
                 source.Subscribe(stcs);
+            });
+        }
+
+        public static ICompletable ToCompletable<T>(this ISingle<T> source)
+        {
+            return Create(cs =>
+            {
+                SingleSubscriberToCompletableSubscriber<T> sscs = new SingleSubscriberToCompletableSubscriber<T>(cs);
+
+                source.Subscribe(sscs);
+            });
+        }
+
+        public static ICompletable Amb(this ICompletable[] sources)
+        {
+            return Create(cs =>
+            {
+                AmbCompletableSubscriber acs = new AmbCompletableSubscriber(cs);
+
+                foreach (ICompletable c in sources)
+                {
+                    if (acs.IsDisposed())
+                    {
+                        break;
+                    }
+
+                    c.Subscribe(acs);
+                }
+            });
+        }
+
+        public static ICompletable Amb(this IEnumerable<ICompletable> sources)
+        {
+            return Create(cs =>
+            {
+                AmbCompletableSubscriber acs = new AmbCompletableSubscriber(cs);
+
+                foreach (ICompletable c in sources)
+                {
+                    if (acs.IsDisposed())
+                    {
+                        break;
+                    }
+
+                    c.Subscribe(acs);
+                }
             });
         }
     }
