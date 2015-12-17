@@ -41,7 +41,7 @@ namespace RxAdvancedFlow
                 } catch (Exception e1)
                 {
                     Console.WriteLine(e.ToString());
-                    Console.WriteLine(e2.ToString());
+                    Console.WriteLine(e1.ToString());
                 }
             }
         }
