@@ -18,7 +18,14 @@ namespace RxAdvancedFlow.internals.completable
 
         public void Subscribe(ICompletableSubscriber s)
         {
-            
+            try
+            {
+                onSubscribe(s);
+            }
+            catch (Exception e)
+            {
+                RxAdvancedFlowPlugins.OnError(e);
+            }
         }
     }
 }
