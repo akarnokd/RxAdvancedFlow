@@ -57,7 +57,8 @@ namespace RxAdvancedFlow.processors
                 {
                     Remove(cid);
                 }
-            } else
+            }
+            else
             {
                 Exception e = error;
                 if (e != null)

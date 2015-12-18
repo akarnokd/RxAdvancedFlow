@@ -17,6 +17,10 @@ namespace RxAdvancedFlow
         IWorker CreateWorker();
 
         long NowUtc();
+
+        void Start();
+
+        void Shutdown();
     }
 
     public interface IWorker : IDisposable
@@ -25,7 +29,7 @@ namespace RxAdvancedFlow
 
         IDisposable Schedule(Action action, TimeSpan delay);
 
-        IDisposable Schedule(Action action, TimeSpan initialDelay, TimeSpan period);
+        IDisposable SchedulePeriodically(Action action, TimeSpan initialDelay, TimeSpan period);
 
         long NowUtc();
     }

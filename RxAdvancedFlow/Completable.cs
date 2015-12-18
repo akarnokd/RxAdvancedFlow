@@ -8,6 +8,7 @@ using RxAdvancedFlow.internals.completable;
 using RxAdvancedFlow.disposables;
 using System.Threading;
 using RxAdvancedFlow.internals.disposables;
+using RxAdvancedFlow.internals.subscribers;
 
 namespace RxAdvancedFlow
 {
@@ -192,6 +193,88 @@ namespace RxAdvancedFlow
             });
         }
 
+        public static ICompletable Concat(this ICompletable[] sources)
+        {
+            return Concat(sources);
+        }
 
+        public static ICompletable Concat(this IEnumerable<ICompletable> sources)
+        {
+            return Create(cs =>
+            {
+                IEnumerator<ICompletable> it = sources.GetEnumerator();
+
+                ConcatCompletableSubscriber ccs = new ConcatCompletableSubscriber(cs, it);
+
+                cs.OnSubscribe(ccs);
+
+                ccs.OnComplete();
+            });
+        }
+
+        static readonly ICompletable EmptyCompletable = Create(cs =>
+        {
+            cs.OnSubscribe(EmptyDisposable.Empty);
+            cs.OnComplete();
+        });
+
+        static readonly ICompletable NeverCompletable = Create(cs => cs.OnSubscribe(EmptyDisposable.Empty));
+
+        public static ICompletable Empty()
+        {
+            return EmptyCompletable;
+        }
+
+        public static ICompletable Never()
+        {
+            return NeverCompletable;
+        }
+
+        public static ICompletable Throw(Exception e)
+        {
+            return Throw(() => e);
+        }
+
+        public static ICompletable Throw(Func<Exception> exceptionFactory)
+        {
+            return Create(cs =>
+            {
+                cs.OnSubscribe(EmptyDisposable.Empty);
+                cs.OnError(exceptionFactory());
+            });
+        }
+
+        public static ICompletable DoOnComplete(this ICompletable source, Action onCompleteCall)
+        {
+            return Create(cs =>
+            {
+                LambdaCompletableSubscriber lcs = new LambdaCompletableSubscriber(
+                    cs, d => { }, onCompleteCall, e => { }, () => { });
+
+                source.Subscribe(lcs);
+            });
+        }
+
+        public static ICompletable DoOnError(this ICompletable source, Action<Exception> onErrorCall)
+        {
+            return Create(cs =>
+            {
+                LambdaCompletableSubscriber lcs = new LambdaCompletableSubscriber(
+                    cs, d => { }, () => { }, onErrorCall, () => { });
+
+                source.Subscribe(lcs);
+            });
+        }
+
+        public static ICompletable DoAfterTerminate(this ICompletable source, Action onAfterTerminateCall)
+        {
+            return Create(cs =>
+            {
+                LambdaCompletableSubscriber lcs = new LambdaCompletableSubscriber(
+                    cs, d => { }, () => { }, e => { }, onAfterTerminateCall);
+
+                source.Subscribe(lcs);
+            });
+        }
     }
 }
