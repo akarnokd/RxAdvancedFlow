@@ -50,13 +50,17 @@
     <Compile Include="internals\completable\CompletableFromAction.cs" />
     <Compile Include="internals\completable\CompletableLift.cs" />
     <Compile Include="internals\completable\CompletableSubscriberToObserver.cs" />
+    <Compile Include="internals\completable\MergeCompletableSubscriber.cs" />
     <Compile Include="internals\completable\ObserverToCompletableSubscriber.cs" />
     <Compile Include="internals\completable\SingleSubscriberToCompletableSubscriber.cs" />
     <Compile Include="internals\completable\SubscriberToCompletableSubscriber.cs" />
     <Compile Include="internals\disposables\DisposableHelper.cs" />
     <Compile Include="internals\disposables\DisposableSubscription.cs" />
     <Compile Include="disposables\SetCompositeDisposable.cs" />
+    <Compile Include="internals\disposables\EmptyDisposable.cs" />
     <Compile Include="internals\OnSubscribeHelper.cs" />
+    <Compile Include="IScheduler.cs" />
+    <Compile Include="processors\CompletableProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RxAdvancedFlowPlugins.cs" />
     <Compile Include="Single.cs" />

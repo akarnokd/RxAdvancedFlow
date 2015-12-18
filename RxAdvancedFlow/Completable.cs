@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using RxAdvancedFlow.internals.completable;
 using RxAdvancedFlow.disposables;
 using System.Threading;
+using RxAdvancedFlow.internals.disposables;
 
 namespace RxAdvancedFlow
 {
@@ -113,5 +114,84 @@ namespace RxAdvancedFlow
                 }
             });
         }
+
+        public static ICompletable Merge(this ICompletable[] sources)
+        {
+            return Create(cs =>
+            {
+                MergeCompletableSubscriber mcs = new MergeCompletableSubscriber(cs);
+                mcs.SpWip(sources.Length);
+
+                foreach (ICompletable c in sources)
+                {
+                    if (mcs.IsDisposed() || mcs.LvWip() <= 0)
+                    {
+                        break;
+                    }
+
+                    c.Subscribe(mcs);
+                }
+            });
+        }
+
+        public static ICompletable Merge(this IEnumerable<ICompletable> sources)
+        {
+            return Create(cs =>
+            {
+                MergeCompletableSubscriber mcs = new MergeCompletableSubscriber(cs);
+                mcs.SpWip(1);
+
+                foreach (ICompletable c in sources)
+                {
+                    if (mcs.IsDisposed() || mcs.LvWip() <= 0)
+                    {
+                        break;
+                    }
+
+                    mcs.IncrementWip();
+                    c.Subscribe(mcs);
+                }
+
+                mcs.OnComplete();
+            });
+
+        }
+
+        public static ICompletable Defer(Func<ICompletable> factory)
+        {
+            return Create(cs =>
+            {
+                ICompletable c;
+
+                try {
+                    c = factory();
+                } catch (Exception e)
+                {
+                    EmptyDisposable.Error(cs, e);
+                    return;
+                }
+
+                c.Subscribe(cs);
+            });
+        }
+
+        public static ICompletable FromAction(Action action)
+        {
+            return Create(cs =>
+            {
+                cs.OnSubscribe(EmptyDisposable.Empty);
+                try
+                {
+                    action();
+                } catch (Exception e)
+                {
+                    cs.OnError(e);
+                    return;
+                }
+                cs.OnComplete();
+            });
+        }
+
+
     }
 }
