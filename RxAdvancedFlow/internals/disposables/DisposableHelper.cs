@@ -15,24 +15,26 @@ namespace RxAdvancedFlow.internals.disposables
         /// <summary>
         /// The single instance of an IDisposable which indicates a disposed state.
         /// </summary>
-        public static readonly IDisposable Instance = new DefaultDisposed();    
+        public static readonly IDisposable Disposed = new DefaultDisposed();    
 
         /// <summary>
         /// Atomically swaps in the common disposed instance and disposes any previous
         /// non-null content.
         /// </summary>
         /// <param name="d">The target field to swap with the common disposed instance</param>
-        public static void Terminate(ref IDisposable d)
+        public static bool Terminate(ref IDisposable d)
         {
             IDisposable a = Volatile.Read(ref d);
-            if (a != Instance)
+            if (a != Disposed)
             {
-                a = Interlocked.Exchange(ref d, Instance);
-                if (a != null && a != Instance)
+                a = Interlocked.Exchange(ref d, Disposed);
+                if (a != Disposed)
                 {
-                    a.Dispose();
+                    a?.Dispose();
+                    return true;
                 }
             }
+            return false;
         }
 
         /// <summary>
@@ -42,7 +44,7 @@ namespace RxAdvancedFlow.internals.disposables
         /// <returns>True if the field contains the common disposed instance.</returns>
         public static bool IsTerminated(ref IDisposable d)
         {
-            return Volatile.Read(ref d) == Instance;
+            return Volatile.Read(ref d) == Disposed;
         }
 
         /// <summary>
@@ -58,7 +60,7 @@ namespace RxAdvancedFlow.internals.disposables
             for (;;)
             {
                 IDisposable a = Volatile.Read(ref d);
-                if (a == Instance)
+                if (a == Disposed)
                 {
                     value?.Dispose();
                     return false;
@@ -85,7 +87,7 @@ namespace RxAdvancedFlow.internals.disposables
             for (;;)
             {
                 IDisposable a = Volatile.Read(ref d);
-                if (a == Instance)
+                if (a == Disposed)
                 {
                     value?.Dispose();
                     return false;
@@ -110,7 +112,7 @@ namespace RxAdvancedFlow.internals.disposables
             for (;;)
             {
                 IDisposable a = Volatile.Read(ref d);
-                if (a == Instance)
+                if (a == Disposed)
                 {
                     value?.Dispose();
                     return true;

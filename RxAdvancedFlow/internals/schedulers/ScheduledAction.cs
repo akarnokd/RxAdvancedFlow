@@ -35,7 +35,7 @@ namespace RxAdvancedFlow.internals.schedulers
 
         public void Run()
         {
-            if (Volatile.Read(ref cancel) != DisposableHelper.Instance)
+            if (Volatile.Read(ref cancel) != DisposableHelper.Disposed)
             {
                 try
                 {
@@ -51,18 +51,18 @@ namespace RxAdvancedFlow.internals.schedulers
         void Finish()
         {
             IDisposable c = Volatile.Read(ref parent);
-            if (c != DisposableHelper.Instance)
+            if (c != DisposableHelper.Disposed)
             {
                 c = Interlocked.CompareExchange(ref parent, Finished, c);
 
-                if (c != DisposableHelper.Instance)
+                if (c != DisposableHelper.Disposed)
                 {
                     (c as ICompositeDisposable)?.Delete(this);
                 }
             }
 
             c = Volatile.Read(ref cancel);
-            if (c != DisposableHelper.Instance)
+            if (c != DisposableHelper.Disposed)
             {
                 Interlocked.CompareExchange(ref cancel, Finished, c);
             }
@@ -75,7 +75,7 @@ namespace RxAdvancedFlow.internals.schedulers
             {
                 a = Interlocked.CompareExchange(ref cancel, c, null);
 
-                if (a == DisposableHelper.Instance)
+                if (a == DisposableHelper.Disposed)
                 {
                     c.Dispose();
                 }
@@ -86,9 +86,9 @@ namespace RxAdvancedFlow.internals.schedulers
         {
             IDisposable a = Volatile.Read(ref cancel);
 
-            if (a != Finished && a != DisposableHelper.Instance)
+            if (a != Finished && a != DisposableHelper.Disposed)
             {
-                a = Interlocked.CompareExchange(ref cancel, DisposableHelper.Instance, a);
+                a = Interlocked.CompareExchange(ref cancel, DisposableHelper.Disposed, a);
 
                 if (a != null)
                 {
@@ -98,11 +98,11 @@ namespace RxAdvancedFlow.internals.schedulers
 
             a = Volatile.Read(ref parent);
 
-            if (a != Finished && a != DisposableHelper.Instance)
+            if (a != Finished && a != DisposableHelper.Disposed)
             {
-                a = Interlocked.CompareExchange(ref parent, DisposableHelper.Instance, a);
+                a = Interlocked.CompareExchange(ref parent, DisposableHelper.Disposed, a);
 
-                if (a != Finished && a != DisposableHelper.Instance)
+                if (a != Finished && a != DisposableHelper.Disposed)
                 {
                     (a as ICompositeDisposable)?.Delete(this);
                 }

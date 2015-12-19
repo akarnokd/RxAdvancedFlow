@@ -35,7 +35,7 @@ namespace RxAdvancedFlow.internals.disposables
         /// <summary>
         /// This node represents the disposed state of this VersionedSoloDisposable class.
         /// </summary>
-        static readonly Node Disposed = new Node(long.MaxValue, DisposableHelper.Instance);
+        static readonly Node Disposed = new Node(long.MaxValue, DisposableHelper.Disposed);
 
         public VersionedSoloDisposable()
         {

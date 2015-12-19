@@ -51,14 +51,24 @@
     <Compile Include="disposables\MultipleAssignmentDisposable.cs" />
     <Compile Include="Flowable.cs" />
     <Compile Include="internals\completable\AmbCompletableSubscriber.cs" />
+    <Compile Include="internals\completable\CallbackCompletableSubscriber.cs" />
     <Compile Include="internals\completable\CompletableFromAction.cs" />
     <Compile Include="internals\completable\CompletableLift.cs" />
+    <Compile Include="internals\completable\CompletablePublisher.cs" />
+    <Compile Include="internals\completable\CompletableObservable.cs" />
     <Compile Include="internals\completable\CompletableSubscriberToObserver.cs" />
     <Compile Include="internals\completable\ConcatCompletableSubscriber.cs" />
+    <Compile Include="internals\completable\DelayCompletableSubscriber.cs" />
     <Compile Include="internals\completable\MergeCompletableSubscriber.cs" />
+    <Compile Include="internals\completable\ObserveOnCompletableSubscriber.cs" />
     <Compile Include="internals\completable\ObserverToCompletableSubscriber.cs" />
+    <Compile Include="internals\completable\OnErrorCompleteCompletableSubscriber.cs" />
+    <Compile Include="internals\completable\ResumeCompletableSubscriber.cs" />
     <Compile Include="internals\completable\SingleSubscriberToCompletableSubscriber.cs" />
+    <Compile Include="internals\completable\SubscribeOnCompletableSubscriber.cs" />
     <Compile Include="internals\completable\SubscriberToCompletableSubscriber.cs" />
+    <Compile Include="internals\completable\UnsubscribeOnCompletableSubscriber.cs" />
+    <Compile Include="internals\completable\UsingCompletableSubscriber.cs" />
     <Compile Include="internals\disposables\ActionDisposable.cs" />
     <Compile Include="internals\disposables\ActionWeakDisposable.cs" />
     <Compile Include="internals\disposables\DisposableHelper.cs" />
@@ -66,14 +76,22 @@
     <Compile Include="disposables\SetCompositeDisposable.cs" />
     <Compile Include="internals\disposables\EmptyDisposable.cs" />
     <Compile Include="internals\disposables\VersionedSoloDisposable.cs" />
+    <Compile Include="internals\InfiniteRepeat.cs" />
     <Compile Include="internals\OnSubscribeHelper.cs" />
     <Compile Include="internals\completable\LambdaCompletableSubscriber.cs" />
+    <Compile Include="internals\publisher\PublisherFromAction.cs" />
+    <Compile Include="internals\publisher\PublisherLift.cs" />
     <Compile Include="internals\schedulers\ScheduledAction.cs" />
+    <Compile Include="internals\single\SingleFromAction.cs" />
+    <Compile Include="internals\single\SingleLift.cs" />
+    <Compile Include="internals\subscriptions\EmptySubscription.cs" />
     <Compile Include="IScheduler.cs" />
     <Compile Include="processors\CompletableProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RxAdvancedFlowPlugins.cs" />
     <Compile Include="Single.cs" />
+    <Compile Include="subscribers\AbstractCompletableDisposable.cs" />
+    <Compile Include="subscribers\LatchedCompletableSubscriber.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

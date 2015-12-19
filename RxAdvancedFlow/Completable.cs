@@ -9,6 +9,8 @@ using RxAdvancedFlow.disposables;
 using System.Threading;
 using RxAdvancedFlow.internals.disposables;
 using RxAdvancedFlow.internals.subscribers;
+using RxAdvancedFlow.internals;
+using RxAdvancedFlow.subscribers;
 
 namespace RxAdvancedFlow
 {
@@ -279,22 +281,37 @@ namespace RxAdvancedFlow
 
         public static IDisposable Subscribe(this ICompletable source, Action onCompleteCall)
         {
-            throw new NotImplementedException();
+            return Subscribe(source, onCompleteCall, e => RxAdvancedFlowPlugins.OnError(e));
         }
 
         public static IDisposable Subscribe(this ICompletable source, Action onCompleteCall, Action<Exception> onErrorCall)
         {
-            throw new NotImplementedException();
+            CallbackCompletableSubscriber ccs = new CallbackCompletableSubscriber(onCompleteCall, onErrorCall);
+
+            source.Subscribe(ccs);
+
+            return ccs;
         }
 
         public static ICompletable OnErrorComplete(this ICompletable source)
         {
-            throw new NotImplementedException();
+            return Create(cs =>
+            {
+                source.Subscribe(new OnErrorCompleteCompletableSubscriber(cs));
+            });
+        }
+
+        public static ICompletable OnErrorResumeNext(this ICompletable source, ICompletable next)
+        {
+            return OnErrorResumeNext(source, e => next);
         }
 
         public static ICompletable OnErrorResumeNext(this ICompletable source, Func<Exception, ICompletable> nextSelector)
         {
-            throw new NotImplementedException();
+            return Create(cs =>
+            {
+                source.Subscribe(new ResumeCompletableSubscriber(cs, nextSelector));
+            });
         }
 
         public static ICompletable Using<S>(
@@ -303,42 +320,99 @@ namespace RxAdvancedFlow
             Action<S> stateDisposer,
             bool eager = true)
         {
-            throw new NotImplementedException();
+            return Create(cs =>
+            {
+                S state;
+
+                try
+                {
+                    state = stateSupplier();
+                }
+                catch (Exception ex)
+                {
+                    EmptyDisposable.Error(cs, ex);
+                    return;
+                }
+
+                ICompletable c;
+
+                try
+                {
+                    c = completableFactory(state);
+                }
+                catch (Exception ex)
+                {
+                    EmptyDisposable.Error(cs, ex);
+                    return;
+                }
+
+                c.Subscribe(new UsingCompletableSubscriber(cs, eager, () => stateDisposer(state)));
+            });
         }
 
-        public static ICompletable Repeat()
+        public static ICompletable Repeat(this ICompletable source)
+        {
+            return Concat(new InfiniteRepeat<ICompletable>(source));
+        }
+
+        public static ICompletable Repeat(this ICompletable source, long times)
+        {
+            return Concat(InfiniteRepeat<ICompletable>.RepeatFinite(source, times));
+        }
+
+        public static ICompletable RepeatUntil(this ICompletable source, Func<bool> shouldRepeat)
+        {
+            return Concat(InfiniteRepeat<ICompletable>.PredicateRepeatUntil(source, shouldRepeat));
+        }
+
+        public static ICompletable RepeatWhen(this ICompletable source, Func<IObservable<object>, IObservable<object>> whenFunction)
         {
             throw new NotImplementedException();
         }
 
-        public static ICompletable Repeat(long times)
+        public static ICompletable RepeatWhen(this ICompletable source, Func<IPublisher<object>, IPublisher<object>> whenFunction)
         {
             throw new NotImplementedException();
         }
 
-        public static ICompletable RepeatUntil(Func<bool> shouldRepeat)
+        public static ICompletable Retry(this ICompletable source)
         {
             throw new NotImplementedException();
         }
 
-        public static ICompletable RepeatWhen(Func<IObservable<object>, IObservable<object>> whenFunction)
+        public static ICompletable Retry(this ICompletable source, long times)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable Retry(this ICompletable source, Func<Exception, bool> retryIf)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable RetryWhen(this ICompletable source, Func<IObservable<Exception>, IObservable<object>> whenFunction)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable RetryWhen(this ICompletable source, Func<IPublisher<Exception>, IPublisher<object>> whenFunction)
         {
             throw new NotImplementedException();
         }
 
         public static IObservable<T> ToObservable<T>(this ICompletable source)
         {
-            throw new NotImplementedException();
+            return new CompletableObservable<T>(source);
         }
 
         public static IPublisher<T> ToPublisher<T>(this ICompletable source)
         {
-            throw new NotImplementedException();
+            return new CompletablePublisher<T>(source);
         }
 
         public static ISingle<T> ToSingle<T>(this ICompletable source, T successValue)
         {
-            throw new NotImplementedException();
+            return ToSingle(source, () => successValue);
         }
 
         public static ISingle<T> ToSingle<T>(this ICompletable source, Func<T> successValueSupplier)
@@ -348,12 +422,15 @@ namespace RxAdvancedFlow
 
         public static ICompletable Delay(this ICompletable source, TimeSpan time, bool delayError = false)
         {
-            throw new NotImplementedException();
+            return Delay(source, time, DefaultScheduler.Instance, delayError);
         }
 
         public static ICompletable Delay(this ICompletable source, TimeSpan time, IScheduler scheduler, bool delayError = false)
         {
-            throw new NotImplementedException();
+            return Create(cs =>
+            {
+                source.Subscribe(new DelayCompletableSubscriber(cs, scheduler, time, delayError));
+            });
         }
 
         public static ICompletable Timeout(this ICompletable source, TimeSpan time)
@@ -378,12 +455,20 @@ namespace RxAdvancedFlow
 
         public static ICompletable Timer(TimeSpan time)
         {
-            throw new NotImplementedException();
+            return Timer(time, DefaultScheduler.Instance);
         }
 
         public static ICompletable Timer(TimeSpan time, IScheduler scheduler)
         {
-            throw new NotImplementedException();
+            return Create(cs =>
+            {
+                MultipleAssignmentDisposable mad = new MultipleAssignmentDisposable();
+                cs.OnSubscribe(mad);
+                if (!mad.IsDisposed())
+                {
+                    mad.Set(scheduler.ScheduleDirect(() => cs.OnComplete()));
+                }
+            });
         }
 
         public static ICompletable AndThen(this ICompletable source, ICompletable other)
@@ -391,14 +476,90 @@ namespace RxAdvancedFlow
             throw new NotImplementedException();
         }
 
+        public static IObservable<T> AndThen<T>(this ICompletable source, IObservable<T> other)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<T> AndThen<T>(this ICompletable source, IPublisher<T> other)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static ISingle<T> AndThen<T>(this ICompletable source, ISingle<T> other)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable AndThen<T>(this IObservable<T> source, ICompletable other)
+        {
+            return source.ToCompletable().AndThen(other);
+        }
+
+        public static ICompletable AndThen<T>(this IPublisher<T> source, ICompletable other)
+        {
+            return source.ToCompletable().AndThen(other);
+        }
+
+        public static ICompletable AndThen<T>(this ISingle<T> source, ICompletable other)
+        {
+            return source.ToCompletable().AndThen(other);
+        }
+
         public static ICompletable SubscribeOn(this ICompletable source, IScheduler scheduler)
         {
+            return Create(cs =>
+            {
+                MultipleAssignmentDisposable inner = new MultipleAssignmentDisposable();
 
+                MultipleAssignmentDisposable outer = new MultipleAssignmentDisposable(inner);
+
+                cs.OnSubscribe(outer);
+
+                inner.Set(scheduler.ScheduleDirect(() =>
+                {
+                    source.Subscribe(new SubscribeOnCompletableSubscriber(cs, outer));
+                }));
+
+            });
         }
 
         public static ICompletable ObserveOn(this ICompletable source, IScheduler scheduler)
         {
+            return Create(cs =>
+            {
+                ObserveOnCompletableSubscriber oocs = new ObserveOnCompletableSubscriber(cs, scheduler);
 
+                source.Subscribe(oocs);
+            });
+        }
+
+        public static ICompletable UnsubscribeOn(this ICompletable source, IScheduler scheduler)
+        {
+            return Create(cs =>
+            {
+                UnsubscribeOnCompletableSubscriber oocs = new UnsubscribeOnCompletableSubscriber(cs, scheduler);
+
+                source.Subscribe(oocs);
+            });
+        }
+
+        public static void Await(this ICompletable source)
+        {
+            LatchedCompletableSubscriber lcs = new LatchedCompletableSubscriber();
+
+            source.Subscribe(lcs);
+
+            lcs.Await();
+        }
+
+        public static bool Await(this ICompletable source, TimeSpan timeout)
+        {
+            LatchedCompletableSubscriber lcs = new LatchedCompletableSubscriber();
+
+            source.Subscribe(lcs);
+
+            return lcs.Await(timeout);
         }
     }
 
