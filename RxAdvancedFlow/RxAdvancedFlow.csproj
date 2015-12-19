@@ -45,6 +45,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Completable.cs" />
+    <Compile Include="DefaultScheduler.cs" />
+    <Compile Include="disposables\ICompositeDisposable.cs" />
+    <Compile Include="disposables\ISoloDisposable.cs" />
+    <Compile Include="disposables\MultipleAssignmentDisposable.cs" />
     <Compile Include="Flowable.cs" />
     <Compile Include="internals\completable\AmbCompletableSubscriber.cs" />
     <Compile Include="internals\completable\CompletableFromAction.cs" />
@@ -55,12 +59,16 @@
     <Compile Include="internals\completable\ObserverToCompletableSubscriber.cs" />
     <Compile Include="internals\completable\SingleSubscriberToCompletableSubscriber.cs" />
     <Compile Include="internals\completable\SubscriberToCompletableSubscriber.cs" />
+    <Compile Include="internals\disposables\ActionDisposable.cs" />
+    <Compile Include="internals\disposables\ActionWeakDisposable.cs" />
     <Compile Include="internals\disposables\DisposableHelper.cs" />
     <Compile Include="internals\disposables\DisposableSubscription.cs" />
     <Compile Include="disposables\SetCompositeDisposable.cs" />
     <Compile Include="internals\disposables\EmptyDisposable.cs" />
+    <Compile Include="internals\disposables\VersionedSoloDisposable.cs" />
     <Compile Include="internals\OnSubscribeHelper.cs" />
     <Compile Include="internals\completable\LambdaCompletableSubscriber.cs" />
+    <Compile Include="internals\schedulers\ScheduledAction.cs" />
     <Compile Include="IScheduler.cs" />
     <Compile Include="processors\CompletableProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -11,7 +11,7 @@ namespace RxAdvancedFlow.disposables
     /// A Set-based composite disposable that allows tracking and disposing other
     /// disposables.
     /// </summary>
-    public sealed class SetCompositeDisposable : IDisposable
+    public sealed class SetCompositeDisposable : ICompositeDisposable
     {
         HashSet<IDisposable> set;
 
@@ -22,6 +22,15 @@ namespace RxAdvancedFlow.disposables
         }
 
         public SetCompositeDisposable(params IDisposable[] disposables)
+        {
+            set = new HashSet<IDisposable>();
+            foreach (IDisposable d in disposables)
+            {
+                set.Add(d);
+            }
+        }
+
+        public SetCompositeDisposable(IEnumerable<IDisposable> disposables)
         {
             set = new HashSet<IDisposable>();
             foreach (IDisposable d in disposables)
@@ -139,6 +148,20 @@ namespace RxAdvancedFlow.disposables
         public bool IsDisposed()
         {
             return Volatile.Read(ref disposed);
+        }
+
+        public bool IsEmpty()
+        {
+            if (IsDisposed())
+            {
+                return true;
+            }
+
+            lock (this)
+            {
+                HashSet<IDisposable> _set = set;
+                return _set == null || _set.Count == 0;
+            }
         }
     }
 }

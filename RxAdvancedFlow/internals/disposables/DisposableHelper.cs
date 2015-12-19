@@ -129,7 +129,7 @@ namespace RxAdvancedFlow.internals.disposables
         }
     }
 
-    internal sealed class DefaultDisposed : IDisposable
+    sealed class DefaultDisposed : IDisposable
     {
         public void Dispose()
         {

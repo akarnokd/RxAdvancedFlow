@@ -276,5 +276,131 @@ namespace RxAdvancedFlow
                 source.Subscribe(lcs);
             });
         }
+
+        public static IDisposable Subscribe(this ICompletable source, Action onCompleteCall)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static IDisposable Subscribe(this ICompletable source, Action onCompleteCall, Action<Exception> onErrorCall)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable OnErrorComplete(this ICompletable source)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable OnErrorResumeNext(this ICompletable source, Func<Exception, ICompletable> nextSelector)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable Using<S>(
+            Func<S> stateSupplier, 
+            Func<S, ICompletable> completableFactory, 
+            Action<S> stateDisposer,
+            bool eager = true)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable Repeat()
+        {
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable Repeat(long times)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable RepeatUntil(Func<bool> shouldRepeat)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable RepeatWhen(Func<IObservable<object>, IObservable<object>> whenFunction)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static IObservable<T> ToObservable<T>(this ICompletable source)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<T> ToPublisher<T>(this ICompletable source)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static ISingle<T> ToSingle<T>(this ICompletable source, T successValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static ISingle<T> ToSingle<T>(this ICompletable source, Func<T> successValueSupplier)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable Delay(this ICompletable source, TimeSpan time, bool delayError = false)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable Delay(this ICompletable source, TimeSpan time, IScheduler scheduler, bool delayError = false)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable Timeout(this ICompletable source, TimeSpan time)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable Timeout(this ICompletable source, TimeSpan time, IScheduler scheduler)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable Timeout(this ICompletable source, TimeSpan time, ICompletable next)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable Timeout(this ICompletable source, TimeSpan time, IScheduler scheduler, ICompletable next)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable Timer(TimeSpan time)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable Timer(TimeSpan time, IScheduler scheduler)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable AndThen(this ICompletable source, ICompletable other)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable SubscribeOn(this ICompletable source, IScheduler scheduler)
+        {
+
+        }
+
+        public static ICompletable ObserveOn(this ICompletable source, IScheduler scheduler)
+        {
+
+        }
     }
+
+
 }
