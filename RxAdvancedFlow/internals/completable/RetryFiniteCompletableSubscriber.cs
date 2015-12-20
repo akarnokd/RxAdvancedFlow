@@ -9,24 +9,42 @@ using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.completable
 {
-    sealed class ConcatCompletableSubscriber : ICompletableSubscriber, IDisposable
+    sealed class RetryFiniteCompletableSubscriber : ICompletableSubscriber, IDisposable
     {
-
         readonly ICompletableSubscriber actual;
 
-        readonly IEnumerator<ICompletable> it;
+        readonly ICompletable source;
 
         IDisposable d;
 
         int wip;
 
-        public ConcatCompletableSubscriber(ICompletableSubscriber actual, IEnumerator<ICompletable> it)
+        long remaining;
+
+        public RetryFiniteCompletableSubscriber(ICompletableSubscriber actual, 
+            ICompletable source, long times)
         {
             this.actual = actual;
-            this.it = it;
+            this.source = source;
+            this.remaining = times;
+        }
+
+        public void Dispose()
+        {
+            DisposableHelper.Terminate(ref d);
         }
 
         public void OnComplete()
+        {
+            actual.OnComplete();
+        }
+
+        public void OnError(Exception e)
+        {
+            Resubscribe();
+        }
+
+        internal void Resubscribe()
         {
             if (Interlocked.Increment(ref wip) == 1)
             {
@@ -37,33 +55,20 @@ namespace RxAdvancedFlow.internals.completable
                         return;
                     }
 
-                    if (it.MoveNext())
+                    if (--remaining < 0)
                     {
-                        ICompletable c = it.Current;
+                        return;
+                    }
 
-                        c.Subscribe(this);
-                    }
-                    else
-                    {
-                        actual.OnComplete();
-                    }
-                } while (Interlocked.Decrement(ref wip) != 0);
+                    source.Subscribe(this);
+
+                } while (Interlocked.Decrement(ref wip) == 0);
             }
-        }
-
-        public void OnError(Exception e)
-        {
-            actual.OnError(e);
         }
 
         public void OnSubscribe(IDisposable d)
         {
             DisposableHelper.Replace(ref this.d, d);
-        }
-
-        public void Dispose()
-        {
-            DisposableHelper.Terminate(ref this.d);
         }
     }
 }

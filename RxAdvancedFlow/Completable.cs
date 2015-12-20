@@ -62,26 +62,6 @@ namespace RxAdvancedFlow
             });
         }
 
-        public static ICompletable ToCompletable<T>(this IPublisher<T> source)
-        {
-            return Create(cs =>
-            {
-                SubscriberToCompletableSubscriber<T> stcs = new SubscriberToCompletableSubscriber<T>(cs);
-
-                source.Subscribe(stcs);
-            });
-        }
-
-        public static ICompletable ToCompletable<T>(this ISingle<T> source)
-        {
-            return Create(cs =>
-            {
-                SingleSubscriberToCompletableSubscriber<T> sscs = new SingleSubscriberToCompletableSubscriber<T>(cs);
-
-                source.Subscribe(sscs);
-            });
-        }
-
         public static ICompletable Amb(this ICompletable[] sources)
         {
             return Create(cs =>
@@ -279,6 +259,11 @@ namespace RxAdvancedFlow
             });
         }
 
+        public static IDisposable Subscribe(this ICompletable source)
+        {
+            return Subscribe(source, () => { });
+        }
+
         public static IDisposable Subscribe(this ICompletable source, Action onCompleteCall)
         {
             return Subscribe(source, onCompleteCall, e => RxAdvancedFlowPlugins.OnError(e));
@@ -377,17 +362,32 @@ namespace RxAdvancedFlow
 
         public static ICompletable Retry(this ICompletable source)
         {
-            throw new NotImplementedException();
+            return Create(cs =>
+            {
+                RetryInfiniteCompletableSubscriber rics = new RetryInfiniteCompletableSubscriber(cs, source);
+
+                rics.Resubscribe();
+            });
         }
 
         public static ICompletable Retry(this ICompletable source, long times)
         {
-            throw new NotImplementedException();
+            return Create(cs =>
+            {
+                RetryFiniteCompletableSubscriber rics = new RetryFiniteCompletableSubscriber(cs, source, times);
+
+                rics.Resubscribe();
+            });
         }
 
         public static ICompletable Retry(this ICompletable source, Func<Exception, bool> retryIf)
         {
-            throw new NotImplementedException();
+            return Create(cs =>
+            {
+                RetryIfCompletableSubscriber rics = new RetryIfCompletableSubscriber(cs, source, retryIf);
+
+                rics.Resubscribe();
+            });
         }
 
         public static ICompletable RetryWhen(this ICompletable source, Func<IObservable<Exception>, IObservable<object>> whenFunction)
@@ -435,22 +435,25 @@ namespace RxAdvancedFlow
 
         public static ICompletable Timeout(this ICompletable source, TimeSpan time)
         {
-            throw new NotImplementedException();
+            return Timeout(source, time, DefaultScheduler.Instance, null);
         }
 
         public static ICompletable Timeout(this ICompletable source, TimeSpan time, IScheduler scheduler)
         {
-            throw new NotImplementedException();
+            return Timeout(source, time, scheduler, null);
         }
 
         public static ICompletable Timeout(this ICompletable source, TimeSpan time, ICompletable next)
         {
-            throw new NotImplementedException();
+            return Timeout(source, time, DefaultScheduler.Instance, next);
         }
 
         public static ICompletable Timeout(this ICompletable source, TimeSpan time, IScheduler scheduler, ICompletable next)
         {
-            throw new NotImplementedException();
+            return Create(cs =>
+            {
+                source.Subscribe(new TimeoutCompletableSubscriber(cs, scheduler, time, next));
+            });
         }
 
         public static ICompletable Timer(TimeSpan time)
@@ -473,12 +476,13 @@ namespace RxAdvancedFlow
 
         public static ICompletable AndThen(this ICompletable source, ICompletable other)
         {
-            throw new NotImplementedException();
+            ICompletable[] a = { source, other };
+            return Concat(a);
         }
 
         public static IObservable<T> AndThen<T>(this ICompletable source, IObservable<T> other)
         {
-            throw new NotImplementedException();
+            return new CompletableAndThenObservable<T>(source, other);
         }
 
         public static IPublisher<T> AndThen<T>(this ICompletable source, IPublisher<T> other)

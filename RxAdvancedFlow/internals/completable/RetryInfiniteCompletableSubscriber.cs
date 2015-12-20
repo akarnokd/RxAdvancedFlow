@@ -9,24 +9,38 @@ using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.completable
 {
-    sealed class ConcatCompletableSubscriber : ICompletableSubscriber, IDisposable
+    sealed class RetryInfiniteCompletableSubscriber : ICompletableSubscriber, IDisposable
     {
-
         readonly ICompletableSubscriber actual;
 
-        readonly IEnumerator<ICompletable> it;
+        readonly ICompletable source;
 
         IDisposable d;
 
         int wip;
 
-        public ConcatCompletableSubscriber(ICompletableSubscriber actual, IEnumerator<ICompletable> it)
+        public RetryInfiniteCompletableSubscriber(ICompletableSubscriber actual, ICompletable source)
         {
             this.actual = actual;
-            this.it = it;
+            this.source = source;
+        }
+
+        public void Dispose()
+        {
+            DisposableHelper.Terminate(ref d);
         }
 
         public void OnComplete()
+        {
+            actual.OnComplete();
+        }
+
+        public void OnError(Exception e)
+        {
+            Resubscribe();
+        }
+
+        internal void Resubscribe()
         {
             if (Interlocked.Increment(ref wip) == 1)
             {
@@ -37,33 +51,15 @@ namespace RxAdvancedFlow.internals.completable
                         return;
                     }
 
-                    if (it.MoveNext())
-                    {
-                        ICompletable c = it.Current;
+                    source.Subscribe(this);
 
-                        c.Subscribe(this);
-                    }
-                    else
-                    {
-                        actual.OnComplete();
-                    }
-                } while (Interlocked.Decrement(ref wip) != 0);
+                } while (Interlocked.Decrement(ref wip) == 0);
             }
-        }
-
-        public void OnError(Exception e)
-        {
-            actual.OnError(e);
         }
 
         public void OnSubscribe(IDisposable d)
         {
             DisposableHelper.Replace(ref this.d, d);
-        }
-
-        public void Dispose()
-        {
-            DisposableHelper.Terminate(ref this.d);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using ReactiveStreamsCS;
+using RxAdvancedFlow.internals.completable;
 using RxAdvancedFlow.internals.single;
 using System;
 using System.Collections.Generic;
@@ -32,5 +33,17 @@ namespace RxAdvancedFlow
         {
             return To(source, composeFunction);
         }
+
+        public static ICompletable ToCompletable<T>(this ISingle<T> source)
+        {
+            return Completable.Create(cs =>
+            {
+                SingleSubscriberToCompletableSubscriber<T> sscs = new SingleSubscriberToCompletableSubscriber<T>(cs);
+
+                source.Subscribe(sscs);
+            });
+        }
+
+
     }
 }

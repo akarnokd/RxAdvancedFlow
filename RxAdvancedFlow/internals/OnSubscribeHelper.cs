@@ -31,6 +31,16 @@ namespace RxAdvancedFlow.internals
         }
 
         /// <summary>
+        /// Reports an exception that indicates the requested amount was non-positive
+        /// to the RxAdvancedFlowPlugins.
+        /// </summary>
+        /// <param name="n">The requested amount.</param>
+        public static void ReportBadRequest(long n)
+        {
+            RxAdvancedFlowPlugins.OnError(new Exception("n > 0 required but it was " + n));
+        }
+
+        /// <summary>
         /// Sets a disposable reference field or reports an error if already set.
         /// </summary>
         /// <param name="d"></param>
@@ -74,5 +84,20 @@ namespace RxAdvancedFlow.internals
             return true;
         }
 
+        /// <summary>
+        /// Validates the request amount which should be a positive value.
+        /// </summary>
+        /// <param name="n"></param>
+        /// <returns>If the validation was successful</returns>
+        public static bool ValidateRequest(long n)
+        {
+            if (n <= 0)
+            {
+                ReportBadRequest(n);
+
+                return false;
+            }
+            return true;
+        }
     }
 }

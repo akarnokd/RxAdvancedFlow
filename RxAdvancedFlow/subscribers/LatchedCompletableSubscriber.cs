@@ -42,11 +42,28 @@ namespace RxAdvancedFlow.subscribers
         public void Await()
         {
             cdl.Wait();
+
+            Exception e = err;
+            if (e != null)
+            {
+                throw e;
+            }
         }
 
         public bool Await(TimeSpan timeout)
         {
-            return cdl.Wait(timeout);
+            bool r = cdl.Wait(timeout);
+
+            if (r)
+            {
+                Exception e = err;
+                if (e != null)
+                {
+                    throw e;
+                }
+            }
+
+            return r;
         }
 
         public bool IsTerminated()

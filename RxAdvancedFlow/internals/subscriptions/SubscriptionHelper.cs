@@ -1,0 +1,108 @@
+﻿using ReactiveStreamsCS;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace RxAdvancedFlow.internals.subscriptions
+{
+    static class SubscriptionHelper
+    {
+        public static readonly ISubscription Cancelled = new CancelledSubscription();
+
+        public static bool Terminate(ref ISubscription field)
+        {
+            ISubscription s = Volatile.Read(ref field);
+            if (s != Cancelled)
+            {
+                s = Interlocked.Exchange(ref field, Cancelled);
+                if (s != Cancelled)
+                {
+                    s?.Cancel();
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static bool Set(ref ISubscription field, ISubscription next)
+        {
+            for (;;)
+            {
+                ISubscription a = Volatile.Read(ref field);
+                if (a == Cancelled)
+                {
+                    next?.Cancel();
+                    return false;
+                }
+                if (Interlocked.CompareExchange(ref field, next, a) == a)
+                {
+                    a?.Cancel();
+
+                    return true;
+                }
+            }
+        }
+
+        public static bool Replace(ref ISubscription field, ISubscription next)
+        {
+            for (;;)
+            {
+                ISubscription a = Volatile.Read(ref field);
+                if (a == Cancelled)
+                {
+                    next?.Cancel();
+                    return false;
+                }
+                if (Interlocked.CompareExchange(ref field, next, a) == a)
+                {
+                    return true;
+                }
+            }
+        }
+
+        public static bool SetOnce(ref ISubscription field, ISubscription first)
+        {
+            for (;;)
+            {
+                ISubscription a = Volatile.Read(ref field);
+                if (a == Cancelled)
+                {
+                    first?.Cancel();
+                    return false;
+                }
+
+                if (a != null)
+                {
+                    return false;
+                }
+
+                if (Interlocked.CompareExchange(ref field, first, null) == null)
+                {
+                    return true;
+                }
+            }
+        }
+
+        public static bool IsTerminated(ref ISubscription field)
+        {
+            return Volatile.Read(ref field) == Cancelled;
+        }
+    }
+
+    sealed class CancelledSubscription : ISubscription
+    {
+        public void Cancel()
+        {
+            // no op            
+        }
+
+        public void Request(long n)
+        {
+            // no op
+        }
+    }
+}

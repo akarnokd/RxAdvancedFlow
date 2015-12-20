@@ -44,14 +44,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Class1.cs" />
     <Compile Include="Completable.cs" />
     <Compile Include="DefaultScheduler.cs" />
     <Compile Include="disposables\ICompositeDisposable.cs" />
     <Compile Include="disposables\ISoloDisposable.cs" />
     <Compile Include="disposables\MultipleAssignmentDisposable.cs" />
     <Compile Include="Flowable.cs" />
+    <Compile Include="internals\BackpressureHelper.cs" />
     <Compile Include="internals\completable\AmbCompletableSubscriber.cs" />
     <Compile Include="internals\completable\CallbackCompletableSubscriber.cs" />
+    <Compile Include="internals\completable\CompletableAndThenObservable.cs" />
+    <Compile Include="internals\completable\CompletableAndThenPublisher.cs" />
     <Compile Include="internals\completable\CompletableFromAction.cs" />
     <Compile Include="internals\completable\CompletableLift.cs" />
     <Compile Include="internals\completable\CompletablePublisher.cs" />
@@ -64,9 +68,13 @@
     <Compile Include="internals\completable\ObserverToCompletableSubscriber.cs" />
     <Compile Include="internals\completable\OnErrorCompleteCompletableSubscriber.cs" />
     <Compile Include="internals\completable\ResumeCompletableSubscriber.cs" />
+    <Compile Include="internals\completable\RetryIfCompletableSubscriber.cs" />
+    <Compile Include="internals\completable\RetryInfiniteCompletableSubscriber.cs" />
+    <Compile Include="internals\completable\RetryFiniteCompletableSubscriber.cs" />
     <Compile Include="internals\completable\SingleSubscriberToCompletableSubscriber.cs" />
     <Compile Include="internals\completable\SubscribeOnCompletableSubscriber.cs" />
     <Compile Include="internals\completable\SubscriberToCompletableSubscriber.cs" />
+    <Compile Include="internals\completable\TimeoutCompletableSubscriber.cs" />
     <Compile Include="internals\completable\UnsubscribeOnCompletableSubscriber.cs" />
     <Compile Include="internals\completable\UsingCompletableSubscriber.cs" />
     <Compile Include="internals\disposables\ActionDisposable.cs" />
@@ -84,7 +92,9 @@
     <Compile Include="internals\schedulers\ScheduledAction.cs" />
     <Compile Include="internals\single\SingleFromAction.cs" />
     <Compile Include="internals\single\SingleLift.cs" />
+    <Compile Include="internals\subscriptions\SubscriptionHelper.cs" />
     <Compile Include="internals\subscriptions\EmptySubscription.cs" />
+    <Compile Include="subscriptions\SingleSubscription.cs" />
     <Compile Include="IScheduler.cs" />
     <Compile Include="processors\CompletableProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
