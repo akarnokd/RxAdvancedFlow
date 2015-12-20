@@ -83,7 +83,7 @@ namespace RxAdvancedFlow.internals.subscribers
                 onSubscribeCall(d);
             } catch (Exception e)
             {
-                actual.OnSubscribe(EmptyDisposable.Empty);
+                actual.OnSubscribe(EmptyDisposable.Instance);
                 actual.OnError(e);
                 return;
             }

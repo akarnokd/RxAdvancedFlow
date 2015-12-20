@@ -91,6 +91,7 @@ namespace RxAdvancedFlow.internals.subscriptions
         {
             return Volatile.Read(ref field) == Cancelled;
         }
+
     }
 
     sealed class CancelledSubscription : ISubscription

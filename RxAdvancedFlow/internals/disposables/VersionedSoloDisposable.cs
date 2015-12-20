@@ -31,7 +31,7 @@ namespace RxAdvancedFlow.internals.disposables
         /// <summary>
         /// The first node in any instance of the VersionedSoloDisposable class.
         /// </summary>
-        static readonly Node First = new Node(long.MinValue, EmptyDisposable.Empty);
+        static readonly Node First = new Node(long.MinValue, EmptyDisposable.Instance);
         /// <summary>
         /// This node represents the disposed state of this VersionedSoloDisposable class.
         /// </summary>

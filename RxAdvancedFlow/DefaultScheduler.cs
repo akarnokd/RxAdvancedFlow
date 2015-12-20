@@ -120,7 +120,7 @@ namespace RxAdvancedFlow
 
                         return sa;
                     }
-                    return EmptyDisposable.Empty;
+                    return EmptyDisposable.Instance;
                 }
 
                 public IDisposable Schedule(Action action, TimeSpan delay)
@@ -145,7 +145,7 @@ namespace RxAdvancedFlow
 
                         return cancel;
                     }
-                    return EmptyDisposable.Empty;
+                    return EmptyDisposable.Instance;
                 }
 
                 public IDisposable SchedulePeriodically(Action action, TimeSpan initialDelay, TimeSpan period)
@@ -196,7 +196,7 @@ namespace RxAdvancedFlow
 
                         return cancel;
                     }
-                    return EmptyDisposable.Empty;
+                    return EmptyDisposable.Instance;
                 }
 
                 public void Run()

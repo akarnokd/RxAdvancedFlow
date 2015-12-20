@@ -16,24 +16,24 @@ namespace RxAdvancedFlow.internals.disposables
             }
         }
 
-        public static readonly IDisposable Empty = new EmptyDisposableImpl();
+        public static readonly IDisposable Instance = new EmptyDisposableImpl();
 
         public static void Error(ICompletableSubscriber cs, Exception e)
         {
-            cs.OnSubscribe(Empty);
+            cs.OnSubscribe(Instance);
             cs.OnError(e);
         }
 
 
         public static void Complete(ICompletableSubscriber cs)
         {
-            cs.OnSubscribe(Empty);
+            cs.OnSubscribe(Instance);
             cs.OnComplete();
         }
 
         public static void Error<T>(ISingleSubscriber<T> cs, Exception e)
         {
-            cs.OnSubscribe(Empty);
+            cs.OnSubscribe(Instance);
             cs.OnError(e);
         }
     }

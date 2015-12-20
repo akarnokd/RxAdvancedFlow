@@ -162,7 +162,7 @@ namespace RxAdvancedFlow
         {
             return Create(cs =>
             {
-                cs.OnSubscribe(EmptyDisposable.Empty);
+                cs.OnSubscribe(EmptyDisposable.Instance);
                 try
                 {
                     action();
@@ -194,17 +194,16 @@ namespace RxAdvancedFlow
             });
         }
 
-        static readonly ICompletable EmptyCompletable = Create(cs =>
+        static readonly ICompletable CompleteCompletable = Create(cs =>
         {
-            cs.OnSubscribe(EmptyDisposable.Empty);
-            cs.OnComplete();
+            EmptyDisposable.Complete(cs);
         });
 
-        static readonly ICompletable NeverCompletable = Create(cs => cs.OnSubscribe(EmptyDisposable.Empty));
+        static readonly ICompletable NeverCompletable = Create(cs => cs.OnSubscribe(EmptyDisposable.Instance));
 
-        public static ICompletable Empty()
+        public static ICompletable Complete()
         {
-            return EmptyCompletable;
+            return CompleteCompletable;
         }
 
         public static ICompletable Never()
@@ -221,7 +220,7 @@ namespace RxAdvancedFlow
         {
             return Create(cs =>
             {
-                cs.OnSubscribe(EmptyDisposable.Empty);
+                cs.OnSubscribe(EmptyDisposable.Instance);
                 cs.OnError(exceptionFactory());
             });
         }
@@ -280,9 +279,14 @@ namespace RxAdvancedFlow
 
         public static ICompletable OnErrorComplete(this ICompletable source)
         {
+            return OnErrorComplete(source, e => true);
+        }
+
+        public static ICompletable OnErrorComplete(this ICompletable source, Func<Exception, bool> predicate)
+        {
             return Create(cs =>
             {
-                source.Subscribe(new OnErrorCompleteCompletableSubscriber(cs));
+                source.Subscribe(new OnErrorCompleteCompletableSubscriber(cs, predicate));
             });
         }
 
@@ -352,11 +356,13 @@ namespace RxAdvancedFlow
 
         public static ICompletable RepeatWhen(this ICompletable source, Func<IObservable<object>, IObservable<object>> whenFunction)
         {
+            // TODO implement
             throw new NotImplementedException();
         }
 
         public static ICompletable RepeatWhen(this ICompletable source, Func<IPublisher<object>, IPublisher<object>> whenFunction)
         {
+            // TODO implement
             throw new NotImplementedException();
         }
 
@@ -392,11 +398,13 @@ namespace RxAdvancedFlow
 
         public static ICompletable RetryWhen(this ICompletable source, Func<IObservable<Exception>, IObservable<object>> whenFunction)
         {
+            // TODO implement
             throw new NotImplementedException();
         }
 
         public static ICompletable RetryWhen(this ICompletable source, Func<IPublisher<Exception>, IPublisher<object>> whenFunction)
         {
+            // TODO implement
             throw new NotImplementedException();
         }
 
@@ -417,7 +425,10 @@ namespace RxAdvancedFlow
 
         public static ISingle<T> ToSingle<T>(this ICompletable source, Func<T> successValueSupplier)
         {
-            throw new NotImplementedException();
+            return Single.Create<T>(cs =>
+            {
+                source.Subscribe(new ToSingleCompletableSubscriber<T>(cs, successValueSupplier));
+            });
         }
 
         public static ICompletable Delay(this ICompletable source, TimeSpan time, bool delayError = false)
@@ -487,12 +498,12 @@ namespace RxAdvancedFlow
 
         public static IPublisher<T> AndThen<T>(this ICompletable source, IPublisher<T> other)
         {
-            throw new NotImplementedException();
+            return new CompletableAndThenPublisher<T>(source, other);
         }
 
         public static ISingle<T> AndThen<T>(this ICompletable source, ISingle<T> other)
         {
-            throw new NotImplementedException();
+            return new CompletableAndThenSingle<T>(source, other);
         }
 
         public static ICompletable AndThen<T>(this IObservable<T> source, ICompletable other)
@@ -565,7 +576,127 @@ namespace RxAdvancedFlow
 
             return lcs.Await(timeout);
         }
+
+        public static ICompletable AmbWith(this ICompletable source, ICompletable other)
+        {
+            return Amb(new ICompletable[] { source, other });
+        }
+
+        public static ICompletable MergeWith(this ICompletable source, ICompletable other)
+        {
+            return Merge(new ICompletable[] { source, other });
+        }
+
+        public static ICompletable ConcatWith(this ICompletable source, ICompletable other)
+        {
+            return Concat(new ICompletable[] { source, other });
+        }
+
+        public static ICompletable ToCompletable(this Task task)
+        {
+            return Create(cs =>
+            {
+                MultipleAssignmentDisposable mad = new MultipleAssignmentDisposable();
+
+                cs.OnSubscribe(mad);
+
+                IDisposable d = task.ContinueWith(t =>
+                {
+                    Exception e = t.Exception;
+
+                    if (e == null)
+                    {
+                        cs.OnComplete();
+                    }
+                    else
+                    {
+                        cs.OnError(e);
+                    }
+                });
+
+                mad.Set(d);
+            });
+        }
+
+        public static ICompletable Concat(this IObservable<ICompletable> sources)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable Concat(this IPublisher<ICompletable> sources)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable Merge(this IObservable<ICompletable> sources, int maxConcurrency = int.MaxValue)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable Merge(this IPublisher<ICompletable> sources, int maxConcurrency = int.MaxValue)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable MergeDelayError(this ICompletable[] sources, int maxConcurrency = int.MaxValue)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable MergeDelayError(this IEnumerable<ICompletable> sources, int maxConcurrency = int.MaxValue)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable MergeDelayError(this IObservable<ICompletable> sources, int maxConcurrency = int.MaxValue)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable MergeDelayError(this IPublisher<ICompletable> sources, int maxConcurrency = int.MaxValue)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable DelaySubscription(this ICompletable source, TimeSpan delay)
+        {
+            return DelaySubscription(source, delay, DefaultScheduler.Instance);
+        }
+
+        public static ICompletable DelaySubscription(this ICompletable source, TimeSpan delay, IScheduler scheduler)
+        {
+            return Create(cs =>
+            {
+                MultipleAssignmentDisposable t = new MultipleAssignmentDisposable();
+
+                MultipleAssignmentDisposable mad = new MultipleAssignmentDisposable(t);
+
+                cs.OnSubscribe(mad);
+
+                t.Set(scheduler.ScheduleDirect(() => {
+                    source.Subscribe(new SubscribeOnCompletableSubscriber(cs, mad));
+                }, delay));
+            });
+        }
+
+        public static ICompletable DelaySubscription<T>(this ICompletable source, IObservable<T> other)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static ICompletable DelaySubscription<T>(this ICompletable source, IPublisher<T> other)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
     }
-
-
 }

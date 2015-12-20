@@ -44,7 +44,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
     <Compile Include="Completable.cs" />
     <Compile Include="DefaultScheduler.cs" />
     <Compile Include="disposables\ICompositeDisposable.cs" />
@@ -56,6 +55,7 @@
     <Compile Include="internals\completable\CallbackCompletableSubscriber.cs" />
     <Compile Include="internals\completable\CompletableAndThenObservable.cs" />
     <Compile Include="internals\completable\CompletableAndThenPublisher.cs" />
+    <Compile Include="internals\completable\CompletableAndThenSingle.cs" />
     <Compile Include="internals\completable\CompletableFromAction.cs" />
     <Compile Include="internals\completable\CompletableLift.cs" />
     <Compile Include="internals\completable\CompletablePublisher.cs" />
@@ -75,6 +75,7 @@
     <Compile Include="internals\completable\SubscribeOnCompletableSubscriber.cs" />
     <Compile Include="internals\completable\SubscriberToCompletableSubscriber.cs" />
     <Compile Include="internals\completable\TimeoutCompletableSubscriber.cs" />
+    <Compile Include="internals\completable\ToSingleCompletableSubscriber.cs" />
     <Compile Include="internals\completable\UnsubscribeOnCompletableSubscriber.cs" />
     <Compile Include="internals\completable\UsingCompletableSubscriber.cs" />
     <Compile Include="internals\disposables\ActionDisposable.cs" />
@@ -85,16 +86,29 @@
     <Compile Include="internals\disposables\EmptyDisposable.cs" />
     <Compile Include="internals\disposables\VersionedSoloDisposable.cs" />
     <Compile Include="internals\InfiniteRepeat.cs" />
+    <Compile Include="internals\LambdaHelper.cs" />
     <Compile Include="internals\OnSubscribeHelper.cs" />
     <Compile Include="internals\completable\LambdaCompletableSubscriber.cs" />
+    <Compile Include="internals\ProcessorHelper.cs" />
     <Compile Include="internals\publisher\PublisherFromAction.cs" />
     <Compile Include="internals\publisher\PublisherLift.cs" />
+    <Compile Include="internals\ScalarSource.cs" />
     <Compile Include="internals\schedulers\ScheduledAction.cs" />
+    <Compile Include="internals\single\AmbSingleSubscriber.cs" />
+    <Compile Include="internals\single\SingleCache.cs" />
+    <Compile Include="internals\single\ZipSingleSubscriber.cs" />
+    <Compile Include="internals\single\EqualsSingleSubscriber.cs" />
+    <Compile Include="internals\single\SubscriberToSingleSubscriber.cs" />
+    <Compile Include="internals\single\ObserverToSingleSubscriber.cs" />
     <Compile Include="internals\single\SingleFromAction.cs" />
     <Compile Include="internals\single\SingleLift.cs" />
+    <Compile Include="internals\single\SingleToObservable.cs" />
     <Compile Include="internals\subscriptions\SubscriptionHelper.cs" />
     <Compile Include="internals\subscriptions\EmptySubscription.cs" />
-    <Compile Include="subscriptions\SingleSubscription.cs" />
+    <Compile Include="processors\SingleProcessor.cs" />
+    <Compile Include="subscriptions\ScalarDelayedSubscription.cs" />
+    <Compile Include="subscriptions\ScalarSubscription.cs" />
+    <Compile Include="subscriptions\SingleSubscriptionArbiter.cs" />
     <Compile Include="IScheduler.cs" />
     <Compile Include="processors\CompletableProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

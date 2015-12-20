@@ -32,7 +32,7 @@ namespace RxAdvancedFlow.disposables
             IDisposable a = Volatile.Read(ref d);
             if (a == DisposableHelper.Disposed)
             {
-                return EmptyDisposable.Empty;
+                return EmptyDisposable.Instance;
             }
             return a;
         }

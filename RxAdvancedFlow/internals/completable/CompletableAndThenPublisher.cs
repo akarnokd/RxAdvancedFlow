@@ -1,4 +1,5 @@
 ﻿using ReactiveStreamsCS;
+using RxAdvancedFlow.internals.disposables;
 using RxAdvancedFlow.internals.subscriptions;
 using System;
 using System.Collections.Generic;
@@ -115,7 +116,9 @@ namespace RxAdvancedFlow.internals.completable
 
             public void Cancel()
             {
-                throw new NotImplementedException();
+                DisposableHelper.Terminate(ref firstDisposable);
+
+                SubscriptionHelper.Terminate(ref secondSubscription);
             }
 
             sealed class SecondSubscriber : ISubscriber<T>

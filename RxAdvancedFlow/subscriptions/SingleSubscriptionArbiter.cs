@@ -14,7 +14,7 @@ namespace RxAdvancedFlow.subscriptions
     /// An ISubscription that allows setting a single inner ISubscription
     /// later and accumulates requests and cancellation until then.
     /// </summary>
-    public sealed class SingleSubscription : ISubscription
+    public sealed class SingleSubscriptionArbiter : ISubscription
     {
 
         long missedRequests;

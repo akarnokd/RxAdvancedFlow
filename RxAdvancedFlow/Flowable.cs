@@ -1,4 +1,5 @@
 ﻿using ReactiveStreamsCS;
+using RxAdvancedFlow.internals;
 using RxAdvancedFlow.internals.completable;
 using RxAdvancedFlow.internals.publisher;
 using System;
@@ -38,6 +39,11 @@ namespace RxAdvancedFlow
 
                 source.Subscribe(stcs);
             });
+        }
+
+        public static IPublisher<T> Just<T>(T value)
+        {
+            return new ScalarSource<T>(value);
         }
 
 

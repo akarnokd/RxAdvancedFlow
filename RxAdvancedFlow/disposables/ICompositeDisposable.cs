@@ -17,5 +17,7 @@ namespace RxAdvancedFlow.disposables
         void Clear();
 
         bool IsEmpty();
+
+        bool IsDisposed();
     }
 }
