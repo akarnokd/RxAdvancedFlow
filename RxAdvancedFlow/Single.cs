@@ -352,8 +352,44 @@ namespace RxAdvancedFlow
 
         public static ISingle<T> Using<T, S>(Func<S> stateSupplier, Func<S, ISingle<T>> singleFactory, Action<S> stateDisposer, bool eager = false)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return Create<T>(s =>
+            {
+                S state;
+
+                try
+                {
+                    state = stateSupplier();
+                }
+                catch (Exception e)
+                {
+                    EmptyDisposable.Error(s, e);
+                    return;
+                }
+
+                ISingle<T> source;
+
+                try {
+
+                    source = singleFactory(state);
+                }
+                catch (Exception e)
+                {
+                    try
+                    {
+                        stateDisposer(state);
+                    }
+                    catch (Exception ex)
+                    {
+                        EmptyDisposable.Error(s, new AggregateException(e, ex));
+                        return;
+                    }
+
+                    EmptyDisposable.Error(s, e);
+                    return;
+                }
+
+                source.Subscribe(new UsingSingleSubscriber<T>(s, () => stateDisposer(state), eager));
+            });
         }
 
         public static ISingle<R> Zip<T, R>(this ISingle<T>[] sources, Func<T[], R> zipper)
@@ -722,6 +758,134 @@ namespace RxAdvancedFlow
             return Create<T>(s =>
             {
                 source.Subscribe(new OnErrorReturnSingleSubscriber<T>(s, valueSupplier));
+            });
+        }
+
+        public static ISingle<T> OnErrorResumeNext<T>(this ISingle<T> source, Func<Exception, ISingle<T>> resumeWith)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new ResumeNextSingleSubscriber<T>(s, resumeWith));
+            });
+        }
+
+        public static IPublisher<T> Repeat<T>(this ISingle<T> source)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<T> Repeat<T>(this ISingle<T> source, long times)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<T> Repeat<T>(this ISingle<T> source, Func<bool> shouldRepeat)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<T> RepeatWhen<T>(this ISingle<T> source, 
+            Func<IObservable<object>, IObservable<object>> whenFunction)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<T> RepeatWhen<T>(this ISingle<T> source,
+            Func<IPublisher<object>, IPublisher<object>> whenFunction)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static ISingle<T> Retry<T>(this ISingle<T> source)
+        {
+            return Create<T>(s =>
+            {
+                RetryInfiniteSingleSubscriber<T> riss = new RetryInfiniteSingleSubscriber<T>(source, s);
+
+                riss.Resubscribe();
+            });
+        }
+
+        public static ISingle<T> Retry<T>(this ISingle<T> source, long times)
+        {
+            return Create<T>(s =>
+            {
+                RetryFiniteSingleSubscriber<T> riss = new RetryFiniteSingleSubscriber<T>(source, s, times);
+
+                riss.Resubscribe();
+            });
+        }
+
+        public static ISingle<T> Retry<T>(this ISingle<T> source, Func<Exception, bool> shouldRetry)
+        {
+            return Create<T>(s =>
+            {
+                RetryIfSingleSubscriber<T> riss = new RetryIfSingleSubscriber<T>(source, s, shouldRetry);
+
+                riss.Resubscribe();
+            });
+        }
+
+        public static ISingle<T> RetryWhen<T>(this ISingle<T> source, 
+            Func<IObservable<Exception>, IObservable<object>> whenFunction)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static ISingle<T> RetryWhen<T>(this ISingle<T> source,
+            Func<IPublisher<Exception>, IPublisher<object>> whenFunction)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static IDisposable Subscribe<T>(this ISingle<T> source)
+        {
+            LambdaSingleSubscriber<T> lss = new LambdaSingleSubscriber<T>(v => { }, e => { });
+
+            source.Subscribe(lss);
+
+            return lss;
+        }
+
+        public static IDisposable Subscribe<T>(this ISingle<T> source, Action<T> onSuccess)
+        {
+            return Subscribe<T>(source, onSuccess, RxAdvancedFlowPlugins.OnError);
+        }
+
+        public static IDisposable Subscribe<T>(this ISingle<T> source, Action<T> onSuccess, Action<Exception> onError)
+        {
+            return Subscribe<T>(source, onSuccess, onError);
+        }
+
+        public static IDisposable Subscribe<T>(this ISingle<T> source, Action<T, Exception> onTerminate)
+        {
+            return Subscribe<T>(source, v => { onTerminate(v, null); }, e => { onTerminate(default(T), e); });
+        }
+
+        public static ICompletable AndThen<T>(this ISingle<T> source, ICompletable other)
+        {
+            return ToCompletable(source).AndThen(other);
+        }
+
+        public static ISingle<T> SubscribeOn<T>(this ISingle<T> source, IScheduler scheduler)
+        {
+            return Create<T>(s =>
+            {
+                MultipleAssignmentDisposable inner = new MultipleAssignmentDisposable();
+
+                MultipleAssignmentDisposable mad = new MultipleAssignmentDisposable(inner);
+
+                inner.Set(scheduler.ScheduleDirect(() =>
+                {
+                    source.Subscribe(new SingleSubscriberWrapper<T>(s, mad));
+                }));
             });
         }
     }

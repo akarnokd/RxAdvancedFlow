@@ -41,6 +41,11 @@ namespace RxAdvancedFlow
             });
         }
 
+        public static ICompletable AndThen<T>(this IPublisher<T> source, ICompletable other)
+        {
+            return source.ToCompletable().AndThen(other);
+        }
+
         public static IPublisher<T> Just<T>(T value)
         {
             return new ScalarSource<T>(value);

@@ -50,6 +50,7 @@
     <Compile Include="disposables\ISoloDisposable.cs" />
     <Compile Include="disposables\MultipleAssignmentDisposable.cs" />
     <Compile Include="disposables\ListCompositeDisposable.cs" />
+    <Compile Include="disposables\SerialDisposable.cs" />
     <Compile Include="Flowable.cs" />
     <Compile Include="internals\BackpressureHelper.cs" />
     <Compile Include="internals\completable\AmbCompletableSubscriber.cs" />
@@ -98,12 +99,18 @@
     <Compile Include="internals\single\AmbSingleSubscriber.cs" />
     <Compile Include="internals\single\DelaySingeSubscriber.cs" />
     <Compile Include="internals\single\FlatMapSingleSubscriber.cs" />
+    <Compile Include="internals\single\LambdaSingleSubscriber.cs" />
     <Compile Include="internals\single\LifecycleSingleSubscriber.cs" />
     <Compile Include="internals\single\MapSingleSubscriber.cs" />
     <Compile Include="internals\single\ObserveOnSingleSubscriber.cs" />
     <Compile Include="internals\single\OnErrorReturnSingleSubscriber.cs" />
+    <Compile Include="internals\single\ResumeNextSingleSubscriber.cs" />
+    <Compile Include="internals\single\RetryFiniteSingleSubscriber.cs" />
+    <Compile Include="internals\single\RetryIfSingleSubscriber.cs" />
+    <Compile Include="internals\single\RetryInfiniteSingleSubscriber.cs" />
     <Compile Include="internals\single\SingleCache.cs" />
     <Compile Include="internals\single\SingleSubscriberWrapper.cs" />
+    <Compile Include="internals\single\UsingSingleSubscriber.cs" />
     <Compile Include="internals\single\ZipSingleSubscriber.cs" />
     <Compile Include="internals\single\EqualsSingleSubscriber.cs" />
     <Compile Include="internals\single\SubscriberToSingleSubscriber.cs" />

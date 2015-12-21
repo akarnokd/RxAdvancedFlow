@@ -511,16 +511,6 @@ namespace RxAdvancedFlow
             return source.ToCompletable().AndThen(other);
         }
 
-        public static ICompletable AndThen<T>(this IPublisher<T> source, ICompletable other)
-        {
-            return source.ToCompletable().AndThen(other);
-        }
-
-        public static ICompletable AndThen<T>(this ISingle<T> source, ICompletable other)
-        {
-            return source.ToCompletable().AndThen(other);
-        }
-
         public static ICompletable SubscribeOn(this ICompletable source, IScheduler scheduler)
         {
             return Create(cs =>
