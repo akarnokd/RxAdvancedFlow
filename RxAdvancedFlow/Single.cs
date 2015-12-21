@@ -4,6 +4,7 @@ using RxAdvancedFlow.internals;
 using RxAdvancedFlow.internals.completable;
 using RxAdvancedFlow.internals.disposables;
 using RxAdvancedFlow.internals.single;
+using RxAdvancedFlow.subscribers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -314,8 +315,7 @@ namespace RxAdvancedFlow
 
         public static ISingle<T> Merge<T>(this ISingle<ISingle<T>> source)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return FlatMap(source, v => v);
         }
 
         public static ISingle<long> Timer(TimeSpan delay)
@@ -559,6 +559,170 @@ namespace RxAdvancedFlow
         public static ISingle<T> Cache<T>(this ISingle<T> source)
         {
             return new SingleCache<T>(source);
+        }
+
+        public static IPublisher<T> ConcatWith<T>(this ISingle<T> source, ISingle<T> other)
+        {
+            return Concat(new ISingle<T>[] { source, other });
+        }
+
+        public static ISingle<T> Delay<T>(this ISingle<T> source, TimeSpan delay, bool delayError = false)
+        {
+            return Delay(source, delay, DefaultScheduler.Instance, delayError);
+        }
+
+        public static ISingle<T> Delay<T>(this ISingle<T> source, TimeSpan delay, IScheduler scheduler, bool delayError = false)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new DelaySingeSubscriber<T>(s, delay, scheduler, delayError));
+            });
+        }
+
+        public static ISingle<T> DelaySubscription<T>(this ISingle<T> source, TimeSpan delay)
+        {
+            return DelaySubscription<T>(source, delay, DefaultScheduler.Instance);
+        }
+
+        public static ISingle<T> DelaySubscription<T>(this ISingle<T> source, TimeSpan delay, IScheduler scheduler)
+        {
+            return Create<T>(s =>
+            {
+
+                MultipleAssignmentDisposable inner = new MultipleAssignmentDisposable();
+
+                MultipleAssignmentDisposable mad = new MultipleAssignmentDisposable(inner);
+
+                s.OnSubscribe(mad);
+
+                inner.Set(scheduler.ScheduleDirect(() => {
+
+                    source.Subscribe(new SingleSubscriberWrapper<T>(s, mad));
+
+                }, delay));
+            });
+        }
+
+        public static ISingle<T> DelaySubscription<T>(this ISingle<T> source, IObservable<T> other)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static ISingle<T> DelaySubscription<T>(this ISingle<T> source, IPublisher<T> other)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static ISingle<T> DoOnSubscribe<T>(this ISingle<T> source, Action<IDisposable> onSubscribeCall)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new LifecycleSingleSubscriber<T>(s,
+                    onSubscribeCall, v => { }, e => { }, () => { }
+                ));
+            });
+        }
+
+        public static ISingle<T> DoOnSuccess<T>(this ISingle<T> source, Action<T> onSuccessCall)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new LifecycleSingleSubscriber<T>(s,
+                    d => { }, onSuccessCall, e => { }, () => { }
+                ));
+            });
+        }
+
+        public static ISingle<T> DoOnError<T>(this ISingle<T> source, Action<Exception> onErrorCall)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new LifecycleSingleSubscriber<T>(s,
+                    d => { }, v => { }, onErrorCall, () => { }
+                ));
+            });
+        }
+
+        public static ISingle<T> DoAfterTerminate<T>(this ISingle<T> source, Action onAfterTerminateCall)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new LifecycleSingleSubscriber<T>(s,
+                    d => { }, v => { }, e => { }, onAfterTerminateCall
+                ));
+            });
+        }
+
+        public static ISingle<R> FlatMap<T, R>(this ISingle<T> source, Func<T, ISingle<R>> mapper)
+        {
+            return Create<R>(s =>
+            {
+                source.Subscribe(new FlatMapSingleSubscriber<T, R>(s, mapper));
+            });
+        }
+
+        public static T Get<T>(this ISingle<T> source)
+        {
+            LatchedSingleSubscriber<T> lss = new LatchedSingleSubscriber<T>();
+
+            source.Subscribe(lss);
+
+            return lss.Get();
+        }
+
+        public static T Get<T>(this ISingle<T> source, TimeSpan timeout)
+        {
+            LatchedSingleSubscriber<T> lss = new LatchedSingleSubscriber<T>();
+
+            source.Subscribe(lss);
+
+            return lss.Get(timeout);
+        }
+
+        public static ISingle<R> Map<T, R>(this ISingle<T> source, Func<T, R> mapper)
+        {
+            return Create<R>(s =>
+            {
+                source.Subscribe(new MapSingleSubscriber<T, R>(s, mapper));
+            });
+        }
+
+        public static ISingle<bool> Contains<T>(this ISingle<T> source, T value)
+        {
+            return Map(source, v => v.Equals(value));
+        }
+
+        public static ISingle<bool> Contains<T>(this ISingle<T> source, T value, IEqualityComparer<T> comparer)
+        {
+            return Map(source, v => comparer.Equals(v, value));
+        }
+
+        public static IPublisher<T> MergeWith<T>(this ISingle<T> source, ISingle<T> other)
+        {
+            return Merge(new ISingle<T>[] { source, other });
+        }
+
+        public static ISingle<T> ObserveOn<T>(this ISingle<T> source, IScheduler scheduler)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new ObserveOnSingleSubscriber<T>(s, scheduler));
+            });
+        }
+
+        public static ISingle<T> OnErrorReturn<T>(this ISingle<T> source, T value)
+        {
+            return OnErrorReturn(source, () => value);
+        }
+
+        public static ISingle<T> OnErrorReturn<T>(this ISingle<T> source, Func<T> valueSupplier)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new OnErrorReturnSingleSubscriber<T>(s, valueSupplier));
+            });
         }
     }
 }

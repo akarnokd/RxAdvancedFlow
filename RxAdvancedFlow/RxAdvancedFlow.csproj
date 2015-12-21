@@ -49,6 +49,7 @@
     <Compile Include="disposables\ICompositeDisposable.cs" />
     <Compile Include="disposables\ISoloDisposable.cs" />
     <Compile Include="disposables\MultipleAssignmentDisposable.cs" />
+    <Compile Include="disposables\ListCompositeDisposable.cs" />
     <Compile Include="Flowable.cs" />
     <Compile Include="internals\BackpressureHelper.cs" />
     <Compile Include="internals\completable\AmbCompletableSubscriber.cs" />
@@ -95,7 +96,14 @@
     <Compile Include="internals\ScalarSource.cs" />
     <Compile Include="internals\schedulers\ScheduledAction.cs" />
     <Compile Include="internals\single\AmbSingleSubscriber.cs" />
+    <Compile Include="internals\single\DelaySingeSubscriber.cs" />
+    <Compile Include="internals\single\FlatMapSingleSubscriber.cs" />
+    <Compile Include="internals\single\LifecycleSingleSubscriber.cs" />
+    <Compile Include="internals\single\MapSingleSubscriber.cs" />
+    <Compile Include="internals\single\ObserveOnSingleSubscriber.cs" />
+    <Compile Include="internals\single\OnErrorReturnSingleSubscriber.cs" />
     <Compile Include="internals\single\SingleCache.cs" />
+    <Compile Include="internals\single\SingleSubscriberWrapper.cs" />
     <Compile Include="internals\single\ZipSingleSubscriber.cs" />
     <Compile Include="internals\single\EqualsSingleSubscriber.cs" />
     <Compile Include="internals\single\SubscriberToSingleSubscriber.cs" />
@@ -106,6 +114,7 @@
     <Compile Include="internals\subscriptions\SubscriptionHelper.cs" />
     <Compile Include="internals\subscriptions\EmptySubscription.cs" />
     <Compile Include="processors\SingleProcessor.cs" />
+    <Compile Include="subscribers\LatchedSingleSubscriber.cs" />
     <Compile Include="subscriptions\ScalarDelayedSubscription.cs" />
     <Compile Include="subscriptions\ScalarSubscription.cs" />
     <Compile Include="subscriptions\SingleSubscriptionArbiter.cs" />
