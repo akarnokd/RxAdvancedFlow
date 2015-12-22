@@ -1,96 +1,361 @@
 ﻿using ReactiveStreamsCS;
 using RxAdvancedFlow.internals.queues;
+using RxAdvancedFlow.internals.subscriptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.publisher
 {
     sealed class PublisherCombineCoordinator<T, R> : ISubscription
     {
-        readonly ISubscriber<T> actual;
+        readonly ISubscriber<R> actual;
 
         readonly Func<T[], R> combiner;
 
+        readonly int bufferSize;
+
         InnerSubscriber[] subscribers;
 
-        MpscStructLinkedQueue<CombineNode> q;
+        SpscStructLinkedArrayQueue<CombineEntry> q;
 
-        public PublisherCombineCoordinator(ISubscriber<T> actual, Func<T[], R> combiner)
+        BasicBackpressureStruct bp;
+
+        T[] values;
+
+        ulong[] nonempty;
+
+        int activeCount;
+
+        int completeCount;
+
+        Exception error;
+
+        bool done;
+
+        public PublisherCombineCoordinator(ISubscriber<R> actual, Func<T[], R> combiner, int capacityHint)
         {
             this.actual = actual;
             this.combiner = combiner;
+            this.bufferSize = capacityHint;
+            q.Init(capacityHint);
         }
-        
+
         public void Subscribe(IPublisher<T>[] sources, int n)
         {
+            values = new T[n];
+            nonempty = new ulong[1 + ((n - 1) >> 4)];
 
+            InnerSubscriber[] a = new InnerSubscriber[n];
+            for (int i = 0; i < n; i++)
+            {
+                a[i] = new InnerSubscriber(this, i);
+            }
+
+            subscribers = a;
+            actual.OnSubscribe(this);
+
+            for (int i = 0; i < n; i++)
+            {
+                if (bp.IsCancelled() || LvDone())
+                {
+                    break;
+                }
+                sources[i].Subscribe(a[i]);
+            }
+        }
+
+        bool HasValue(ulong[] nonempty, int index)
+        {
+            int offset = index >> 4;
+            int bit = index & 15;
+            return 0 != (nonempty[offset] & (1uL << bit));
+        }
+
+        void SetHasValue(ulong[] nonempty, int index)
+        {
+            int offset = index >> 4;
+            int bit = index & 15;
+            nonempty[offset] |= (1uL << bit);
         }
 
         public void Cancel()
         {
-            throw new NotImplementedException();
+            if (bp.TryCancel())
+            {
+                if (bp.Enter())
+                {
+                    CancelAll();
+
+                    ClearQueue();
+                }
+            }
+        }
+
+        void CancelAll()
+        {
+            foreach (InnerSubscriber inner in subscribers)
+            {
+                inner.Cancel();
+            }
+        }
+
+        void ClearQueue()
+        {
+            q.Clear();
         }
 
         public void Request(long n)
         {
-            throw new NotImplementedException();
+            if (OnSubscribeHelper.ValidateRequest(n))
+            {
+                bp.Request(n);
+                Drain();
+            }
+        }
+
+        void Next(T value, int index)
+        {
+            T[] vs = values;
+            int len = vs.Length;
+            ulong[] ne = nonempty;
+
+            lock (this)
+            {
+                int ac = activeCount;
+                if (!HasValue(ne, index))
+                {
+                    activeCount = ++ac;
+                    SetHasValue(ne, index);
+                }
+
+                vs[index] = value;
+
+                if (ac != len)
+                {
+                    return;
+                }
+
+                CombineEntry ce = new CombineEntry();
+                ce.array = new T[len];
+                ce.index = index;
+
+                Array.Copy(vs, 0, ce.array, 0, len);
+
+                q.OfferRef(ref ce);
+            }
+
+            Drain();
+        }
+
+        void Error(Exception e, int index)
+        {
+            if (ExceptionHelper.Add(ref error, e))
+            {
+                SvDone();
+
+                Drain();
+            }
+            else
+            {
+                RxAdvancedFlowPlugins.OnError(e);
+            }
+
+        }
+
+        void Complete(int index)
+        {
+            int len = subscribers.Length;
+            ulong[] ne = nonempty;
+
+            lock (this)
+            {
+                if (HasValue(ne, index))
+                {
+                    int cc = ++completeCount;
+
+                    if (cc != len)
+                    {
+                        return;
+                    }
+                }
+
+                SvDone();
+            }
+
+            Drain();
+        }
+
+        bool LvDone()
+        {
+            return Volatile.Read(ref done);
+        }
+
+        void SvDone()
+        {
+            Volatile.Write(ref done, true);
+        }
+
+        void Drain()
+        {
+            if (bp.Enter())
+            {
+                int missed = 1;
+
+                ISubscriber<R> a = actual;
+                InnerSubscriber[] subs = subscribers;
+
+                for (;;) { 
+
+                    if (CheckTerminated(LvDone(), q.IsEmpty(), a))
+                    {
+                        return;
+                    }
+
+                    long r = bp.Requested();
+                    bool unbounded = r == long.MaxValue;
+                    long e = 0;
+                    CombineEntry v;
+
+                    while (r != 0)
+                    {
+                        bool d = LvDone();
+
+                        bool empty = !q.Poll(out v);
+
+                        if (CheckTerminated(d, empty, a))
+                        {
+                            return;
+                        }
+
+                        if (empty)
+                        {
+                            break;
+                        }
+
+                        R result;
+
+                        try
+                        {
+                            result = combiner(v.array);
+                        }
+                        catch (Exception ex)
+                        {
+                            ExceptionHelper.Add(ref error, ex);
+                            done = true;
+                            continue;
+                        }
+
+                        a.OnNext(result);
+
+                        subs[v.index].Request(1);
+
+                        e++;
+                        r--;
+                    }
+
+                    if (e != 0 && !unbounded)
+                    {
+                        bp.Produced(e);
+                    }
+
+
+                    if (bp.TryLeave(ref missed))
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+
+        bool CheckTerminated(bool d, bool empty, ISubscriber<R> a)
+        {
+            if (bp.IsCancelled())
+            {
+                CancelAll();
+                ClearQueue();
+                return true;
+            }
+
+            if (d)
+            {
+                Exception e = Volatile.Read(ref error);
+                if (e != null)
+                {
+                    ExceptionHelper.Terminate(ref error, out e);
+
+                    CancelAll();
+                    ClearQueue();
+
+                    a.OnError(e);
+                    return true;
+                }
+                else
+                if (empty)
+                {
+                    a.OnComplete();
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         sealed class InnerSubscriber : ISubscriber<T>, ISubscription
         {
-            readonly ISubscriber<T> actual;
+            readonly int index;
 
-            readonly PublisherCombineCoordinator<T> parent;
+            readonly PublisherCombineCoordinator<T, R> parent;
 
-            ISubscription s;
+            SingleArbiterStruct arbiter;
 
-            long requested;
-
-            public InnerSubscriber(ISubscriber<T> actual, PublisherCombineCoordinator<T> parent)
+            public InnerSubscriber(PublisherCombineCoordinator<T, R> parent, int index)
             {
-                this.actual = actual;
+                this.index = index;
                 this.parent = parent;
+                arbiter.InitRequest(parent.bufferSize);
             }
 
             public void Request(long n)
             {
-                throw new NotImplementedException();
+                arbiter.Request(n);
             }
 
             public void Cancel()
             {
-                throw new NotImplementedException();
+                arbiter.Cancel();
             }
 
             public void OnSubscribe(ISubscription s)
             {
-                throw new NotImplementedException();
+                arbiter.Set(s);
             }
 
             public void OnNext(T t)
             {
-                throw new NotImplementedException();
+                parent.Next(t, index);
             }
 
             public void OnError(Exception e)
             {
-                throw new NotImplementedException();
+                parent.Error(e, index);
             }
 
             public void OnComplete()
             {
-                throw new NotImplementedException();
+                parent.Complete(index);
             }
         }
 
-        internal struct CombineNode
+        struct CombineEntry
         {
-            T value;
-            bool done;
-            int index;
+            internal T[] array;
+            internal int index;
         }
+
     }
 }

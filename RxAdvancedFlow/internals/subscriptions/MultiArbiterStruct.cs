@@ -43,7 +43,12 @@ namespace RxAdvancedFlow.internals.subscriptions
 
                 if (j == 0)
                 {
+                    ISubscription b = actual;
+
+                    b?.Cancel();
+
                     actual = next;
+
                     long r = requested;
                     if (r != 0)
                     {
@@ -82,8 +87,27 @@ namespace RxAdvancedFlow.internals.subscriptions
 
             if (OnSubscribeHelper.ValidateRequest(n))
             {
-                BackpressureHelper.Add(ref missedRequested, n);
 
+                if (Volatile.Read(ref wip) == 0)
+                {
+                    int j = Interlocked.CompareExchange(ref wip, 1, 0);
+
+                    if (j == 0)
+                    {
+
+                        requested = BackpressureHelper.AddCap(requested, n);
+
+                        actual?.Request(n);
+
+                        if (Interlocked.Decrement(ref wip) == 0)
+                        {
+                            return;
+                        }
+                    }
+                }
+
+                BackpressureHelper.Add(ref missedRequested, n);
+                    
                 if (Interlocked.Increment(ref wip) == 1)
                 {
                     Drain();
@@ -96,6 +120,33 @@ namespace RxAdvancedFlow.internals.subscriptions
             if (Volatile.Read(ref cancelled))
             {
                 return;
+            }
+
+            if (Volatile.Read(ref wip) == 0)
+            {
+                int j = Interlocked.CompareExchange(ref wip, 1, 0);
+
+                if (j == 0)
+                {
+                    long r = requested;
+
+                    if (r != long.MaxValue)
+                    {
+                        long u = r - n;
+                        if (u < 0)
+                        {
+                            ReportMoreProduced(u);
+                            u = 0;
+                        }
+
+                        requested = u;
+                    }
+
+                    if (Interlocked.Decrement(ref wip) == 0)
+                    {
+                        return;
+                    }
+                }
             }
 
             BackpressureHelper.Add(ref missedProduced, n);
@@ -119,6 +170,11 @@ namespace RxAdvancedFlow.internals.subscriptions
             {
                 Drain();
             }
+        }
+
+        void ReportMoreProduced(long v)
+        {
+            RxAdvancedFlowPlugins.OnError(new InvalidOperationException("More produced than requested: " + v));
         }
 
         void Drain()
@@ -157,8 +213,8 @@ namespace RxAdvancedFlow.internals.subscriptions
                         long v = u - mp;
                         if (v < 0)
                         {
+                            ReportMoreProduced(v);
                             v = 0;
-                            RxAdvancedFlowPlugins.OnError(new InvalidOperationException("More produced than requested"));
                         }
                         u = v;
                     }

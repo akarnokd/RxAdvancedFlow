@@ -13,6 +13,11 @@ namespace RxAdvancedFlow.internals.subscriptions
 
         long requested;
 
+        public void InitRequest(long r)
+        {
+            requested = r;
+        }
+
         public bool Set(ISubscription s)
         {
             return BackpressureHelper.SingleSetSubscription(ref this.s, ref requested, s);

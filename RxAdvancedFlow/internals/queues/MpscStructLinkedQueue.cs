@@ -41,9 +41,14 @@ namespace RxAdvancedFlow.internals.queues
         {
             Node newNode = new Node(value);
 
-            Node prevNode = XchgProducerNode(newNode);
+            return Offer(newNode);
+        }
 
-            prevNode.SoNext(newNode);
+        internal bool Offer(Node node)
+        {
+            Node prevNode = XchgProducerNode(node);
+
+            prevNode.SoNext(node);
 
             return true;
         }
@@ -73,6 +78,36 @@ namespace RxAdvancedFlow.internals.queues
             return false;
         }
 
+        internal void DropWeak()
+        {
+            Node n = consumerNode.LpNext();
+            n.Free();
+            consumerNode = n;
+        }
+
+        internal void Drop()
+        {
+            Node currConsumerNode = consumerNode;
+
+            Node nextNode = currConsumerNode.LvNext();
+
+            if (nextNode != null)
+            {
+                nextNode.Free();
+                consumerNode = nextNode;
+                return;
+            }
+            else
+            if (currConsumerNode != Volatile.Read(ref producerNode))
+            {
+                while ((nextNode = currConsumerNode.LvNext()) != null) ;
+
+                nextNode.Free();
+                consumerNode = nextNode;
+                return;
+            }
+        }
+
         internal bool Peek(out T value)
         {
             Node currConsumerNode = consumerNode;
@@ -95,6 +130,8 @@ namespace RxAdvancedFlow.internals.queues
             value = default(T);
             return false;
         }
+
+
 
         internal bool IsEmpty()
         {
@@ -146,7 +183,7 @@ namespace RxAdvancedFlow.internals.queues
 
         internal class Node
         {
-            T value;
+            internal T value;
 
             Node next;
 
@@ -168,6 +205,11 @@ namespace RxAdvancedFlow.internals.queues
             public Node LvNext()
             {
                 return Volatile.Read(ref next);
+            }
+
+            public Node LpNext()
+            {
+                return next;
             }
 
             public T LpValue()

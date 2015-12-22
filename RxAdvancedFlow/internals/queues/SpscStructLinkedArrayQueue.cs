@@ -57,6 +57,36 @@ namespace RxAdvancedFlow.internals.queues
             return 1 + ((int)index & m);
         }
 
+        internal bool OfferRef(ref T value)
+        {
+            Slot[] a = producerArray;
+            int m = mask;
+            long pi = Volatile.Read(ref producerIndex);
+
+            int offset1 = CalcOffset(pi + 1, m);
+
+            if (a[offset1].Used() != 0)
+            {
+                int offset0 = CalcOffset(pi, m);
+
+                Slot[] b = new Slot[m + 3];
+
+                producerArray = b;
+                b[offset0].SpValueRef(ref value);
+                Volatile.Write(ref producerIndex, pi + 1);
+                a[offset0].SoNext(b);
+            }
+            else
+            {
+                int offset0 = CalcOffset(pi, m);
+
+                Volatile.Write(ref producerIndex, pi + 1);
+                a[offset0].SoValueRef(ref value);
+            }
+
+            return true;
+        }
+
         internal bool Offer(T value)
         {
             Slot[] a = producerArray;
@@ -175,7 +205,19 @@ namespace RxAdvancedFlow.internals.queues
                 used = 1;
             }
 
+            internal void SpValueRef(ref T v)
+            {
+                value = v;
+                used = 1;
+            }
+
             internal void SoValue(T v)
+            {
+                value = v;
+                Volatile.Write(ref used, 1);
+            }
+
+            internal void SoValueRef(ref T v)
             {
                 value = v;
                 Volatile.Write(ref used, 1);

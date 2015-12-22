@@ -53,6 +53,7 @@
     <Compile Include="disposables\SerialDisposable.cs" />
     <Compile Include="Flowable.cs" />
     <Compile Include="internals\BackpressureHelper.cs" />
+    <Compile Include="internals\BasicBackpressureStruct.cs" />
     <Compile Include="internals\completable\AmbCompletableSubscriber.cs" />
     <Compile Include="internals\completable\CallbackCompletableSubscriber.cs" />
     <Compile Include="internals\completable\CompletableAndThenObservable.cs" />
@@ -87,6 +88,7 @@
     <Compile Include="disposables\SetCompositeDisposable.cs" />
     <Compile Include="internals\disposables\EmptyDisposable.cs" />
     <Compile Include="internals\disposables\VersionedSoloDisposable.cs" />
+    <Compile Include="internals\ExceptionHelper.cs" />
     <Compile Include="internals\InfiniteRepeat.cs" />
     <Compile Include="internals\LambdaHelper.cs" />
     <Compile Include="internals\OnSubscribeHelper.cs" />

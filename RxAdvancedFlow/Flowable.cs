@@ -13,6 +13,22 @@ namespace RxAdvancedFlow
     /// </summary>
     public static class Flowable
     {
+        static readonly int DefaultBufferSize = GetSettingsBufferSize();
+
+        static int GetSettingsBufferSize()
+        {
+            string s = Environment.GetEnvironmentVariable("rxaf.buffer-size");
+
+            int i;
+
+            if (int.TryParse(s, out i))
+            {
+                return Math.Max(1, i);
+            }
+
+            return 128;
+        }
+
         public static IPublisher<T> Create<T>(Action<ISubscriber<T>> onSubscribe)
         {
             return new PublisherFromAction<T>(onSubscribe);
@@ -109,28 +125,208 @@ namespace RxAdvancedFlow
             });
         }
 
+        static T[] ToArray<T>(IEnumerable<T> ie, out int n)
+        {
+            T[] a = new T[8];
+            int c = 0;
+
+            foreach (T t in ie)
+            {
+                if (c == a.Length)
+                {
+                    T[] b = new T[c + (c >> 2)];
+                    Array.Copy(a, 0, b, 0, c);
+                    a = b;
+                }
+                a[c++] = t;
+            }
+
+            n = c;
+            return a;
+        }
+
         public static IPublisher<T> Amb<T>(this IEnumerable<IPublisher<T>> sources)
         {
             return Create<T>(s =>
             {
-                IPublisher<T>[] a = new IPublisher<T>[8];
-                int n = 0;
+                int n;
+                IPublisher<T>[] a = ToArray(sources, out n);
 
-                foreach (IPublisher<T> p in sources)
+                if (n == 0)
                 {
-                    if (n == a.Length)
-                    {
-                        IPublisher<T>[] b = new IPublisher<T>[n + (n >> 2)];
-                        Array.Copy(a, 0, b, 0, n);
-                        a = b;
-                    }
-                    a[n] = p;
+                    EmptySubscription.Complete(s);
+                    return;
+                }
+                else
+                if (n == 1)
+                {
+                    a[0].Subscribe(s);
+                    return;
                 }
 
                 PublisherAmbCoordinator<T> ambc = new PublisherAmbCoordinator<T>(s);
 
                 ambc.Subscribe(a, n);
             });
+        }
+
+        public static int BufferSize()
+        {
+            return DefaultBufferSize;
+        }
+
+        public static IPublisher<R> CombineLatest<T, R>(this IPublisher<T>[] sources, Func<T[], R> combiner)
+        {
+            return CombineLatest(sources, combiner, BufferSize());
+        }
+
+        public static IPublisher<R> CombineLatest<T, R>(this IEnumerable<IPublisher<T>> sources, Func<T[], R> combiner)
+        {
+            return CombineLatest(sources, combiner, BufferSize());
+        }
+
+        public static IPublisher<R> CombineLatest<T, R>(this IPublisher<T>[] sources, Func<T[], R> combiner, int bufferSize)
+        {
+            return Create<R>(s =>
+            {
+                PublisherCombineCoordinator<T, R> pcc = new PublisherCombineCoordinator<T, R>(s, combiner, bufferSize);
+
+                pcc.Subscribe(sources, sources.Length);
+            });
+        }
+
+        public static IPublisher<R> CombineLatest<T, R>(this IEnumerable<IPublisher<T>> sources, Func<T[], R> combiner, int bufferSize)
+        {
+            return Create<R>(s =>
+            {
+                int n;
+                IPublisher<T>[] a = ToArray(sources, out n);
+
+                if (n == 0)
+                {
+                    EmptySubscription.Complete(s);
+                    return;
+                }
+                if (n == 1)
+                {
+                    a[0].Map(v => combiner(new T[] { v })).Subscribe(s);
+                    return;
+                }
+
+                PublisherCombineCoordinator<T, R> pcc = new PublisherCombineCoordinator<T, R>(s, combiner, bufferSize);
+
+                pcc.Subscribe(a, n);
+            });
+        }
+
+        public static IPublisher<R> CombineLatest<T1, T2, R>(
+            IPublisher<T1> s1, IPublisher<T2> s2, 
+            Func<T1, T2, R> combiner)
+        {
+            return CombineLatest(new IPublisher<object>[] {
+                (IPublisher<object>)s1, (IPublisher<object>)s2
+            }, LambdaHelper.ToFuncN(combiner));
+        }
+
+        public static IPublisher<R> CombineLatest<T1, T2, T3, R>(
+            IPublisher<T1> s1, IPublisher<T2> s2,
+            IPublisher<T3> s3,
+            Func<T1, T2, T3, R> combiner)
+        {
+            return CombineLatest(new IPublisher<object>[] {
+                (IPublisher<object>)s1, (IPublisher<object>)s2,
+                (IPublisher<object>)s3
+            }, LambdaHelper.ToFuncN(combiner));
+        }
+
+        public static IPublisher<R> CombineLatest<T1, T2, T3, T4, R>(
+            IPublisher<T1> s1, IPublisher<T2> s2,
+            IPublisher<T3> s3, IPublisher<T4> s4,
+            Func<T1, T2, T3, T4, R> combiner)
+        {
+            return CombineLatest(new IPublisher<object>[] {
+                (IPublisher<object>)s1, (IPublisher<object>)s2,
+                (IPublisher<object>)s3, (IPublisher<object>)s4
+            }, LambdaHelper.ToFuncN(combiner));
+        }
+
+        public static IPublisher<R> CombineLatest<T1, T2, T3, T4, T5, R>(
+            IPublisher<T1> s1, IPublisher<T2> s2,
+            IPublisher<T3> s3, IPublisher<T4> s4,
+            IPublisher<T5> s5,
+            Func<T1, T2, T3, T4, T5, R> combiner)
+        {
+            return CombineLatest(new IPublisher<object>[] {
+                (IPublisher<object>)s1, (IPublisher<object>)s2,
+                (IPublisher<object>)s3, (IPublisher<object>)s4,
+                (IPublisher<object>)s5
+            }, LambdaHelper.ToFuncN(combiner));
+        }
+
+        public static IPublisher<R> CombineLatest<T1, T2, T3, T4, T5, T6, R>(
+            IPublisher<T1> s1, IPublisher<T2> s2,
+            IPublisher<T3> s3, IPublisher<T4> s4,
+            IPublisher<T5> s5, IPublisher<T6> s6,
+            Func<T1, T2, T3, T4, T5, T6, R> combiner)
+        {
+            return CombineLatest(new IPublisher<object>[] {
+                (IPublisher<object>)s1, (IPublisher<object>)s2,
+                (IPublisher<object>)s3, (IPublisher<object>)s4,
+                (IPublisher<object>)s5, (IPublisher<object>)s6
+            }, LambdaHelper.ToFuncN(combiner));
+        }
+
+        public static IPublisher<R> CombineLatest<T1, T2, T3, T4, T5, T6, T7, R>(
+            IPublisher<T1> s1, IPublisher<T2> s2,
+            IPublisher<T3> s3, IPublisher<T4> s4,
+            IPublisher<T5> s5, IPublisher<T6> s6,
+            IPublisher<T7> s7,
+            Func<T1, T2, T3, T4, T5, T6, T7, R> combiner)
+        {
+            return CombineLatest(new IPublisher<object>[] {
+                (IPublisher<object>)s1, (IPublisher<object>)s2,
+                (IPublisher<object>)s3, (IPublisher<object>)s4,
+                (IPublisher<object>)s5, (IPublisher<object>)s6,
+                (IPublisher<object>)s7
+            }, LambdaHelper.ToFuncN(combiner));
+        }
+
+        public static IPublisher<R> CombineLatest<T1, T2, T3, T4, T5, T6, T7, T8, R>(
+            IPublisher<T1> s1, IPublisher<T2> s2,
+            IPublisher<T3> s3, IPublisher<T4> s4,
+            IPublisher<T5> s5, IPublisher<T6> s6,
+            IPublisher<T7> s7, IPublisher<T8> s8,
+            Func<T1, T2, T3, T4, T5, T6, T7, T8, R> combiner)
+        {
+            return CombineLatest(new IPublisher<object>[] {
+                (IPublisher<object>)s1, (IPublisher<object>)s2,
+                (IPublisher<object>)s3, (IPublisher<object>)s4,
+                (IPublisher<object>)s5, (IPublisher<object>)s6,
+                (IPublisher<object>)s7, (IPublisher<object>)s8
+            }, LambdaHelper.ToFuncN(combiner));
+        }
+
+        public static IPublisher<R> CombineLatest<T1, T2, T3, T4, T5, T6, T7, T8, T9, R>(
+            IPublisher<T1> s1, IPublisher<T2> s2,
+            IPublisher<T3> s3, IPublisher<T4> s4,
+            IPublisher<T5> s5, IPublisher<T6> s6,
+            IPublisher<T7> s7, IPublisher<T8> s8,
+            IPublisher<T9> s9,
+            Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, R> combiner)
+        {
+            return CombineLatest(new IPublisher<object>[] {
+                (IPublisher<object>)s1, (IPublisher<object>)s2,
+                (IPublisher<object>)s3, (IPublisher<object>)s4,
+                (IPublisher<object>)s5, (IPublisher<object>)s6,
+                (IPublisher<object>)s7, (IPublisher<object>)s8,
+                (IPublisher<object>)s9
+            }, LambdaHelper.ToFuncN(combiner));
+        }
+
+        public static IPublisher<R> Map<T, R>(this IPublisher<T> source, Func<T, R> mapper)
+        {
+            // TODO implement
+            throw new NotImplementedException();
         }
     }
 }
