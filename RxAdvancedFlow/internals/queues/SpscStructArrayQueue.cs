@@ -168,13 +168,6 @@ namespace RxAdvancedFlow.internals.queues
                 return value;
             }
 
-            internal T GetAndNull()
-            {
-                T v = value;
-                Free();
-                return v;
-            }
-
             internal void Free()
             {
                 value = default(T);

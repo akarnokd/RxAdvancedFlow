@@ -93,11 +93,15 @@
     <Compile Include="internals\completable\LambdaCompletableSubscriber.cs" />
     <Compile Include="internals\ProcessorHelper.cs" />
     <Compile Include="internals\publisher\PublisherAmbCoordinator.cs" />
+    <Compile Include="internals\publisher\PublisherCombineCoordinator.cs" />
     <Compile Include="internals\publisher\PublisherFromAction.cs" />
     <Compile Include="internals\publisher\PublisherLift.cs" />
     <Compile Include="internals\queues\IQueue.cs" />
+    <Compile Include="internals\queues\MpscLinkedQueue.cs" />
+    <Compile Include="internals\queues\MpscStructLinkedQueue.cs" />
     <Compile Include="internals\queues\QueueHelper.cs" />
     <Compile Include="internals\queues\SpscArrayQueue.cs" />
+    <Compile Include="internals\queues\SpscLinkedArrayQueue.cs" />
     <Compile Include="internals\queues\SpscStructArrayQueue.cs" />
     <Compile Include="internals\queues\SpscStructLinkedArrayQueue.cs" />
     <Compile Include="internals\ScalarSource.cs" />
@@ -128,6 +132,8 @@
     <Compile Include="internals\single\SingleFromAction.cs" />
     <Compile Include="internals\single\SingleLift.cs" />
     <Compile Include="internals\single\SingleToObservable.cs" />
+    <Compile Include="internals\subscriptions\MultiArbiterStruct.cs" />
+    <Compile Include="internals\subscriptions\SingleArbiterStruct.cs" />
     <Compile Include="internals\subscriptions\SubscriptionHelper.cs" />
     <Compile Include="internals\subscriptions\EmptySubscription.cs" />
     <Compile Include="processors\SingleProcessor.cs" />

@@ -17,26 +17,21 @@ namespace RxAdvancedFlow.subscriptions
     public sealed class SingleSubscriptionArbiter : ISubscription
     {
 
-        long missedRequests;
-
-        ISubscription actual;
+        SingleArbiterStruct a;
 
         public void Cancel()
         {
-            SubscriptionHelper.Terminate(ref actual);
+            a.Cancel();
         }
 
         public void Request(long n)
         {
-            if (OnSubscribeHelper.ValidateRequest(n))
-            {
-                BackpressureHelper.SingleRequest(ref actual, ref missedRequests, n);
-            }
+            a.Request(n);
         }
 
         public bool Set(ISubscription s)
         {
-            return BackpressureHelper.SingleSetSubscription(ref actual, ref missedRequests, s);
+            return a.Set(s);
         }
     }
 }

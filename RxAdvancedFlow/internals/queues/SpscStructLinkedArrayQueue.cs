@@ -30,9 +30,125 @@ namespace RxAdvancedFlow.internals.queues
 
         internal void Init(int capacity)
         {
-            int c = QueueHelper.RoundPowerOf2(capacity);
+            int c = QueueHelper.RoundPowerOf2(Math.Max(2, capacity));
             producerArray = consumerArray = new Slot[c + 2];
             mask = c - 1;
+        }
+
+        internal int Size()
+        {
+            return QueueHelper.Size(ref producerIndex, ref consumerIndex);
+        }
+
+        internal bool IsEmpty()
+        {
+            return QueueHelper.IsEmpty(ref producerIndex, ref consumerIndex);
+        }
+
+        internal void Clear()
+        {
+            T ignored;
+
+            while (Poll(out ignored) && !IsEmpty()) ;
+        }
+
+        int CalcOffset(long index, int m)
+        {
+            return 1 + ((int)index & m);
+        }
+
+        internal bool Offer(T value)
+        {
+            Slot[] a = producerArray;
+            int m = mask;
+            long pi = Volatile.Read(ref producerIndex);
+
+            int offset1 = CalcOffset(pi + 1, m);
+
+            if (a[offset1].Used() != 0)
+            {
+                int offset0 = CalcOffset(pi, m);
+
+                Slot[] b = new Slot[m + 3];
+
+                producerArray = b;
+                b[offset0].SpValue(value);
+                Volatile.Write(ref producerIndex, pi + 1);
+                a[offset0].SoNext(b);
+            }
+            else
+            {
+                int offset0 = CalcOffset(pi, m);
+
+                Volatile.Write(ref producerIndex, pi + 1);
+                a[offset0].SoValue(value);
+            }
+
+            return true;
+        }
+
+        internal bool Peek(out T value)
+        {
+            Slot[] a = consumerArray;
+            int m = mask;
+            long ci = Volatile.Read(ref consumerIndex);
+
+            int offset = CalcOffset(ci, m);
+
+            byte t = a[offset].Used();
+
+            if (t == 0)
+            {
+                value = default(T);
+                return false;
+            }
+            else
+            if (t == 1)
+            {
+                value = a[offset].LpValue();
+                return true;
+            }
+
+            Slot[] b = a[offset].LpNext();
+
+            value = b[offset].LpValue();
+            return true;
+        }
+
+
+        internal bool Poll(out T value)
+        {
+            Slot[] a = consumerArray;
+            int m = mask;
+            long ci = Volatile.Read(ref consumerIndex);
+
+            int offset = CalcOffset(ci, m);
+
+            byte t = a[offset].Used();
+
+            if (t == 0)
+            {
+                value = default(T);
+                return false;
+            }
+            else
+            if (t == 1)
+            {
+                value = a[offset].LpValue();
+                Volatile.Write(ref consumerIndex, ci + 1);
+                a[offset].Free();
+                return true;
+            }
+
+            Slot[] b = a[offset].LpNext();
+
+            consumerArray = b;
+
+            value = b[offset].LpValue();
+            Volatile.Write(ref consumerIndex, ci + 1);
+            b[offset].Free();
+
+            return true;
         }
 
 
@@ -51,6 +167,12 @@ namespace RxAdvancedFlow.internals.queues
             internal byte Used()
             {
                 return Volatile.Read(ref used);
+            }
+
+            internal void SpValue(T v)
+            {
+                value = v;
+                used = 1;
             }
 
             internal void SoValue(T v)
@@ -73,13 +195,6 @@ namespace RxAdvancedFlow.internals.queues
             internal Slot[] LpNext()
             {
                 return next;
-            }
-
-            internal T GetAndNull()
-            {
-                T v = value;
-                Free();
-                return v;
             }
 
             internal void Free()
