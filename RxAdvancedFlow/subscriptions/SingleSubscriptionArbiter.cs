@@ -30,45 +30,13 @@ namespace RxAdvancedFlow.subscriptions
         {
             if (OnSubscribeHelper.ValidateRequest(n))
             {
-                ISubscription a = Volatile.Read(ref actual);
-
-                if (a == null)
-                {
-                    BackpressureHelper.Add(ref missedRequests, n);
-
-                    a = Volatile.Read(ref actual);
-
-                    if (a != null)
-                    {
-                        long r = Interlocked.Exchange(ref missedRequests, 0);
-
-                        if (r != 0)
-                        {
-                            a.Request(r);
-                        }
-                    }
-                }
-                else
-                {
-                    a.Request(n);
-                }
+                BackpressureHelper.SingleRequest(ref actual, ref missedRequests, n);
             }
         }
 
         public bool Set(ISubscription s)
         {
-            if (SubscriptionHelper.SetOnce(ref actual, s))
-            {
-                long r = Interlocked.Exchange(ref missedRequests, 0);
-                if (r != 0)
-                {
-                    s.Request(r);
-                }
-
-                return true;
-            }
-
-            return false;
+            return BackpressureHelper.SingleSetSubscription(ref actual, ref missedRequests, s);
         }
     }
 }

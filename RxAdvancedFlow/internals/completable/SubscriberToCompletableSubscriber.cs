@@ -36,7 +36,7 @@ namespace RxAdvancedFlow.internals.completable
 
         public void OnNext(T t)
         {
-            // 
+            // ignoring values
         }
 
         public void OnSubscribe(ISubscription s)
@@ -44,6 +44,8 @@ namespace RxAdvancedFlow.internals.completable
             if (OnSubscribeHelper.SetSubscription(ref this.s, s))
             {
                 cs.OnSubscribe(this);
+
+                s.Request(long.MaxValue);
             }
         }
     }

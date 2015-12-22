@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ReactiveStreamsCS;
+using RxAdvancedFlow.internals.subscriptions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -152,6 +154,75 @@ namespace RxAdvancedFlow.internals
         public static bool IsTerminated(ref int state)
         {
             return Volatile.Read(ref state) == STATE_HAS_REQUEST_HAS_VALUE;
+        }
+
+        /// <summary>
+        /// Atomically sets the single ISubscriber on the target field and requests the accumulated
+        /// request amount. 
+        /// </summary>
+        /// <param name="field"></param>
+        /// <param name="requested"></param>
+        /// <param name="s"></param>
+        /// <returns>False if the target field contains the common Cancelled instance or is not null</returns>
+        public static bool SingleSetSubscription(ref ISubscription field, ref long requested, ISubscription s)
+        {
+            ISubscription a = Volatile.Read(ref field);
+            
+            if (a == SubscriptionHelper.Cancelled)
+            {
+                s.Cancel();
+                return false;
+            }
+
+            a = Interlocked.CompareExchange(ref field, s, a);
+
+            if (a == SubscriptionHelper.Cancelled)
+            {
+                s.Cancel();
+                return false;
+            }
+
+            if (a == null)
+            {
+                long r = Interlocked.Exchange(ref requested, 0);
+
+                if (r != 0)
+                {
+                    s.Request(r);
+                }
+
+                return true;
+            }
+
+            s.Cancel();
+            OnSubscribeHelper.ReportSubscriptionSet();
+
+            return false;
+        }
+
+        public static void SingleRequest(ref ISubscription s, ref long requested, long n)
+        {
+            ISubscription a = Volatile.Read(ref s);
+            if (a != null)
+            {
+                a.Request(n);
+            } 
+            else
+            {
+                Add(ref requested, n);
+
+                a = Volatile.Read(ref s);
+
+                if (a != null)
+                {
+                    long r = Interlocked.Exchange(ref requested, 0);
+
+                    if (r != 0)
+                    {
+                        a.Request(n);
+                    }
+                }
+            }
         }
     }
 }

@@ -639,16 +639,29 @@ namespace RxAdvancedFlow
             });
         }
 
-        public static ISingle<T> DelaySubscription<T>(this ISingle<T> source, IObservable<T> other)
+        public static ISingle<T> DelaySubscription<T, U>(this ISingle<T> source, IObservable<U> other)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return Create<T>(s =>
+            {
+                DelaySubscriptionByObservableSingleSubscriber<T, U> observer = new DelaySubscriptionByObservableSingleSubscriber<T, U>(source, s);
+
+                s.OnSubscribe(observer);
+
+                IDisposable a = other.Subscribe(observer);
+                observer.Set(a);
+            });
         }
 
-        public static ISingle<T> DelaySubscription<T>(this ISingle<T> source, IPublisher<T> other)
+        public static ISingle<T> DelaySubscription<T, U>(this ISingle<T> source, IPublisher<U> other)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return Create<T>(s =>
+            {
+                DelaySubscriptionByPublisherSingleSubscriber<T, U> subscriber = new DelaySubscriptionByPublisherSingleSubscriber<T, U>(source, s);
+
+                s.OnSubscribe(subscriber);
+
+                other.Subscribe(subscriber);
+            });
         }
 
         public static ISingle<T> DoOnSubscribe<T>(this ISingle<T> source, Action<IDisposable> onSubscribeCall)
@@ -887,6 +900,32 @@ namespace RxAdvancedFlow
                     source.Subscribe(new SingleSubscriberWrapper<T>(s, mad));
                 }));
             });
+        }
+
+        public static ISingle<T> Timeout<T>(this ISingle<T> source, TimeSpan timeout, ISingle<T> other = null)
+        {
+            return Timeout(source, timeout, DefaultScheduler.Instance, other);
+        }
+
+        public static ISingle<T> Timeout<T>(this ISingle<T> source, TimeSpan timeout, IScheduler scheduler, ISingle<T> other = null)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new TimeoutSingleSubscriber<T>(s, timeout, scheduler, other));
+            });
+        }
+
+        public static ISingle<T> UnsubscribeOn<T>(this ISingle<T> source, IScheduler scheduler)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new UnsubscribeOnSingleSubscriber<T>(s, scheduler));
+            });
+        }
+
+        public static ISingle<R> ZipWith<T1, T2, R>(this ISingle<T1> source, ISingle<T2> other, Func<T1, T2, R> zipper)
+        {
+            return Zip(source, other, zipper);
         }
     }
 }

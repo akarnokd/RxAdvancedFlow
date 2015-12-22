@@ -329,9 +329,19 @@ namespace RxAdvancedFlow
                 {
                     c = completableFactory(state);
                 }
-                catch (Exception ex)
+                catch (Exception e)
                 {
-                    EmptyDisposable.Error(cs, ex);
+                    try
+                    {
+                        stateDisposer(state);
+                    }
+                    catch (Exception ex)
+                    {
+                        EmptyDisposable.Error(cs, new AggregateException(e, ex));
+                        return;
+                    }
+
+                    EmptyDisposable.Error(cs, e);
                     return;
                 }
 

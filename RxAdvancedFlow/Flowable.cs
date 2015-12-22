@@ -2,7 +2,9 @@
 using RxAdvancedFlow.internals;
 using RxAdvancedFlow.internals.completable;
 using RxAdvancedFlow.internals.publisher;
+using RxAdvancedFlow.internals.subscriptions;
 using System;
+using System.Collections.Generic;
 
 namespace RxAdvancedFlow
 {
@@ -51,6 +53,84 @@ namespace RxAdvancedFlow
             return new ScalarSource<T>(value);
         }
 
+        public static IPublisher<T> Empty<T>()
+        {
+            return Create<T>(s => EmptySubscription.Complete(s));
+        }
 
+        public static IPublisher<T> Never<T>()
+        {
+            return Create<T>(s => s.OnSubscribe(EmptySubscription.Instance));
+        }
+
+        public static IPublisher<T> Throw<T>(Exception error)
+        {
+            return Throw<T>(() => error);
+        }
+
+        public static IPublisher<T> Throw<T>(Func<Exception> errorSupplier)
+        {
+            return Create<T>(s =>
+            {
+                s.OnSubscribe(EmptySubscription.Instance);
+
+                Exception e;
+
+                try
+                {
+                    e = errorSupplier();
+                }
+                catch (Exception ex)
+                {
+                    e = ex;
+                }
+
+                s.OnError(e);
+            });
+        }
+
+        public static IPublisher<T> Amb<T>(this IPublisher<T>[] sources)
+        {
+            int n = sources.Length;
+            if (n == 0)
+            {
+                return Empty<T>();
+            }
+            if (n == 1)
+            {
+                return sources[0];
+            }
+
+            return Create<T>(s =>
+            {
+                PublisherAmbCoordinator<T> ambc = new PublisherAmbCoordinator<T>(s);
+
+                ambc.Subscribe(sources, sources.Length);
+            });
+        }
+
+        public static IPublisher<T> Amb<T>(this IEnumerable<IPublisher<T>> sources)
+        {
+            return Create<T>(s =>
+            {
+                IPublisher<T>[] a = new IPublisher<T>[8];
+                int n = 0;
+
+                foreach (IPublisher<T> p in sources)
+                {
+                    if (n == a.Length)
+                    {
+                        IPublisher<T>[] b = new IPublisher<T>[n + (n >> 2)];
+                        Array.Copy(a, 0, b, 0, n);
+                        a = b;
+                    }
+                    a[n] = p;
+                }
+
+                PublisherAmbCoordinator<T> ambc = new PublisherAmbCoordinator<T>(s);
+
+                ambc.Subscribe(a, n);
+            });
+        }
     }
 }
