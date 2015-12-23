@@ -35,5 +35,16 @@ namespace RxAdvancedFlow.internals.subscriptions
             s.OnSubscribe(Instance);
             s.OnComplete();
         }
+
+        public static bool NullCheck<T, U>(ISubscriber<T> s, U value) where U : class
+        {
+            if (value == null)
+            {
+                Error(s, new NullReferenceException("value supplied is null"));
+                return false;
+            }
+
+            return true;
+        }
     }
 }

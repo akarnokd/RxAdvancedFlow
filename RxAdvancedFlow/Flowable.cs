@@ -105,7 +105,7 @@ namespace RxAdvancedFlow
             });
         }
 
-        public static IPublisher<T> Amb<T>(this IPublisher<T>[] sources)
+        public static IPublisher<T> AmbArray<T>(params IPublisher<T>[] sources)
         {
             int n = sources.Length;
             if (n == 0)
@@ -123,6 +123,11 @@ namespace RxAdvancedFlow
 
                 ambc.Subscribe(sources, sources.Length);
             });
+        }
+
+        public static IPublisher<T> Amb<T>(this IPublisher<T>[] sources)
+        {
+            return AmbArray(sources);
         }
 
         static T[] ToArray<T>(IEnumerable<T> ie, out int n)
@@ -323,10 +328,72 @@ namespace RxAdvancedFlow
             }, LambdaHelper.ToFuncN(combiner));
         }
 
+        public static IPublisher<T> Concat<T>(this IPublisher<T>[] sources)
+        {
+            return Concat((IEnumerable<IPublisher<T>>)sources);
+        }
+
+        public static IPublisher<T> ConcatArray<T>(params IPublisher<T>[] sources)
+        {
+            return Concat((IEnumerable<IPublisher<T>>)sources);
+        }
+
+        public static IPublisher<T> Concat<T>(this IEnumerable<IPublisher<T>> sources)
+        {
+            return Create<T>(s =>
+            {
+                PublisherConcatSubscriber<T> pcs = new PublisherConcatSubscriber<T>(s, sources.GetEnumerator());
+
+                s.OnSubscribe(pcs);
+
+                pcs.OnComplete();
+            });
+        }
+
+        public static IPublisher<T> Concat<T>(this IPublisher<IPublisher<T>> sources, int prefetch = 2)
+        {
+            return ConcatMap(sources, v => v, prefetch);
+        }
+
+        public static IPublisher<T> Defer<T>(Func<IPublisher<T>> publisherFactory)
+        {
+            return Create<T>(s =>
+            {
+                IPublisher<T> p;
+
+                try
+                {
+                    p = publisherFactory();
+                }
+                catch (Exception e)
+                {
+                    EmptySubscription.Error(s, e);
+                    return;
+                }
+
+                if (EmptySubscription.NullCheck(s, p))
+                {
+                    p.Subscribe(s);
+                }
+            });
+        }
+
+
+
         public static IPublisher<R> Map<T, R>(this IPublisher<T> source, Func<T, R> mapper)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return Create<R>(s =>
+            {
+                source.Subscribe(new PublisherMapSubscriber<T, R>(s, mapper));
+            });
+        }
+
+        public static IPublisher<R> ConcatMap<T, R>(this IPublisher<T> source, Func<T, IPublisher<R>> mapper, int prefetch = 2)
+        {
+            return Create<R>(s =>
+            {
+                source.Subscribe(new PublisherConcatMapSubscriber<T, R>(s, mapper, prefetch));
+            });
         }
     }
 }

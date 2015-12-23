@@ -225,5 +225,14 @@ namespace RxAdvancedFlow.internals
             }
         }
 
+        /// <summary>
+        /// Creates the default missing backpressure exception indicator.
+        /// </summary>
+        /// <returns></returns>
+        public static Exception MissingBackpressureException()
+        {
+            return new InvalidOperationException("Backpressure not honored");
+        }
+
     }
 }

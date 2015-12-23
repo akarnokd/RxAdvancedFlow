@@ -53,7 +53,7 @@ namespace RxAdvancedFlow.internals.completable
 
                     source.Subscribe(this);
 
-                } while (Interlocked.Decrement(ref wip) == 0);
+                } while (Interlocked.Decrement(ref wip) != 0);
             }
         }
 

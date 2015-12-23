@@ -29,6 +29,16 @@ namespace RxAdvancedFlow.internals.subscriptions
 
         bool cancelled;
 
+        public void InitRequest(long n)
+        {
+            requested = n;
+        }
+
+        public bool IsCancelled()
+        {
+            return Volatile.Read(ref cancelled);
+        }
+
         public void Set(ISubscription next)
         {
             if (Volatile.Read(ref cancelled))
@@ -78,6 +88,10 @@ namespace RxAdvancedFlow.internals.subscriptions
             }
         }
 
+        /// <summary>
+        /// Request from the current actual ISubscriber.
+        /// </summary>
+        /// <param name="n">The request amount. Validated</param>
         public void Request(long n)
         {
             if (Volatile.Read(ref cancelled))
