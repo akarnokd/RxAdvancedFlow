@@ -23,7 +23,7 @@ namespace RxAdvancedFlow.internals.publisher
 
         ISubscription s;
 
-        SpscStructArrayQueue<T> q;
+        SpscArrayQueueStruct<T> q;
 
         MultiArbiterStruct arbiter;
 

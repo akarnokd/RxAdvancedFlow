@@ -34,7 +34,7 @@ namespace RxAdvancedFlow.internals.publisher
 
         bool done;
 
-        SpscStructLinkedArrayQueue<R> q;
+        SpscLinkedArrayQueueStruct<R> q;
 
         // all kinds of threads
 
@@ -542,7 +542,7 @@ namespace RxAdvancedFlow.internals.publisher
 
             bool done;
 
-            SpscStructArrayQueue<R> q;
+            SpscArrayQueueStruct<R> q;
 
             public PublisherMergeInner(long id, PublisherMerge<T, R> parent, int bufferSize)
             {

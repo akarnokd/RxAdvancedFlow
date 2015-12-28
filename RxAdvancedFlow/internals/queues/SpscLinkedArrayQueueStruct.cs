@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace RxAdvancedFlow.internals.queues
 {
     [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    internal struct SpscStructLinkedArrayQueue<T>
+    internal struct SpscLinkedArrayQueueStruct<T>
     {
         internal int mask;
 
@@ -211,6 +211,39 @@ namespace RxAdvancedFlow.internals.queues
             b[offset].Free();
 
             return true;
+        }
+
+        /// <summary>
+        /// Drops the current value available via Peek.
+        /// </summary>
+        public void Drop()
+        {
+            Slot[] a = consumerArray;
+            int m = mask;
+            long ci = Volatile.Read(ref consumerIndex);
+
+            int offset = CalcOffset(ci, m);
+
+            byte t = a[offset].Used();
+
+            if (t == 0)
+            {
+                return;
+            }
+            else
+            if (t == 1)
+            {
+                Volatile.Write(ref consumerIndex, ci + 1);
+                a[offset].Free();
+                return;
+            }
+
+            Slot[] b = a[offset].LpNext();
+
+            consumerArray = b;
+
+            Volatile.Write(ref consumerIndex, ci + 1);
+            b[offset].Free();
         }
 
 

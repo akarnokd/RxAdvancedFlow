@@ -107,14 +107,15 @@
     <Compile Include="internals\publisher\PublisherMerge.cs" />
     <Compile Include="internals\publisher\PublisherRange.cs" />
     <Compile Include="internals\publisher\PublisherSequenceEqual.cs" />
+    <Compile Include="internals\publisher\PublisherSwitchMap.cs" />
     <Compile Include="internals\queues\IQueue.cs" />
     <Compile Include="internals\queues\MpscLinkedQueue.cs" />
     <Compile Include="internals\queues\MpscStructLinkedQueue.cs" />
     <Compile Include="internals\queues\QueueHelper.cs" />
     <Compile Include="internals\queues\SpscArrayQueue.cs" />
     <Compile Include="internals\queues\SpscLinkedArrayQueue.cs" />
-    <Compile Include="internals\queues\SpscStructArrayQueue.cs" />
-    <Compile Include="internals\queues\SpscStructLinkedArrayQueue.cs" />
+    <Compile Include="internals\queues\SpscArrayQueueStruct.cs" />
+    <Compile Include="internals\queues\SpscLinkedArrayQueueStruct.cs" />
     <Compile Include="internals\ScalarSource.cs" />
     <Compile Include="internals\schedulers\ScheduledAction.cs" />
     <Compile Include="internals\single\AmbSingleSubscriber.cs" />

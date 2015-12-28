@@ -8,7 +8,7 @@ namespace RxAdvancedFlow.internals.queues
 {
     sealed class SpscLinkedArrayQueue<T> : IQueue<T>
     {
-        SpscStructLinkedArrayQueue<T> q;
+        SpscLinkedArrayQueueStruct<T> q;
 
         public SpscLinkedArrayQueue(int islandSize)
         {

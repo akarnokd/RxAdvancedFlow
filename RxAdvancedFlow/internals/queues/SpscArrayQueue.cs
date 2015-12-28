@@ -10,7 +10,7 @@ namespace RxAdvancedFlow.internals.queues
     sealed class SpscArrayQueue<T> : IQueue<T>
     {
 
-        SpscStructArrayQueue<T> q;
+        SpscArrayQueueStruct<T> q;
 
         public SpscArrayQueue(int capacity)
         {

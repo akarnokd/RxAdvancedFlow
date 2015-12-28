@@ -52,6 +52,11 @@ namespace RxAdvancedFlow.internals
             return Volatile.Read(ref requested);
         }
 
+        /// <summary>
+        /// Adds the specified request amount. Does not validate the number.
+        /// </summary>
+        /// <param name="n"></param>
+        /// <returns></returns>
         public long Request(long n)
         {
             return BackpressureHelper.Add(ref requested, n);

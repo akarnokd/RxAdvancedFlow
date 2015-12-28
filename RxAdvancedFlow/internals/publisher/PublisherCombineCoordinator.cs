@@ -21,7 +21,7 @@ namespace RxAdvancedFlow.internals.publisher
 
         InnerSubscriber[] subscribers;
 
-        SpscStructLinkedArrayQueue<CombineEntry> q;
+        SpscLinkedArrayQueueStruct<CombineEntry> q;
 
         BasicBackpressureStruct bp;
 

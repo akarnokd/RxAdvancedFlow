@@ -18,7 +18,7 @@ namespace RxAdvancedFlow.internals.queues
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    internal struct SpscStructArrayQueue<T>
+    internal struct SpscArrayQueueStruct<T>
     {
         internal Slot[] array;
         internal int mask;

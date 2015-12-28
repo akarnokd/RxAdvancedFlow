@@ -610,7 +610,26 @@ namespace RxAdvancedFlow
 
         public static IPublisher<bool> SequenceEqual<T>(this IPublisher<T> first, IPublisher<T> second, IEqualityComparer<T> comparer)
         {
+            return Create<bool>(s =>
+            {
+                PublisherSequenceEqual<T> parent = new PublisherSequenceEqual<T>(s, BufferSize(), comparer);
 
+                s.OnSubscribe(parent);
+
+                parent.Subscribe(first, second);
+            });
+        }
+
+        public static IPublisher<T> SwitchOnNext<T>(this IPublisher<IPublisher<T>> sources)
+        {
+            return sources.SwitchMap(v => v);
+        }
+
+        public static IPublisher<R> SwitchMap<T, R>(this IPublisher<T> source, Func<T, IPublisher<R>> mapper)
+        {
+            return Create<R>(s => {
+                source.Subscribe(new PublisherSwitchMap<T, R>(s, mapper, BufferSize()));
+            });
         }
     }
 }
