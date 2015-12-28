@@ -519,6 +519,16 @@ namespace RxAdvancedFlow
             });
         }
 
+        public static IPublisher<T> Merge<T>(this IPublisher<T>[] sources, int maxConcurrency = int.MaxValue)
+        {
+            return FromArray(sources).FlatMap(v => v, false, maxConcurrency);
+        }
+
+        public static IPublisher<T> MergeDelayError<T>(this IPublisher<T>[] sources, int maxConcurrency = int.MaxValue)
+        {
+            return FromArray(sources).FlatMap(v => v, true, maxConcurrency);
+        }
+
         public static IPublisher<T> Merge<T>(int maxConcurrency = int.MaxValue, params IPublisher<T>[] sources)
         {
             return FromArray(sources).FlatMap(v => v, false, maxConcurrency);
@@ -541,11 +551,20 @@ namespace RxAdvancedFlow
 
         public static IPublisher<R> FlatMap<T, R>(this IPublisher<T> source, Func<T, IPublisher<R>> mapper, bool delayError = false, int maxConcurrency = int.MaxValue)
         {
-            return FlatMap(source, mapper, delayError, maxConcurrency, BufferSize());
+            return FlatMap(source, mapper, BufferSize(), delayError, maxConcurrency);
         }
 
-        public static IPublisher<R> FlatMap<T, R>(this IPublisher<T> source, Func<T, IPublisher<R>> mapper, bool delayError = false, int maxConcurrency = int.MaxValue, int bufferSize)
+        public static IPublisher<R> FlatMap<T, R>(this IPublisher<T> source, Func<T, IPublisher<R>> mapper, int bufferSize, bool delayError = false, int maxConcurrency = int.MaxValue)
         {
+            if (source is ScalarSource<T>)
+            {
+                ScalarSource<T> scalar = (ScalarSource<T>)source;
+
+                T t = scalar.Get();
+
+                return Defer(() => mapper(t));
+            }
+
             return Create<R>(s =>
             {
                 PublisherMerge<T, R> parent = new PublisherMerge<T, R>(s, maxConcurrency, delayError, bufferSize, mapper);
@@ -556,5 +575,42 @@ namespace RxAdvancedFlow
             });
         }
 
+        public static IPublisher<int> Range(int start, int count)
+        {
+            if (count < 0)
+            {
+                throw new ArgumentOutOfRangeException("count >= required but it was " + count);
+            }
+            if (count == 0)
+            {
+                return Empty<int>();
+            }
+            if (count == 1)
+            {
+                return Just<int>(start);
+            }
+
+            long end = ((long)start) + count;
+
+            if (end > int.MaxValue)
+            {
+                throw new ArgumentOutOfRangeException("start + count overflows the integer range");
+            }
+
+            return Create<int>(s =>
+            {
+                s.OnSubscribe(new PublisherRange(start, end, s));
+            });
+        }
+
+        public static IPublisher<bool> SequenceEqual<T>(this IPublisher<T> first, IPublisher<T> second)
+        {
+            return SequenceEqual(first, second, EqualityComparer<T>.Default);
+        }
+
+        public static IPublisher<bool> SequenceEqual<T>(this IPublisher<T> first, IPublisher<T> second, IEqualityComparer<T> comparer)
+        {
+
+        }
     }
 }

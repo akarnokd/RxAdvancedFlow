@@ -47,9 +47,7 @@ namespace RxAdvancedFlow.internals.queues
         {
             if (array == null)
             {
-                int c = QueueHelper.RoundPowerOf2(capacity);
-                mask = c - 1;
-                Volatile.Write(ref array, new Slot[c + 2]);
+                InitVolatile(capacity);
             }
         }
 

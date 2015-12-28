@@ -105,6 +105,8 @@
     <Compile Include="internals\publisher\PublisherLift.cs" />
     <Compile Include="internals\publisher\PublisherMapSubscriber.cs" />
     <Compile Include="internals\publisher\PublisherMerge.cs" />
+    <Compile Include="internals\publisher\PublisherRange.cs" />
+    <Compile Include="internals\publisher\PublisherSequenceEqual.cs" />
     <Compile Include="internals\queues\IQueue.cs" />
     <Compile Include="internals\queues\MpscLinkedQueue.cs" />
     <Compile Include="internals\queues\MpscStructLinkedQueue.cs" />

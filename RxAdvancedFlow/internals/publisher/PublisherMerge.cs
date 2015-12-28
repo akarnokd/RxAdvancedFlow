@@ -291,6 +291,11 @@ namespace RxAdvancedFlow.internals.publisher
             }
         }
 
+        bool IsDone()
+        {
+            return Volatile.Read(ref done);
+        }
+
         void DrainLoop()
         {
             ISubscriber<R> a = actual;
@@ -299,12 +304,13 @@ namespace RxAdvancedFlow.internals.publisher
             for (;;)
             {
 
-                bool d = Volatile.Read(ref done);
+                bool d = IsDone();
                 PublisherMergeInner[] inners = Volatile.Read(ref subscribers);
-
                 int n = inners.Length;
 
-                if (CheckTerminated(d, n == 0, a))
+                bool empty = n == 0 && q.IsEmpty();
+
+                if (CheckTerminated(d, empty, a))
                 {
                     return;
                 }
@@ -316,9 +322,153 @@ namespace RxAdvancedFlow.internals.publisher
                 {
                     if (q.IsConsumable())
                     {
+                        while (e != r)
+                        {
+                            d = IsDone();
 
+                            R t;
+
+                            empty = !q.Poll(out t);
+
+                            if (CheckTerminated(d, empty, a))
+                            {
+                                return;
+                            }
+
+                            if (empty)
+                            {
+                                break;
+                            }
+
+                            a.OnNext(t);
+
+                            e++;
+                        }
+
+                        if (e != 0L)
+                        {
+                            r = bp.Produced(e);
+
+                            s.Request(e);
+
+                            e = 0L;
+                        }
+                    }
+
+                    d = IsDone();
+                    inners = Volatile.Read(ref subscribers);
+                    n = inners.Length;
+
+                    empty = n == 0 && q.IsEmpty();
+
+                    if (CheckTerminated(d, empty, a))
+                    {
+                        return;
                     }
                 }
+
+                int idx = lastIndex;
+                if (idx >= n)
+                {
+                    idx = 0;
+                }
+
+                for (int i = 0; i < n; i++)
+                {
+                    PublisherMergeInner inner = inners[idx];
+
+                    d = inner.IsDone();
+                    empty = inner.IsEmpty();
+
+                    if (d && empty)
+                    {
+                        Remove(inner);
+
+                        s.Request(1);
+
+                        inners = Volatile.Read(ref subscribers);
+                        n = inners.Length;
+                        idx--;
+                    }
+                    else
+                    if (r != e && !empty)
+                    {
+                        while (e != r)
+                        {
+                            d = inner.IsDone();
+
+                            R t;
+
+                            empty = !inner.Poll(out t);
+
+                            if (d && empty)
+                            {
+                                Remove(inner);
+
+                                s.Request(1);
+
+                                inners = Volatile.Read(ref subscribers);
+                                n = inners.Length;
+                                idx--;
+
+                                break;
+                            } else
+                            if (empty)
+                            {
+                                break;
+                            }
+
+                            a.OnNext(t);
+
+                            e++;
+                        }
+
+                        d = inner.IsDone();
+                        empty = inner.IsEmpty();
+
+                        if (e == r && d && empty)
+                        {
+                            Remove(inner);
+
+                            s.Request(1);
+
+                            inners = Volatile.Read(ref subscribers);
+                            n = inners.Length;
+                            idx--;
+                        }
+
+                        if (e != 0L)
+                        {
+                            r = bp.Produced(e);
+
+                            if (!d)
+                            {
+                                inner.Request((int)e);
+                            }
+
+                            e = 0L;
+                        }
+                    }
+
+                    idx++;
+                    if (idx >= n)
+                    {
+                        idx = 0;
+                    }
+                }
+
+                d = IsDone();
+                inners = Volatile.Read(ref subscribers);
+                n = inners.Length;
+
+                empty = n == 0 && q.IsEmpty();
+
+                if (CheckTerminated(d, empty, a))
+                {
+                    return;
+                }
+
+                lastIndex = idx;
 
                 missed = bp.Leave(missed);
                 if (missed == 0)
@@ -458,6 +608,26 @@ namespace RxAdvancedFlow.internals.publisher
             internal void Done()
             {
                 Volatile.Write(ref done, true);
+            }
+
+            internal bool IsDone()
+            {
+                return Volatile.Read(ref done);
+            }
+
+            internal bool IsEmpty()
+            {
+                return q.IsEmpty();
+            }
+
+            internal bool IsConsumable()
+            {
+                return q.IsConsumable();
+            }
+
+            internal bool Poll(out R value)
+            {
+                return q.Poll(out value);
             }
         }
     }

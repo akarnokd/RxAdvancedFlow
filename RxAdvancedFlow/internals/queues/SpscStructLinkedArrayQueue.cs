@@ -45,12 +45,17 @@ namespace RxAdvancedFlow.internals.queues
         {
             if (producerArray == null)
             {
-                int c = QueueHelper.RoundPowerOf2(Math.Max(2, capacity));
-                Slot[] a = new Slot[c + 2];
-                mask = c - 1;
-                producerArray = a;
-                Volatile.Write(ref consumerArray, a);
+                InitVolatile(capacity);
             }
+        }
+
+        internal void InitVolatile(int capacity)
+        {
+            int c = QueueHelper.RoundPowerOf2(Math.Max(2, capacity));
+            Slot[] a = new Slot[c + 2];
+            mask = c - 1;
+            producerArray = a;
+            Volatile.Write(ref consumerArray, a);
         }
 
         /// <summary>
