@@ -3,8 +3,10 @@ using RxAdvancedFlow.internals;
 using RxAdvancedFlow.internals.completable;
 using RxAdvancedFlow.internals.publisher;
 using RxAdvancedFlow.internals.subscriptions;
+using RxAdvancedFlow.subscriptions;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace RxAdvancedFlow
 {
@@ -395,5 +397,164 @@ namespace RxAdvancedFlow
                 source.Subscribe(new PublisherConcatMapSubscriber<T, R>(s, mapper, prefetch));
             });
         }
+
+
+        public static IPublisher<T> FromArray<T>(params T[] array)
+        {
+            int len = array.Length;
+            if (len == 0)
+            {
+                return Empty<T>();
+            }
+            else
+            if (len == 1)
+            {
+                return Just<T>(array[0]);
+            }
+            return Create<T>(s =>
+            {
+                s.OnSubscribe(new PublisherFromArray<T>(s, array));
+            });
+        }
+
+        public static IPublisher<T> FromEnumerable<T>(IEnumerable<T> source)
+        {
+            return Create<T>(s =>
+            {
+                IEnumerator<T> et = source.GetEnumerator();
+
+                bool b;
+
+                try
+                {
+                    b = et.MoveNext();
+                }
+                catch (Exception ex)
+                {
+                    EmptySubscription.Error(s, ex);
+                    return;
+                }
+
+                if (!b)
+                {
+                    EmptySubscription.Complete(s);
+                    return;
+                }
+
+                s.OnSubscribe(new PublisherFromEnumerable<T>(s, et));
+            });
+        }
+
+        public static IPublisher<T> FromTask<T>(Task<T> task)
+        {
+            return Create<T>(s =>
+            {
+                ScalarDelayedSubscription<T> sds = new ScalarDelayedSubscription<T>(s);
+
+                s.OnSubscribe(sds);
+
+                task.ContinueWith(t =>
+                {
+                    Exception e = t.Exception;
+                    if (e != null)
+                    {
+                        s.OnError(e);
+                    }
+                    else
+                    {
+                        sds.Set(t.Result);
+                    }
+                });
+            });
+        }
+
+        public static IPublisher<T> FromFunction<T>(Func<T> function)
+        {
+            return Create<T>(s =>
+            {
+                ScalarDelayedSubscription<T> sds = new ScalarDelayedSubscription<T>(s);
+
+                s.OnSubscribe(sds);
+
+                T t;
+
+                try
+                {
+                    t = function();
+                }
+                catch (Exception ex)
+                {
+                    s.OnError(ex);
+                    return;
+                }
+
+                sds.Set(t);
+            });
+        }
+
+        public static IPublisher<long> Interval(TimeSpan period)
+        {
+            return Interval(period, period, DefaultScheduler.Instance);
+        }
+
+        public static IPublisher<long> Interval(TimeSpan period, IScheduler scheduler)
+        {
+            return Interval(period, period, scheduler);
+        }
+
+        public static IPublisher<long> Interval(TimeSpan initialDelay, TimeSpan period)
+        {
+            return Interval(initialDelay, period, DefaultScheduler.Instance);
+        }
+
+        public static IPublisher<long> Interval(TimeSpan initialDelay, TimeSpan period, IScheduler scheduler)
+        {
+            return Create<long>(s =>
+            {
+                PublisherInterval pi = new PublisherInterval(s);
+
+                s.OnSubscribe(pi);
+
+                pi.SetTimer(scheduler.SchedulePeriodicallyDirect(pi.Run, initialDelay, period));
+            });
+        }
+
+        public static IPublisher<T> Merge<T>(int maxConcurrency = int.MaxValue, params IPublisher<T>[] sources)
+        {
+            return FromArray(sources).FlatMap(v => v, false, maxConcurrency);
+        }
+
+        public static IPublisher<T> MergeDelayError<T>(int maxConcurrency = int.MaxValue, params IPublisher<T>[] sources)
+        {
+            return FromArray(sources).FlatMap(v => v, true, maxConcurrency);
+        }
+
+        public static IPublisher<T> Merge<T>(this IEnumerable<IPublisher<T>> sources, int maxConcurrency = int.MaxValue)
+        {
+            return FromEnumerable(sources).FlatMap(v => v, false, maxConcurrency);
+        }
+
+        public static IPublisher<T> MergeDelayError<T>(this IEnumerable<IPublisher<T>> sources, int maxConcurrency = int.MaxValue)
+        {
+            return FromEnumerable(sources).FlatMap(v => v, true, maxConcurrency);
+        }
+
+        public static IPublisher<R> FlatMap<T, R>(this IPublisher<T> source, Func<T, IPublisher<R>> mapper, bool delayError = false, int maxConcurrency = int.MaxValue)
+        {
+            return FlatMap(source, mapper, delayError, maxConcurrency, BufferSize());
+        }
+
+        public static IPublisher<R> FlatMap<T, R>(this IPublisher<T> source, Func<T, IPublisher<R>> mapper, bool delayError = false, int maxConcurrency = int.MaxValue, int bufferSize)
+        {
+            return Create<R>(s =>
+            {
+                PublisherMerge<T, R> parent = new PublisherMerge<T, R>(s, maxConcurrency, delayError, bufferSize, mapper);
+
+                s.OnSubscribe(parent);
+
+                source.Subscribe(parent);
+            });
+        }
+
     }
 }

@@ -62,16 +62,30 @@ namespace RxAdvancedFlow.internals
             return Interlocked.Add(ref requested, -n);
         }
 
+        /// <summary>
+        /// Tries to enter the drain state or signals more work if it fails.
+        /// </summary>
+        /// <returns></returns>
         public bool Enter()
         {
             return Interlocked.Increment(ref wip) == 1;
         }
 
+        /// <summary>
+        /// Tries to enter into the drain state and returns true if successful.
+        /// If it fails, the work-in-progress amount is not changed.
+        /// </summary>
+        /// <returns></returns>
         public bool TryEnter()
         {
             return Volatile.Read(ref wip) == 0 && Interlocked.CompareExchange(ref wip, 1, 0) == 0;
         }
 
+        /// <summary>
+        /// Tries to leave the drain state and returns true if successful.
+        /// False indicates more work has to be performed.
+        /// </summary>
+        /// <returns></returns>
         public bool Leave()
         {
             return Interlocked.Decrement(ref wip) == 0;

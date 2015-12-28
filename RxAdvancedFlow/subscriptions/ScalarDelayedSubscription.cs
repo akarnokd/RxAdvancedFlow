@@ -15,41 +15,36 @@ namespace RxAdvancedFlow.subscriptions
     /// <typeparam name="T"></typeparam>
     public sealed class ScalarDelayedSubscription<T> : ISubscription
     {
-        readonly ISubscriber<T> actual;
-
-        int state;
-
-        T value;
+        ScalarDelayedSubscriptionStruct<T> sds;
 
         public ScalarDelayedSubscription(ISubscriber<T> actual)
         {
-            this.actual = actual;
+            sds.InitSubscriber(actual);
+        }
+
+        public T Value()
+        {
+            return sds.Value();
         }
 
         public void Cancel()
         {
-            BackpressureHelper.SetTerminated(ref state);
+            sds.Cancel();
         }
 
         public void Request(long n)
         {
-            if (OnSubscribeHelper.ValidateRequest(n))
-            {
-                if (BackpressureHelper.SetRequest(ref state, ref value))
-                {
-                    actual.OnNext(value);
-                    actual.OnComplete();
-                }
-            }
+            sds.Request(n);
         }
 
         public void Set(T t)
         {
-            if (BackpressureHelper.SetValue(ref state, ref value, t))
-            {
-                actual.OnNext(t);
-                actual.OnComplete();
-            }
+            sds.Set(t);
+        }
+
+        public bool IsCancelled()
+        {
+            return sds.IsCancelled();
         }
     }
 }

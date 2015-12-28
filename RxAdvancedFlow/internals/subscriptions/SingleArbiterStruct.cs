@@ -35,5 +35,10 @@ namespace RxAdvancedFlow.internals.subscriptions
         {
             SubscriptionHelper.Terminate(ref s);
         }
+
+        public bool IsCancelled()
+        {
+            return SubscriptionHelper.IsTerminated(ref s);
+        }
     }
 }

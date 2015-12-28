@@ -99,8 +99,12 @@
     <Compile Include="internals\publisher\PublisherConcatMapSubscriber.cs" />
     <Compile Include="internals\publisher\PublisherConcatSubscriber.cs" />
     <Compile Include="internals\publisher\PublisherFromAction.cs" />
+    <Compile Include="internals\publisher\PublisherFromEnumerable.cs" />
+    <Compile Include="internals\publisher\PublisherFromArray.cs" />
+    <Compile Include="internals\publisher\PublisherInterval.cs" />
     <Compile Include="internals\publisher\PublisherLift.cs" />
     <Compile Include="internals\publisher\PublisherMapSubscriber.cs" />
+    <Compile Include="internals\publisher\PublisherMerge.cs" />
     <Compile Include="internals\queues\IQueue.cs" />
     <Compile Include="internals\queues\MpscLinkedQueue.cs" />
     <Compile Include="internals\queues\MpscStructLinkedQueue.cs" />
@@ -137,6 +141,8 @@
     <Compile Include="internals\single\SingleFromAction.cs" />
     <Compile Include="internals\single\SingleLift.cs" />
     <Compile Include="internals\single\SingleToObservable.cs" />
+    <Compile Include="internals\subscribers\CancelledSubscriber.cs" />
+    <Compile Include="internals\subscribers\EmptySubscriber.cs" />
     <Compile Include="internals\subscribers\LockedSerializedSubscriberStruct.cs" />
     <Compile Include="internals\subscriptions\MultiArbiterStruct.cs" />
     <Compile Include="internals\subscriptions\SingleArbiterStruct.cs" />
@@ -145,7 +151,9 @@
     <Compile Include="processors\SingleProcessor.cs" />
     <Compile Include="subscribers\LatchedSingleSubscriber.cs" />
     <Compile Include="subscribers\LockedSerializedSubscriber.cs" />
+    <Compile Include="subscribers\TestSubscriber.cs" />
     <Compile Include="subscriptions\ScalarDelayedSubscription.cs" />
+    <Compile Include="subscriptions\ScalarDelayedSubscriptionStruct.cs" />
     <Compile Include="subscriptions\ScalarSubscription.cs" />
     <Compile Include="subscriptions\SingleSubscriptionArbiter.cs" />
     <Compile Include="IScheduler.cs" />

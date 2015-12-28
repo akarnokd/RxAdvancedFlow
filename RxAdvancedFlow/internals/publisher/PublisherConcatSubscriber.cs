@@ -19,6 +19,8 @@ namespace RxAdvancedFlow.internals.publisher
 
         int wip;
 
+        long produced;
+
         public PublisherConcatSubscriber(ISubscriber<T> actual, IEnumerator<IPublisher<T>> enumerator)
         {
             this.actual = actual;
@@ -57,6 +59,19 @@ namespace RxAdvancedFlow.internals.publisher
                     {
                         IPublisher<T> p = enumerator.Current;
 
+                        if (p == null)
+                        {
+                            actual.OnError(new NullReferenceException("The enumerator returned a null value"));
+                            return;
+                        }
+
+                        long c = produced;
+                        if (c != 0L)
+                        {
+                            produced = 0L;
+                            arbiter.Produced(c);
+                        }
+
                         p.Subscribe(this);
                     }
                     else
@@ -75,9 +90,9 @@ namespace RxAdvancedFlow.internals.publisher
 
         public void OnNext(T t)
         {
-            actual.OnNext(t);
+            produced++;
 
-            arbiter.Produced(1);
+            actual.OnNext(t);
         }
 
         public void OnSubscribe(ISubscription s)

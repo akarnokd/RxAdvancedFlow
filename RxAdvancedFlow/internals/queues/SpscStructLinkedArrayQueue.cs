@@ -35,6 +35,33 @@ namespace RxAdvancedFlow.internals.queues
             mask = c - 1;
         }
 
+        /// <summary>
+        /// Initializes the arrays once.
+        /// This should be run from the main emission thread and it
+        /// flushes the consumer array via a volatile write
+        /// </summary>
+        /// <param name="capacity"></param>
+        internal void InitOnce(int capacity)
+        {
+            if (producerArray == null)
+            {
+                int c = QueueHelper.RoundPowerOf2(Math.Max(2, capacity));
+                Slot[] a = new Slot[c + 2];
+                mask = c - 1;
+                producerArray = a;
+                Volatile.Write(ref consumerArray, a);
+            }
+        }
+
+        /// <summary>
+        /// Returns true if the queue can be consumed.
+        /// </summary>
+        /// <returns></returns>
+        internal bool IsConsumable()
+        {
+            return Volatile.Read(ref consumerArray) != null;
+        }
+
         internal int Size()
         {
             return QueueHelper.Size(ref producerIndex, ref consumerIndex);

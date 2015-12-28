@@ -103,11 +103,6 @@ namespace RxAdvancedFlow.internals.publisher
             arbiter.Set(s);
         }
 
-        internal void Produced(long n)
-        {
-            arbiter.Produced(n);
-        }
-
         internal void Complete()
         {
             Volatile.Write(ref active, true);
@@ -155,7 +150,23 @@ namespace RxAdvancedFlow.internals.publisher
                             return;
                         }
 
+                        if (p == null)
+                        {
+                            s.Cancel();
+
+                            actual.OnError(new NullReferenceException("The mapper returned a null Publisher"));
+                            return;
+                        }
+
                         Volatile.Write(ref active, true);
+
+                        long c = inner.produced;
+                        if (c != 0L)
+                        {
+                            inner.produced = 0L;
+                            arbiter.Produced(c);
+                        }
+
 
                         p.Subscribe(inner);
 
@@ -174,6 +185,8 @@ namespace RxAdvancedFlow.internals.publisher
 
             readonly ISubscriber<R> actual;
 
+            internal long produced;
+
             public InnerSubscriber(ISubscriber<R> actual, PublisherConcatMapSubscriber<T, R> parent)
             {
                 this.actual = actual;
@@ -187,9 +200,9 @@ namespace RxAdvancedFlow.internals.publisher
 
             public void OnNext(R t)
             {
-                actual.OnNext(t);
+                produced++;
 
-                parent.Produced(1);
+                actual.OnNext(t);
             }
 
             public void OnError(Exception e)

@@ -43,6 +43,28 @@ namespace RxAdvancedFlow.internals.queues
             mask = c - 1;
         }
 
+        internal void InitOnce(int capacity)
+        {
+            if (array == null)
+            {
+                int c = QueueHelper.RoundPowerOf2(capacity);
+                mask = c - 1;
+                Volatile.Write(ref array, new Slot[c + 2]);
+            }
+        }
+
+        internal void InitVolatile(int capacity)
+        {
+            int c = QueueHelper.RoundPowerOf2(capacity);
+            mask = c - 1;
+            Volatile.Write(ref array, new Slot[c + 2]);
+        }
+
+        internal bool IsConsumable()
+        {
+            return Volatile.Read(ref array) != null;
+        }
+
         int CalcOffset(long index, int m)
         {
             return 1 + ((int)index & m);
