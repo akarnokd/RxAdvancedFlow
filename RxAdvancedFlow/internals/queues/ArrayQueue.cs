@@ -49,23 +49,22 @@ namespace RxAdvancedFlow.internals.queues
             if (consumerIndex + m + 1 == pi)
             {
                 int oldLen = a.Length;
-                int oldOffset = (int)pi & m;
+                int offset = (int)pi & m;
 
                 int newLen = oldLen << 1;
                 m = newLen - 1;
-                int newOffset = (int)pi & m;
 
                 T[] b = new T[newLen];
 
-                int n = oldLen - oldOffset;
-                Array.Copy(a, oldOffset, b, oldOffset, n);
-                Array.Copy(a, 0, b, oldLen, oldOffset);
+                int n = oldLen - offset;
+                Array.Copy(a, offset, b, offset, n);
+                Array.Copy(a, 0, b, oldLen, offset);
 
                 mask = m;
                 a = b;
                 array = b;
                 producerIndex = pi + 1;
-                b[newOffset] = value;
+                b[(int)pi & m] = value;
             }
             else
             {
@@ -116,6 +115,18 @@ namespace RxAdvancedFlow.internals.queues
             {
                 consumerIndex = ci + 1;
                 array[(int)ci & mask] = default(T);
+            }
+        }
+
+        internal void ForEach(Action<T> action)
+        {
+            int m = mask;
+            T[] a = array;
+
+            for (long i = consumerIndex; i != producerIndex; i++)
+            {
+                int offset = (int)i & m;
+                action(a[offset]);
             }
         }
     }

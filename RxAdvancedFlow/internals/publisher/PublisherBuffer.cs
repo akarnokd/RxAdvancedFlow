@@ -246,6 +246,12 @@ namespace RxAdvancedFlow.internals.publisher
 
         int once;
 
+        long requested;
+
+        bool cancelled;
+
+        long produced;
+
         public PublisherBufferOverlap(ISubscriber<C> actual, Func<C> bufferFactory, int size, int skip)
         {
             this.actual = actual;
@@ -299,11 +305,13 @@ namespace RxAdvancedFlow.internals.publisher
 
                     b.Add(t);
 
+                    produced++;
+
                     actual.OnNext(b);
                 }
             }
 
-            buffers.ForEach(b => b.Add(t));
+            buffers.ForEach(v => v.Add(t));
         }
 
         public void OnError(Exception e)
@@ -322,30 +330,41 @@ namespace RxAdvancedFlow.internals.publisher
             {
                 return;
             }
-            actual.OnComplete();
+
+            long p = produced;
+            if (p != 0L && Volatile.Read(ref requested) != long.MaxValue)
+            {
+                Interlocked.Add(ref requested, -p);
+            }
+
+            BackpressureHelper.PostComplete(ref requested, buffers, actual, ref cancelled);
         }
 
         public void Request(long n)
         {
             if (OnSubscribeHelper.ValidateRequest(n))
             {
-                if (Volatile.Read(ref once) == 0 && Interlocked.CompareExchange(ref once, 1, 0) == 0)
+                if (BackpressureHelper.PostCompleteRequest(ref requested, n, buffers, actual, ref cancelled))
                 {
-                    long u = BackpressureHelper.MultiplyCap(size, n);
-                    long v = BackpressureHelper.MultiplyCap(skip - size, n - 1);
-                    long w = BackpressureHelper.AddCap(u, v);
-                    s.Request(w);
-                }
-                else
-                {
-                    long u = BackpressureHelper.MultiplyCap(skip, n);
-                    s.Request(u);
+                    if (Volatile.Read(ref once) == 0 && Interlocked.CompareExchange(ref once, 1, 0) == 0)
+                    {
+                        long u = BackpressureHelper.MultiplyCap(size, n);
+                        long v = BackpressureHelper.MultiplyCap(skip - size, n - 1);
+                        long w = BackpressureHelper.AddCap(u, v);
+                        s.Request(w);
+                    }
+                    else
+                    {
+                        long u = BackpressureHelper.MultiplyCap(skip, n);
+                        s.Request(u);
+                    }
                 }
             }
         }
 
         public void Cancel()
         {
+            Volatile.Write(ref cancelled, true);
             s.Cancel();
         }
     }
