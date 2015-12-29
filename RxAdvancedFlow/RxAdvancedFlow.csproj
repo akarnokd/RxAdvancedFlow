@@ -98,6 +98,8 @@
     <Compile Include="internals\publisher\PublisherAll.cs" />
     <Compile Include="internals\publisher\PublisherAmb.cs" />
     <Compile Include="internals\publisher\PublisherBuffer.cs" />
+    <Compile Include="internals\publisher\PublisherDelay.cs" />
+    <Compile Include="internals\publisher\PublisherDelaySubscription.cs" />
     <Compile Include="internals\publisher\PublisherIgnoreElements.cs" />
     <Compile Include="internals\publisher\PublisherIsEmpty.cs" />
     <Compile Include="internals\publisher\PublisherCount.cs" />
@@ -120,9 +122,13 @@
     <Compile Include="internals\publisher\PublisherSequenceEqual.cs" />
     <Compile Include="internals\publisher\PublisherSkip.cs" />
     <Compile Include="internals\publisher\PublisherSkipLast.cs" />
+    <Compile Include="internals\publisher\PublisherTakeWhile.cs" />
+    <Compile Include="internals\publisher\PublisherSkipWhile.cs" />
     <Compile Include="internals\publisher\PublisherSwitchMap.cs" />
     <Compile Include="internals\publisher\PublisherTake.cs" />
     <Compile Include="internals\publisher\PublisherTakeLast.cs" />
+    <Compile Include="internals\publisher\PublisherSkipUntil.cs" />
+    <Compile Include="internals\publisher\PublisherTakeUntil.cs" />
     <Compile Include="internals\publisher\PublisherTimer.cs" />
     <Compile Include="internals\publisher\PublisherUsing.cs" />
     <Compile Include="internals\publisher\PublisherZip.cs" />

@@ -1083,5 +1083,117 @@ namespace RxAdvancedFlow
                 source.Subscribe(new PublisherSkipLast<T>(s, n));
             });
         }
+
+        public static IPublisher<T> TakeUntil<T, U>(this IPublisher<T> source, IPublisher<U> other)
+        {
+            return Create<T>(s =>
+            {
+                PublisherTakeUntil<T, U> main = new PublisherTakeUntil<T, U>(s);
+
+                ISubscriber<U> su = main.CreateOther();
+
+                s.OnSubscribe(main);
+
+                other.Subscribe(su);
+
+                source.Subscribe(main);
+            });
+        }
+
+        public static IPublisher<T> SkipUntil<T, U>(this IPublisher<T> source, IPublisher<U> other)
+        {
+            return Create<T>(s =>
+            {
+                PublisherSkipUntil<T, U> main = new PublisherSkipUntil<T, U>(s);
+
+                ISubscriber<U> su = main.CreateOther();
+
+                s.OnSubscribe(main);
+
+                other.Subscribe(su);
+
+                source.Subscribe(main);
+            });
+        }
+
+        public static IPublisher<T> SkipWhile<T>(this IPublisher<T> source, Func<T, bool> predicate)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherSkipWhile<T>(s, predicate));
+            });
+        }
+
+        public static IPublisher<T> TakeWhile<T>(this IPublisher<T> source, Func<T, bool> predicate)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherTakeWhile<T>(s, predicate));
+            });
+        }
+
+        public static IPublisher<T> TakeUntil<T>(this IPublisher<T> source, Func<T, bool> predicate)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherTakeUntil<T>(s, predicate));
+            });
+        }
+
+        public static IPublisher<T> Delay<T>(this IPublisher<T> source, TimeSpan delay, bool delayError = false)
+        {
+            return Delay(source, delay, DefaultScheduler.Instance, delayError);
+        }
+
+        public static IPublisher<T> Delay<T>(this IPublisher<T> source, TimeSpan delay, IScheduler scheduler, bool delayError = false)
+        {
+            return Create<T>(s =>
+            {
+                if (delayError)
+                {
+                    source.Subscribe(new PublisherDelayFull<T>(s, scheduler.CreateWorker(), delay));
+                }
+                else
+                {
+                    source.Subscribe(new PublisherDelayNormal<T>(s, scheduler.CreateWorker(), delay));
+                }
+            });
+        }
+
+        public static IPublisher<T> DelaySubscription<T, U>(this IPublisher<T> source, IPublisher<U> other)
+        {
+            return Create<T>(s =>
+            {
+                other.Subscribe(new PublisherDelaySubscription<T, U>(s, source));
+            });
+        }
+
+        public static IPublisher<T> DelaySubscription<T>(this IPublisher<T> source, TimeSpan delay)
+        {
+            return DelaySubscription<T>(source, delay, DefaultScheduler.Instance);
+        }
+
+        public static IPublisher<T> DelaySubscription<T>(this IPublisher<T> source, TimeSpan delay, IScheduler scheduler)
+        {
+            return Create<T>(s =>
+            {
+                PublisherDelaySubscriptionTimed<T> main = new PublisherDelaySubscriptionTimed<T>(s);
+
+                s.OnSubscribe(main);
+
+                main.Set(scheduler.ScheduleDirect(() =>
+                {
+                    source.Subscribe(main);
+                }, delay));
+            });
+        }
+
+        public static IPublisher<T> Delay<T, U>(this IPublisher<T> source, Func<T, IPublisher<U>> itemDelay)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherDelaySelector<T, U>(s, itemDelay));
+            });
+        }
     }
 }
