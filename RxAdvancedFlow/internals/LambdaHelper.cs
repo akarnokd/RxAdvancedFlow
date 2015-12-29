@@ -11,9 +11,9 @@ namespace RxAdvancedFlow.internals
     /// </summary>
     static class LambdaHelper
     {
-        public static Func<object[], R> ToFuncN<T1, T2, R>(Func<T1, T2, R> func)
+        public static Func<T[], R> ToFuncN<T, R>(Func<T, T, R> func)
         {
-            return arr => func((T1)arr[0], (T2)arr[1]);
+            return arr => func(arr[0], arr[1]);
         }
 
         public static Func<object[], R> ToFuncN<T1, T2, T3, R>(Func<T1, T2, T3, R> func)

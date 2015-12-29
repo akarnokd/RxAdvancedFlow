@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.publisher
 {
-    sealed class PublisherConcatMapSubscriber<T, R> : ISubscriber<T>, ISubscription
+    sealed class PublisherConcatMap<T, R> : ISubscriber<T>, ISubscription
     {
         readonly int prefetch;
 
@@ -33,7 +33,7 @@ namespace RxAdvancedFlow.internals.publisher
 
         bool done;
 
-        public PublisherConcatMapSubscriber(ISubscriber<R> actual, Func<T, IPublisher<R>> mapper, int prefetch)
+        public PublisherConcatMap(ISubscriber<R> actual, Func<T, IPublisher<R>> mapper, int prefetch)
         {
             this.actual.Init(actual);
             this.prefetch = prefetch;
@@ -181,13 +181,13 @@ namespace RxAdvancedFlow.internals.publisher
 
         sealed class InnerSubscriber : ISubscriber<R>
         {
-            readonly PublisherConcatMapSubscriber<T, R> parent;
+            readonly PublisherConcatMap<T, R> parent;
 
             readonly ISubscriber<R> actual;
 
             internal long produced;
 
-            public InnerSubscriber(ISubscriber<R> actual, PublisherConcatMapSubscriber<T, R> parent)
+            public InnerSubscriber(ISubscriber<R> actual, PublisherConcatMap<T, R> parent)
             {
                 this.actual = actual;
                 this.parent = parent;

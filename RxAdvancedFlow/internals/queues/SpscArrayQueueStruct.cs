@@ -124,6 +124,20 @@ namespace RxAdvancedFlow.internals.queues
             return false;
         }
 
+        internal void Drop()
+        {
+            Slot[] a = array;
+            int m = mask;
+            long ci = LvConsumerIndex();
+
+            int offset = CalcOffset(ci, m);
+
+            if (a[offset].IsUsed())
+            {
+                SoConsumerIndex(ci + 1);
+                a[offset].Free();
+            }
+        }
 
         internal int Size()
         {

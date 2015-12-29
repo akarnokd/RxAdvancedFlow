@@ -11,6 +11,15 @@ namespace RxAdvancedFlow.internals
     {
         public static readonly Exception TerminalException = new Exception();
 
+        /// <summary>
+        /// Atomically sets or aggregates the exceptions in the field
+        /// and returns true if successful or false if the target
+        /// field has been terminated (so that the exception can
+        /// be sent to somewhere else).
+        /// </summary>
+        /// <param name="field"></param>
+        /// <param name="newException"></param>
+        /// <returns></returns>
         public static bool Add(ref Exception field, Exception newException)
         {
             for (;;)

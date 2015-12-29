@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.publisher
 {
-    sealed class PublisherCombineCoordinator<T, R> : ISubscription
+    sealed class PublisherCombineLatest<T, R> : ISubscription
     {
         readonly ISubscriber<R> actual;
 
@@ -37,7 +37,7 @@ namespace RxAdvancedFlow.internals.publisher
 
         bool done;
 
-        public PublisherCombineCoordinator(ISubscriber<R> actual, Func<T[], R> combiner, int capacityHint)
+        public PublisherCombineLatest(ISubscriber<R> actual, Func<T[], R> combiner, int capacityHint)
         {
             this.actual = actual;
             this.combiner = combiner;
@@ -309,11 +309,11 @@ namespace RxAdvancedFlow.internals.publisher
         {
             readonly int index;
 
-            readonly PublisherCombineCoordinator<T, R> parent;
+            readonly PublisherCombineLatest<T, R> parent;
 
             SingleArbiterStruct arbiter;
 
-            public InnerSubscriber(PublisherCombineCoordinator<T, R> parent, int index)
+            public InnerSubscriber(PublisherCombineLatest<T, R> parent, int index)
             {
                 this.index = index;
                 this.parent = parent;

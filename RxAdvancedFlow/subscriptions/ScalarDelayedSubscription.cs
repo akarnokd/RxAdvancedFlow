@@ -15,11 +15,13 @@ namespace RxAdvancedFlow.subscriptions
     /// <typeparam name="T"></typeparam>
     public sealed class ScalarDelayedSubscription<T> : ISubscription
     {
+        readonly ISubscriber<T> actual;
+
         ScalarDelayedSubscriptionStruct<T> sds;
 
         public ScalarDelayedSubscription(ISubscriber<T> actual)
         {
-            sds.InitSubscriber(actual);
+            this.actual = actual;
         }
 
         public T Value()
@@ -34,12 +36,12 @@ namespace RxAdvancedFlow.subscriptions
 
         public void Request(long n)
         {
-            sds.Request(n);
+            sds.Request(n, actual);
         }
 
         public void Set(T t)
         {
-            sds.Set(t);
+            sds.Set(t, actual);
         }
 
         public bool IsCancelled()

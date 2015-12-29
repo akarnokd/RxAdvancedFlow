@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace RxAdvancedFlow.internals.publisher
 {
     [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    sealed class PublisherMerge<T, R> : ISubscriber<T>, ISubscription
+    sealed class PublisherFlatMap<T, R> : ISubscriber<T>, ISubscription
     {
         readonly ISubscriber<R> actual;
 
@@ -54,7 +54,7 @@ namespace RxAdvancedFlow.internals.publisher
 
         int produced;
 
-        public PublisherMerge(ISubscriber<R> actual, int maxConcurrency, bool delayError, int bufferSize, Func<T, IPublisher<R>> mapper)
+        public PublisherFlatMap(ISubscriber<R> actual, int maxConcurrency, bool delayError, int bufferSize, Func<T, IPublisher<R>> mapper)
         {
             this.actual = actual;
             this.maxConcurrency = maxConcurrency;
@@ -532,7 +532,7 @@ namespace RxAdvancedFlow.internals.publisher
         {
             readonly long id;
 
-            readonly PublisherMerge<T, R> parent;
+            readonly PublisherFlatMap<T, R> parent;
 
             readonly int limit;
 
@@ -544,7 +544,7 @@ namespace RxAdvancedFlow.internals.publisher
 
             SpscArrayQueueStruct<R> q;
 
-            public PublisherMergeInner(long id, PublisherMerge<T, R> parent, int bufferSize)
+            public PublisherMergeInner(long id, PublisherFlatMap<T, R> parent, int bufferSize)
             {
                 this.id = id;
                 this.parent = parent;

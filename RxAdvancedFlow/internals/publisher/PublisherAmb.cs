@@ -9,31 +9,33 @@ using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.publisher
 {
-    sealed class PublisherAmbCoordinator<T> : ISubscription
+    sealed class PublisherAmb<T> : ISubscription
     {
         readonly ISubscriber<T> actual;
 
-        InnerSubscription[] subscriptions;
+        readonly InnerSubscription[] subscriptions;
 
         int winner = int.MinValue;
 
         bool cancelled;
 
-        public PublisherAmbCoordinator(ISubscriber<T> actual)
+        public PublisherAmb(ISubscriber<T> actual, int n)
         {
             this.actual = actual;
-        }
-
-        public void Subscribe(IPublisher<T>[] sources, int n)
-        {
             InnerSubscription[] a = new InnerSubscription[n];
             for (int i = 0; i < n; i++)
             {
                 a[i] = new InnerSubscription(actual, this, i);
             }
+            subscriptions = a;
+        }
+
+        public void Subscribe(IPublisher<T>[] sources, int n)
+        {
 
             actual.OnSubscribe(this);
 
+            InnerSubscription[] a = subscriptions;
             for (int i = 0; i < n; i++)
             {
                 if (Volatile.Read(ref cancelled) || Volatile.Read(ref winner) != int.MinValue)
@@ -101,7 +103,7 @@ namespace RxAdvancedFlow.internals.publisher
         {
             readonly ISubscriber<T> actual;
 
-            readonly PublisherAmbCoordinator<T> parent;
+            readonly PublisherAmb<T> parent;
 
             readonly int index;
 
@@ -111,7 +113,7 @@ namespace RxAdvancedFlow.internals.publisher
 
             bool won;
             
-            public InnerSubscription(ISubscriber<T> actual, PublisherAmbCoordinator<T> parent, int index)
+            public InnerSubscription(ISubscriber<T> actual, PublisherAmb<T> parent, int index)
             {
                 this.actual = actual;
                 this.parent = parent;

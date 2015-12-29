@@ -73,12 +73,12 @@ namespace RxAdvancedFlow
 
         public static IPublisher<T> Empty<T>()
         {
-            return Create<T>(s => EmptySubscription.Complete(s));
+            return PublisherEmpty<T>.Instance;
         }
 
         public static IPublisher<T> Never<T>()
         {
-            return Create<T>(s => s.OnSubscribe(EmptySubscription.Instance));
+            return PublisherNever<T>.Instance;
         }
 
         public static IPublisher<T> Throw<T>(Exception error)
@@ -121,9 +121,9 @@ namespace RxAdvancedFlow
 
             return Create<T>(s =>
             {
-                PublisherAmbCoordinator<T> ambc = new PublisherAmbCoordinator<T>(s);
+                PublisherAmb<T> ambc = new PublisherAmb<T>(s, n);
 
-                ambc.Subscribe(sources, sources.Length);
+                ambc.Subscribe(sources, n);
             });
         }
 
@@ -171,7 +171,7 @@ namespace RxAdvancedFlow
                     return;
                 }
 
-                PublisherAmbCoordinator<T> ambc = new PublisherAmbCoordinator<T>(s);
+                PublisherAmb<T> ambc = new PublisherAmb<T>(s, n);
 
                 ambc.Subscribe(a, n);
             });
@@ -196,7 +196,7 @@ namespace RxAdvancedFlow
         {
             return Create<R>(s =>
             {
-                PublisherCombineCoordinator<T, R> pcc = new PublisherCombineCoordinator<T, R>(s, combiner, bufferSize);
+                PublisherCombineLatest<T, R> pcc = new PublisherCombineLatest<T, R>(s, combiner, bufferSize);
 
                 pcc.Subscribe(sources, sources.Length);
             });
@@ -220,19 +220,18 @@ namespace RxAdvancedFlow
                     return;
                 }
 
-                PublisherCombineCoordinator<T, R> pcc = new PublisherCombineCoordinator<T, R>(s, combiner, bufferSize);
+                PublisherCombineLatest<T, R> pcc = new PublisherCombineLatest<T, R>(s, combiner, bufferSize);
 
                 pcc.Subscribe(a, n);
             });
         }
 
         public static IPublisher<R> CombineLatest<T1, T2, R>(
-            IPublisher<T1> s1, IPublisher<T2> s2, 
+            IPublisher<T1> s1, IPublisher<T2> s2,
             Func<T1, T2, R> combiner)
         {
-            return CombineLatest(new IPublisher<object>[] {
-                (IPublisher<object>)s1, (IPublisher<object>)s2
-            }, LambdaHelper.ToFuncN(combiner));
+            // TODO requires custom implementation of PublisherCombineLatest
+            throw new NotImplementedException();
         }
 
         public static IPublisher<R> CombineLatest<T1, T2, T3, R>(
@@ -240,10 +239,8 @@ namespace RxAdvancedFlow
             IPublisher<T3> s3,
             Func<T1, T2, T3, R> combiner)
         {
-            return CombineLatest(new IPublisher<object>[] {
-                (IPublisher<object>)s1, (IPublisher<object>)s2,
-                (IPublisher<object>)s3
-            }, LambdaHelper.ToFuncN(combiner));
+            // TODO requires custom implementation of PublisherCombineLatest
+            throw new NotImplementedException();
         }
 
         public static IPublisher<R> CombineLatest<T1, T2, T3, T4, R>(
@@ -251,10 +248,8 @@ namespace RxAdvancedFlow
             IPublisher<T3> s3, IPublisher<T4> s4,
             Func<T1, T2, T3, T4, R> combiner)
         {
-            return CombineLatest(new IPublisher<object>[] {
-                (IPublisher<object>)s1, (IPublisher<object>)s2,
-                (IPublisher<object>)s3, (IPublisher<object>)s4
-            }, LambdaHelper.ToFuncN(combiner));
+            // TODO requires custom implementation of PublisherCombineLatest
+            throw new NotImplementedException();
         }
 
         public static IPublisher<R> CombineLatest<T1, T2, T3, T4, T5, R>(
@@ -263,11 +258,8 @@ namespace RxAdvancedFlow
             IPublisher<T5> s5,
             Func<T1, T2, T3, T4, T5, R> combiner)
         {
-            return CombineLatest(new IPublisher<object>[] {
-                (IPublisher<object>)s1, (IPublisher<object>)s2,
-                (IPublisher<object>)s3, (IPublisher<object>)s4,
-                (IPublisher<object>)s5
-            }, LambdaHelper.ToFuncN(combiner));
+            // TODO requires custom implementation of PublisherCombineLatest
+            throw new NotImplementedException();
         }
 
         public static IPublisher<R> CombineLatest<T1, T2, T3, T4, T5, T6, R>(
@@ -276,11 +268,8 @@ namespace RxAdvancedFlow
             IPublisher<T5> s5, IPublisher<T6> s6,
             Func<T1, T2, T3, T4, T5, T6, R> combiner)
         {
-            return CombineLatest(new IPublisher<object>[] {
-                (IPublisher<object>)s1, (IPublisher<object>)s2,
-                (IPublisher<object>)s3, (IPublisher<object>)s4,
-                (IPublisher<object>)s5, (IPublisher<object>)s6
-            }, LambdaHelper.ToFuncN(combiner));
+            // TODO requires custom implementation of PublisherCombineLatest
+            throw new NotImplementedException();
         }
 
         public static IPublisher<R> CombineLatest<T1, T2, T3, T4, T5, T6, T7, R>(
@@ -290,12 +279,8 @@ namespace RxAdvancedFlow
             IPublisher<T7> s7,
             Func<T1, T2, T3, T4, T5, T6, T7, R> combiner)
         {
-            return CombineLatest(new IPublisher<object>[] {
-                (IPublisher<object>)s1, (IPublisher<object>)s2,
-                (IPublisher<object>)s3, (IPublisher<object>)s4,
-                (IPublisher<object>)s5, (IPublisher<object>)s6,
-                (IPublisher<object>)s7
-            }, LambdaHelper.ToFuncN(combiner));
+            // TODO requires custom implementation of PublisherCombineLatest
+            throw new NotImplementedException();
         }
 
         public static IPublisher<R> CombineLatest<T1, T2, T3, T4, T5, T6, T7, T8, R>(
@@ -305,12 +290,8 @@ namespace RxAdvancedFlow
             IPublisher<T7> s7, IPublisher<T8> s8,
             Func<T1, T2, T3, T4, T5, T6, T7, T8, R> combiner)
         {
-            return CombineLatest(new IPublisher<object>[] {
-                (IPublisher<object>)s1, (IPublisher<object>)s2,
-                (IPublisher<object>)s3, (IPublisher<object>)s4,
-                (IPublisher<object>)s5, (IPublisher<object>)s6,
-                (IPublisher<object>)s7, (IPublisher<object>)s8
-            }, LambdaHelper.ToFuncN(combiner));
+            // TODO requires custom implementation of PublisherCombineLatest
+            throw new NotImplementedException();
         }
 
         public static IPublisher<R> CombineLatest<T1, T2, T3, T4, T5, T6, T7, T8, T9, R>(
@@ -321,13 +302,8 @@ namespace RxAdvancedFlow
             IPublisher<T9> s9,
             Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, R> combiner)
         {
-            return CombineLatest(new IPublisher<object>[] {
-                (IPublisher<object>)s1, (IPublisher<object>)s2,
-                (IPublisher<object>)s3, (IPublisher<object>)s4,
-                (IPublisher<object>)s5, (IPublisher<object>)s6,
-                (IPublisher<object>)s7, (IPublisher<object>)s8,
-                (IPublisher<object>)s9
-            }, LambdaHelper.ToFuncN(combiner));
+            // TODO requires custom implementation of PublisherCombineLatest
+            throw new NotImplementedException();
         }
 
         public static IPublisher<T> Concat<T>(this IPublisher<T>[] sources)
@@ -344,7 +320,7 @@ namespace RxAdvancedFlow
         {
             return Create<T>(s =>
             {
-                PublisherConcatSubscriber<T> pcs = new PublisherConcatSubscriber<T>(s, sources.GetEnumerator());
+                PublisherConcatEnumerable<T> pcs = new PublisherConcatEnumerable<T>(s, sources.GetEnumerator());
 
                 s.OnSubscribe(pcs);
 
@@ -386,7 +362,7 @@ namespace RxAdvancedFlow
         {
             return Create<R>(s =>
             {
-                source.Subscribe(new PublisherMapSubscriber<T, R>(s, mapper));
+                source.Subscribe(new PublisherMap<T, R>(s, mapper));
             });
         }
 
@@ -394,7 +370,7 @@ namespace RxAdvancedFlow
         {
             return Create<R>(s =>
             {
-                source.Subscribe(new PublisherConcatMapSubscriber<T, R>(s, mapper, prefetch));
+                source.Subscribe(new PublisherConcatMap<T, R>(s, mapper, prefetch));
             });
         }
 
@@ -567,7 +543,7 @@ namespace RxAdvancedFlow
 
             return Create<R>(s =>
             {
-                PublisherMerge<T, R> parent = new PublisherMerge<T, R>(s, maxConcurrency, delayError, bufferSize, mapper);
+                PublisherFlatMap<T, R> parent = new PublisherFlatMap<T, R>(s, maxConcurrency, delayError, bufferSize, mapper);
 
                 s.OnSubscribe(parent);
 
@@ -629,6 +605,301 @@ namespace RxAdvancedFlow
         {
             return Create<R>(s => {
                 source.Subscribe(new PublisherSwitchMap<T, R>(s, mapper, BufferSize()));
+            });
+        }
+
+        public static IPublisher<long> Timer(TimeSpan delay)
+        {
+            return Timer(delay, DefaultScheduler.Instance);
+        }
+
+        public static IPublisher<long> Timer(TimeSpan delay, IScheduler scheduler)
+        {
+            return Create<long>(s =>
+            {
+                PublisherTimer pt = new PublisherTimer(s);
+
+                s.OnSubscribe(pt);
+
+                pt.Set(scheduler.ScheduleDirect(pt.Signal, delay));
+            });
+        }
+
+        public static IPublisher<T> Using<T, S>(Func<S> resourceSupplier, Func<S, IPublisher<T>> sourceFactory, Action<S> resourceDisposer, bool eager = true)
+        {
+            return Create<T>(s =>
+            {
+                S resource;
+
+                try
+                {
+                    resource = resourceSupplier();
+                }
+                catch (Exception e)
+                {
+                    EmptySubscription.Error(s, e);
+                    return;
+                }
+                IPublisher<T> p;
+
+                try
+                {
+                    p = sourceFactory(resource);
+                }
+                catch (Exception e)
+                {
+                    try
+                    {
+                        resourceDisposer(resource);
+                    }
+                    catch (Exception ex)
+                    {
+                        e = new AggregateException(e, ex);
+                    }
+
+                    EmptySubscription.Error(s, e);
+                    return;
+                }
+
+                if (p == null)
+                {
+                    Exception e = new NullReferenceException("The sourceFactory returned a null IPublisher");
+
+                    try
+                    {
+                        resourceDisposer(resource);
+                    }
+                    catch (Exception ex)
+                    {
+                        e = new AggregateException(e, ex);
+                    }
+
+                    EmptySubscription.Error(s, e);
+                    return;
+                }
+
+                p.Subscribe(new PublisherUsing<T, S>(s, resource, resourceDisposer, eager));
+            });
+        }
+
+        public static IPublisher<R> Zip<T, R>(this IPublisher<T>[] sources, Func<T[], R> zipper)
+        {
+            return Zip(sources, zipper, BufferSize());
+        }
+
+        public static IPublisher<R> Zip<T, R>(this IPublisher<T>[] sources, Func<T[], R> zipper, int bufferSize)
+        {
+            int len = sources.Length;
+            if (len == 0)
+            {
+                return Empty<R>();
+            }
+            else
+            if (len == 1)
+            {
+                return sources[0].Map(v => zipper(new T[] { v }));
+            }
+
+            return Create<R>(s =>
+            {
+                int n = sources.Length;
+
+                PublisherZip<T, R> zip = new PublisherZip<T, R>(s, n, zipper, bufferSize);
+
+                s.OnSubscribe(zip);
+
+                zip.Subscribe(sources, n);
+            });
+        }
+
+        public static IPublisher<R> Zip<T, R>(this IEnumerable<IPublisher<T>> sources, Func<T[], R> zipper)
+        {
+            return Zip(sources, zipper, BufferSize());
+        }
+
+        public static IPublisher<R> Zip<T, R>(this IEnumerable<IPublisher<T>> sources, Func<T[], R> zipper, int bufferSize)
+        {
+            return Create<R>(s =>
+            {
+                int n;
+                IPublisher<T>[] a = ToArray(sources, out n);
+
+                if (n == 0)
+                {
+                    EmptySubscription.Complete(s);
+                    return;
+                }
+                else
+                if (n == 1)
+                {
+                    a[0].Map(v => zipper(new T[] { v })).Subscribe(s);
+                    return;
+                }
+
+                PublisherZip<T, R> zip = new PublisherZip<T, R>(s, n, zipper, bufferSize);
+
+                s.OnSubscribe(zip);
+
+                zip.Subscribe(a, n);
+            });
+        }
+
+        public static IPublisher<R> Zip<T1, T2, R>(
+            IPublisher<T1> s1, IPublisher<T2> s2,
+            Func<T1, T2, R> zipper)
+        {
+            return Zip(s1, s2, zipper, BufferSize());
+        }
+        public static IPublisher<R> Zip<T1, T2, R>(
+            IPublisher<T1> s1, IPublisher<T2> s2, 
+            Func<T1, T2, R> zipper, int bufferSize)
+        {
+            return Create<R>(s =>
+            {
+                PublisherZip2<T1, T2, R> zip = new PublisherZip2<T1, T2, R>(s, zipper, bufferSize);
+
+                s.OnSubscribe(zip);
+
+                zip.Subscribe(s1, s2);
+            });
+        }
+
+        public static IPublisher<R> ZipWith<T1, T2, R>(this IPublisher<T1> source, IPublisher<T2> other, Func<T1, T2, R> zipper)
+        {
+            return Zip(source, other, zipper);
+        }
+
+        public static IPublisher<R> Zip<T1, T2, T3, R>(
+            IPublisher<T1> s1, IPublisher<T2> s2,
+            IPublisher<T3> s3,
+            Func<T1, T2, T3, R> zipper)
+        {
+            // TODO requires custom implementation of PublisherZip
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<R> Zip<T1, T2, T3, T4, R>(
+            IPublisher<T1> s1, IPublisher<T2> s2,
+            IPublisher<T3> s3, IPublisher<T2> s4,
+            Func<T1, T2, T3, T4, R> zipper)
+        {
+            // TODO requires custom implementation of PublisherZip
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<R> Zip<T1, T2, T3, T4, T5, R>(
+            IPublisher<T1> s1, IPublisher<T2> s2,
+            IPublisher<T3> s3, IPublisher<T2> s4,
+            IPublisher<T5> s5,
+            Func<T1, T2, T3, T4, T5, R> zipper)
+        {
+            // TODO requires custom implementation of PublisherZip
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<R> Zip<T1, T2, T3, T4, T5, T6, R>(
+            IPublisher<T1> s1, IPublisher<T2> s2,
+            IPublisher<T3> s3, IPublisher<T2> s4,
+            IPublisher<T5> s5, IPublisher<T2> s6,
+            Func<T1, T2, T3, T4, T5, T6, R> zipper)
+        {
+            // TODO requires custom implementation of PublisherZip
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<R> Zip<T1, T2, T3, T4, T5, T6, T7, R>(
+            IPublisher<T1> s1, IPublisher<T2> s2,
+            IPublisher<T3> s3, IPublisher<T2> s4,
+            IPublisher<T5> s5, IPublisher<T2> s6,
+            IPublisher<T7> s7,
+            Func<T1, T2, T3, T4, T5, T6, T7, R> zipper)
+        {
+            // TODO requires custom implementation of PublisherZip
+            throw new NotImplementedException();
+        }
+
+
+        public static IPublisher<R> Zip<T1, T2, T3, T4, T5, T6, T7, T8, R>(
+            IPublisher<T1> s1, IPublisher<T2> s2,
+            IPublisher<T3> s3, IPublisher<T2> s4,
+            IPublisher<T5> s5, IPublisher<T2> s6,
+            IPublisher<T7> s7, IPublisher<T2> s8,
+            Func<T1, T2, T3, T4, T5, T6, T7, T8, R> zipper)
+        {
+            // TODO requires custom implementation of PublisherZip
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<R> Zip<T1, T2, T3, T4, T5, T6, T7, T8, T9, R>(
+            IPublisher<T1> s1, IPublisher<T2> s2,
+            IPublisher<T3> s3, IPublisher<T2> s4,
+            IPublisher<T5> s5, IPublisher<T2> s6,
+            IPublisher<T7> s7, IPublisher<T2> s8,
+            IPublisher<T9> s9,
+            Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, R> zipper)
+        {
+            // TODO requires custom implementation of PublisherZip
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<bool> All<T>(this IPublisher<T> source, Func<T, bool> predicate)
+        {
+            return Create<bool>(s =>
+            {
+                source.Subscribe(new PublisherAll<T>(s, predicate));
+            });
+        }
+
+        public static IPublisher<T> AmbWith<T>(this IPublisher<T> source, IPublisher<T> other)
+        {
+            return AmbArray(source, other);
+        }
+
+        public static IPublisher<bool> Any<T>(this IPublisher<T> source, Func<T, bool> predicate)
+        {
+            return Create<bool>(s =>
+            {
+                source.Subscribe(new PublisherAny<T>(s, predicate));
+            });
+        }
+
+        public static IPublisher<T> AsPublisher<T>(this IPublisher<T> source)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(s);
+            });
+        }
+
+        public static IPublisher<C> Buffer<T, C>(this IPublisher<T> source, int size, int skip, Func<C> bufferFactory) where C : ICollection<T>
+        {
+            if (size <= 0)
+            {
+                throw new ArgumentOutOfRangeException("size > 0 required but it was " + size);
+            }
+            if (skip <= 0)
+            {
+                throw new ArgumentOutOfRangeException("skip > 0 required but it was " + skip);
+            }
+
+            if (size == skip)
+            {
+                return Create<C>(s =>
+                {
+                    source.Subscribe(new PublisherBufferExact<T, C>(s, bufferFactory, size));
+                });
+            }
+            if (size < skip)
+            {
+                return Create<C>(s =>
+                {
+                    source.Subscribe(new PublisherBufferSkip<T, C>(s, bufferFactory, size, skip));
+                });
+            }
+
+            return Create<C>(s =>
+            {
+                source.Subscribe(new PublisherBufferOverlap<T, C>(s, bufferFactory, size, skip));
             });
         }
     }

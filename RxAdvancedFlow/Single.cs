@@ -464,12 +464,12 @@ namespace RxAdvancedFlow
             });
         }
 
-        public static ISingle<R> Zip<T1, T2, R>(
-            ISingle<T1> s1, ISingle<T2> s2, 
-            Func<T1, T2, R> zipper)
+        public static ISingle<R> Zip<T, R>(
+            ISingle<T> s1, ISingle<T> s2, 
+            Func<T, T, R> zipper)
         {
             return Zip(
-                new ISingle<object>[] { (ISingle<object>)s1, (ISingle<object>)s2 }, 
+                new ISingle<T>[] { s1, s2 }, 
                 LambdaHelper.ToFuncN(zipper));
         }
 
@@ -923,7 +923,7 @@ namespace RxAdvancedFlow
             });
         }
 
-        public static ISingle<R> ZipWith<T1, T2, R>(this ISingle<T1> source, ISingle<T2> other, Func<T1, T2, R> zipper)
+        public static ISingle<R> ZipWith<T, R>(this ISingle<T> source, ISingle<T> other, Func<T, T, R> zipper)
         {
             return Zip(source, other, zipper);
         }

@@ -10,16 +10,9 @@ namespace RxAdvancedFlow.subscriptions
 {
     public struct ScalarDelayedSubscriptionStruct<T>
     {
-        ISubscriber<T> actual;
-
         int state;
 
         T value;
-
-        public void InitSubscriber(ISubscriber<T> actual)
-        {
-            this.actual = actual;
-        }
 
         public void InitValue(T value)
         {
@@ -36,7 +29,7 @@ namespace RxAdvancedFlow.subscriptions
             BackpressureHelper.SetTerminated(ref state);
         }
 
-        public void Request(long n)
+        public void Request(long n, ISubscriber<T> actual)
         {
             if (OnSubscribeHelper.ValidateRequest(n))
             {
@@ -48,7 +41,7 @@ namespace RxAdvancedFlow.subscriptions
             }
         }
 
-        public void Set(T t)
+        public void Set(T t, ISubscriber<T> actual)
         {
             if (BackpressureHelper.SetValue(ref state, ref value, t))
             {

@@ -23,6 +23,7 @@ namespace RxAdvancedFlow.internals.publisher
 
         public PublisherFromArray(ISubscriber<T> actual, T[] array)
         {
+            this.actual = actual;
             this.array = array;
         }
 

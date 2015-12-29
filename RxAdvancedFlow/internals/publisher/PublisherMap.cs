@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.publisher
 {
-    sealed class PublisherMapSubscriber<T, R> : ISubscriber<T>
+    sealed class PublisherMap<T, R> : ISubscriber<T>
     {
         readonly ISubscriber<R> actual;
 
@@ -17,7 +17,7 @@ namespace RxAdvancedFlow.internals.publisher
 
         bool done;
 
-        public PublisherMapSubscriber(ISubscriber<R> actual, Func<T, R> mapper)
+        public PublisherMap(ISubscriber<R> actual, Func<T, R> mapper)
         {
             this.actual = actual;
             this.mapper = mapper;

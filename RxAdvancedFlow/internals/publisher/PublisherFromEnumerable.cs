@@ -21,6 +21,7 @@ namespace RxAdvancedFlow.internals.publisher
 
         public PublisherFromEnumerable(ISubscriber<T> actual, IEnumerator<T> enumerator)
         {
+            this.actual = actual;
             this.enumerator = enumerator;
         }
 

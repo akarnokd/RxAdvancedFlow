@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.publisher
 {
-    sealed class PublisherConcatSubscriber<T> : ISubscriber<T>, ISubscription
+    sealed class PublisherConcatEnumerable<T> : ISubscriber<T>, ISubscription
     {
         readonly ISubscriber<T> actual;
 
@@ -21,7 +21,7 @@ namespace RxAdvancedFlow.internals.publisher
 
         long produced;
 
-        public PublisherConcatSubscriber(ISubscriber<T> actual, IEnumerator<IPublisher<T>> enumerator)
+        public PublisherConcatEnumerable(ISubscriber<T> actual, IEnumerator<IPublisher<T>> enumerator)
         {
             this.actual = actual;
             this.enumerator = enumerator;
