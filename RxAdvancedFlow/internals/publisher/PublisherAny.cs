@@ -77,7 +77,7 @@ namespace RxAdvancedFlow.internals.publisher
                 done = true;
                 s.Cancel();
 
-                sds.Set(true, actual);
+                sds.Complete(true, actual);
             }
         }
 
@@ -97,7 +97,7 @@ namespace RxAdvancedFlow.internals.publisher
         {
             if (!done)
             {
-                sds.Set(false, actual);
+                sds.Complete(false, actual);
             }
         }
     }

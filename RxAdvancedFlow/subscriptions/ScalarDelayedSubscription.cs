@@ -41,7 +41,7 @@ namespace RxAdvancedFlow.subscriptions
 
         public void Set(T t)
         {
-            sds.Set(t, actual);
+            sds.Complete(t, actual);
         }
 
         public bool IsCancelled()

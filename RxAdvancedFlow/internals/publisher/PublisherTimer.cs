@@ -43,7 +43,7 @@ namespace RxAdvancedFlow.internals.publisher
 
         public void Signal()
         {
-            sds.Set(0L, actual);
+            sds.Complete(0L, actual);
         }
     }
 }

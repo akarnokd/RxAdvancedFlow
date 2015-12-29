@@ -98,6 +98,11 @@
     <Compile Include="internals\publisher\PublisherAll.cs" />
     <Compile Include="internals\publisher\PublisherAmb.cs" />
     <Compile Include="internals\publisher\PublisherBuffer.cs" />
+    <Compile Include="internals\publisher\PublisherIgnoreElements.cs" />
+    <Compile Include="internals\publisher\PublisherIsEmpty.cs" />
+    <Compile Include="internals\publisher\PublisherCount.cs" />
+    <Compile Include="internals\publisher\PublisherReduce.cs" />
+    <Compile Include="internals\publisher\PublisherCollect.cs" />
     <Compile Include="internals\publisher\PublisherCombineLatest.cs" />
     <Compile Include="internals\publisher\PublisherConcatMap.cs" />
     <Compile Include="internals\publisher\PublisherConcatEnumerable.cs" />
@@ -111,8 +116,13 @@
     <Compile Include="internals\publisher\PublisherFlatMap.cs" />
     <Compile Include="internals\publisher\PublisherNever.cs" />
     <Compile Include="internals\publisher\PublisherRange.cs" />
+    <Compile Include="internals\publisher\PublisherScan.cs" />
     <Compile Include="internals\publisher\PublisherSequenceEqual.cs" />
+    <Compile Include="internals\publisher\PublisherSkip.cs" />
+    <Compile Include="internals\publisher\PublisherSkipLast.cs" />
     <Compile Include="internals\publisher\PublisherSwitchMap.cs" />
+    <Compile Include="internals\publisher\PublisherTake.cs" />
+    <Compile Include="internals\publisher\PublisherTakeLast.cs" />
     <Compile Include="internals\publisher\PublisherTimer.cs" />
     <Compile Include="internals\publisher\PublisherUsing.cs" />
     <Compile Include="internals\publisher\PublisherZip.cs" />

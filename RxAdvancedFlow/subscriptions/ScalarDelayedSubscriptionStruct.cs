@@ -14,7 +14,7 @@ namespace RxAdvancedFlow.subscriptions
 
         T value;
 
-        public void InitValue(T value)
+        public void SetValue(T value)
         {
             this.value = value;
         }
@@ -29,6 +29,12 @@ namespace RxAdvancedFlow.subscriptions
             BackpressureHelper.SetTerminated(ref state);
         }
 
+        /// <summary>
+        /// Requests the specified amount (validated) and emits the current
+        /// value if possible.
+        /// </summary>
+        /// <param name="n"></param>
+        /// <param name="actual"></param>
         public void Request(long n, ISubscriber<T> actual)
         {
             if (OnSubscribeHelper.ValidateRequest(n))
@@ -41,7 +47,7 @@ namespace RxAdvancedFlow.subscriptions
             }
         }
 
-        public void Set(T t, ISubscriber<T> actual)
+        public void Complete(T t, ISubscriber<T> actual)
         {
             if (BackpressureHelper.SetValue(ref state, ref value, t))
             {

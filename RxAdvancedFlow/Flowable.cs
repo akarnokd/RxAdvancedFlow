@@ -902,5 +902,186 @@ namespace RxAdvancedFlow
                 source.Subscribe(new PublisherBufferOverlap<T, C>(s, bufferFactory, size, skip));
             });
         }
+
+        public static IPublisher<R> Collect<T, R>(this IPublisher<T> source, Func<R> containerFactory, Action<R, T> collector)
+        {
+            return Create<R>(s =>
+            {
+                R c;
+
+                try
+                {
+                    c = containerFactory();
+                }
+                catch (Exception e)
+                {
+                    EmptySubscription.Error(s, e);
+                    return;
+                }
+
+                source.Subscribe(new PublisherCollect<T, R>(s, c, collector));
+            });
+        }
+
+        public static IPublisher<R> Scan<T, R>(this IPublisher<T> source, R initialValue, Func<R, T, R> accumulator)
+        {
+            return Create<R>(s =>
+            {
+                source.Subscribe(new PublisherScan<T, R>(s, initialValue, accumulator));
+            });
+        }
+
+        public static IPublisher<R> Scan<T, R>(this IPublisher<T> source, Func<R> initialSupplier, Func<R, T, R> accumulator)
+        {
+            return Create<R>(s =>
+            {
+                R initialValue;
+
+                try
+                {
+                    initialValue = initialSupplier();
+                }
+                catch (Exception e)
+                {
+                    EmptySubscription.Error(s, e);
+                    return;
+                }
+
+                source.Subscribe(new PublisherScan<T, R>(s, initialValue, accumulator));
+            });
+        }
+
+        public static IPublisher<T> Scan<T>(this IPublisher<T> source, Func<T, T, T> accumulator)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherScan<T>(s, accumulator));
+            });
+        }
+
+        public static IPublisher<R> Reduce<T, R>(this IPublisher<T> source, R initialValue, Func<R, T, R> accumulator)
+        {
+            return Create<R>(s =>
+            {
+                source.Subscribe(new PublisherReduce<T, R>(s, initialValue, accumulator));
+            });
+        }
+
+        public static IPublisher<R> Reduce<T, R>(this IPublisher<T> source, Func<R> initialSupplier, Func<R, T, R> accumulator)
+        {
+            return Create<R>(s =>
+            {
+                R initialValue;
+
+                try
+                {
+                    initialValue = initialSupplier();
+                }
+                catch (Exception e)
+                {
+                    EmptySubscription.Error(s, e);
+                    return;
+                }
+
+                source.Subscribe(new PublisherScan<T, R>(s, initialValue, accumulator));
+            });
+        }
+
+        public static IPublisher<T> Reduce<T>(this IPublisher<T> source, Func<T, T, T> accumulator)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherScan<T>(s, accumulator));
+            });
+        }
+
+        public static IPublisher<long> Count<T>(this IPublisher<T> source)
+        {
+            return Create<long>(s =>
+            {
+                source.Subscribe(new PublisherCount<T>(s));
+            });
+        }
+
+        public static IPublisher<bool> IsEmpty<T>(this IPublisher<T> source)
+        {
+            return Create<bool>(s =>
+            {
+                source.Subscribe(new PublisherIsEmpty<T>(s));
+            });
+        }
+
+        public static IPublisher<T> Take<T>(this IPublisher<T> source, long n)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherTake<T>(s, n));
+            });
+        }
+
+        public static IPublisher<T> Skip<T>(this IPublisher<T> source, long n)
+        {
+            if (n < 0)
+            {
+                throw new ArgumentOutOfRangeException("n >= 0 required but it was " + n);
+            }
+            if (n == 0)
+            {
+                return source;
+            }
+
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherSkip<T>(s, n));
+            });
+        }
+
+        public static IPublisher<T> IgnoreElements<T>(this IPublisher<T> source)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherIgnoreElements<T>(s));
+            });
+        }
+
+        public static IPublisher<T> TakeLast<T>(this IPublisher<T> source, int n)
+        {
+            if (n < 0)
+            {
+                throw new ArgumentOutOfRangeException("n >= 0 required but it was " + n);
+            }
+            if (n == 0)
+            {
+                return IgnoreElements(source);
+            }
+            if (n == 1)
+            {
+                return Create<T>(s =>
+                {
+                    source.Subscribe(new PublisherTakeLastOne<T>(s));
+                });
+            }
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherTakeLast<T>(s, n));
+            });
+        }
+
+        public static IPublisher<T> SkipLast<T>(this IPublisher<T> source, int n)
+        {
+            if (n < 0)
+            {
+                throw new ArgumentOutOfRangeException("n >= 0 required but it was " + n);
+            }
+            if (n == 0)
+            {
+                return source;
+            }
+
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherSkipLast<T>(s, n));
+            });
+        }
     }
 }
