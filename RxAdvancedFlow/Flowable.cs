@@ -505,7 +505,12 @@ namespace RxAdvancedFlow
             return FromArray(sources).FlatMap(v => v, true, maxConcurrency);
         }
 
-        public static IPublisher<T> Merge<T>(int maxConcurrency = int.MaxValue, params IPublisher<T>[] sources)
+        public static IPublisher<T> Merge<T>(params IPublisher<T>[] sources)
+        {
+            return FromArray(sources).FlatMap(v => v, false);
+        }
+
+        public static IPublisher<T> Merge<T>(int maxConcurrency, params IPublisher<T>[] sources)
         {
             return FromArray(sources).FlatMap(v => v, false, maxConcurrency);
         }
@@ -1195,5 +1200,265 @@ namespace RxAdvancedFlow
                 source.Subscribe(new PublisherDelaySelector<T, U>(s, itemDelay));
             });
         }
+
+        public static IPublisher<IList<T>> Buffer<T>(this IPublisher<T> source, TimeSpan timespan)
+        {
+            return Buffer(source, timespan, timespan, DefaultScheduler.Instance, () => new List<T>());
+        }
+
+        public static IPublisher<IList<T>> Buffer<T>(this IPublisher<T> source, TimeSpan timespan, IScheduler scheduler)
+        {
+            return Buffer(source, timespan, timespan, scheduler, () => new List<T>());
+        }
+
+        public static IPublisher<C> Buffer<T, C>(this IPublisher<T> source, TimeSpan timespan, 
+            TimeSpan timeskip, IScheduler scheduler, Func<C> bufferFactory) where C : ICollection<T>
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<IList<T>> Buffer<T, U>(this IPublisher<T> source, IPublisher<U> boundary)
+        {
+            return Buffer(source, boundary, () => new List<T>());
+        }
+
+        public static IPublisher<C> Buffer<T, U, C>(this IPublisher<T> source, IPublisher<U> boundary, Func<C> bufferFactory) where C : ICollection<T>
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<IList<T>> Buffer<T, U, V>(this IPublisher<T> source, IPublisher<U> bufferStart, Func<U, IPublisher<V>> bufferEnd)
+        {
+            return Buffer(source, bufferStart, bufferEnd, () => new List<T>());
+        }
+
+        public static IPublisher<C> Buffer<T, U, V, C>(this IPublisher<T> source, IPublisher<U> bufferStart, Func<U, IPublisher<V>> bufferEnd, Func<C> bufferFactory) where C : ICollection<T>
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<IList<T>> Buffer<T>(this IPublisher<T> source, 
+            TimeSpan timespan, int size, bool restartTimer = false)
+        {
+            return Buffer(source, timespan, DefaultScheduler.Instance, size, () => new List<T>(), restartTimer);
+        }
+
+        public static IPublisher<IList<T>> Buffer<T>(this IPublisher<T> source, 
+            TimeSpan timespan, IScheduler scheduler, int size, bool restartTimer = false)
+        {
+            return Buffer(source, timespan, scheduler, size, () => new List<T>(), restartTimer);
+        }
+
+        public static IPublisher<C> Buffer<T, C>(this IPublisher<T> source, 
+            TimeSpan timespan, int size, Func<C> bufferFactory, bool restartTimer = false) where C : ICollection<T>
+        {
+            return Buffer(source, timespan, DefaultScheduler.Instance, size, bufferFactory, restartTimer);
+        }
+
+        public static IPublisher<C> Buffer<T, C>(this IPublisher<T> source, TimeSpan timespan, IScheduler scheduler, int size, Func<C> bufferFactory, bool restartTimer = false) where C : ICollection<T>
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<T> Cache<T>(this IPublisher<T> source)
+        {
+            return CacheWithCapacityHint(source, 16);
+        }
+
+        public static IPublisher<T> CacheWithCapacityHint<T>(this IPublisher<T> source, int capacityHint)
+        {
+            return new PublisherCache<T>(source, capacityHint);
+        }
+
+        public static IPublisher<T> ConcatWith<T>(this IPublisher<T> source, IPublisher<T> other)
+        {
+            return ConcatArray(source, other);
+        }
+
+        public static IPublisher<T> MergeWith<T>(this IPublisher<T> source, IPublisher<T> other)
+        {
+            return Merge(source, other);
+        }
+
+        public static IPublisher<bool> Contains<T>(this IPublisher<T> source, T value)
+        {
+            return Contains<T>(source, value, EqualityComparer<T>.Default);
+        }
+
+        public static IPublisher<bool> Contains<T>(this IPublisher<T> source, T value, IEqualityComparer<T> comparer)
+        {
+            return Any(source, v => comparer.Equals(v, value));
+        }
+
+        public static IPublisher<T> Debounce<T>(this IPublisher<T> source, TimeSpan timespan)
+        {
+            return Debounce(source, timespan, DefaultScheduler.Instance);
+        }
+
+        public static IPublisher<T> Debounce<T>(this IPublisher<T> source, TimeSpan timespan, IScheduler scheduler)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherDebounceTimed<T>(s, scheduler.CreateWorker(), timespan));
+            });
+        }
+
+        public static IPublisher<T> Debounce<T, U>(this IPublisher<T> source, Func<T, IPublisher<U>> selector)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherDebounceSelector<T, U>(s, selector));
+            });
+        }
+
+        public static IPublisher<T> DefaultIfEmpty<T>(this IPublisher<T> source, T value)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherDefaultIfEmpty<T>(s, value));
+            });
+        }
+
+        public static IPublisher<T> SwitchIfEmpty<T>(this IPublisher<T> source, IPublisher<T> other)
+        {
+            return Create<T>(s =>
+            {
+                var parent = new PublisherSwitchIfEmpty<T>(s, other);
+
+                s.OnSubscribe(parent);
+
+                source.Subscribe(parent);
+            });
+        }
+
+        public static IPublisher<T> Dematerialize<T>(this IPublisher<Signal<T>> source)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherDematerialize<T>(s));
+            });
+        }
+
+        public static IPublisher<Signal<T>> Materialize<T>(this IPublisher<T> source)
+        {
+            return Create<Signal<T>>(s =>
+            {
+                source.Subscribe(new PublisherMaterialize<T>(s));
+            });
+        }
+
+        public static IPublisher<T> Distinct<T>(this IPublisher<T> source)
+        {
+            return Distinct(source, v => v, EqualityComparer<T>.Default);
+        }
+
+        public static IPublisher<T> Distinct<T>(this IPublisher<T> source, IEqualityComparer<T> comparer)
+        {
+            return Distinct(source, v => v, comparer);
+        }
+
+        public static IPublisher<T> Distinct<T, K>(this IPublisher<T> source, Func<T, K> keyExtractor)
+        {
+            return Distinct(source, keyExtractor, EqualityComparer<K>.Default);
+        }
+
+        public static IPublisher<T> Distinct<T, K>(this IPublisher<T> source, Func<T, K> keyExtractor, IEqualityComparer<K> comparer)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherDistinct<T, K>(s, keyExtractor, comparer));
+            });
+        }
+
+        public static IPublisher<T> DistinctUntilChanged<T>(this IPublisher<T> source)
+        {
+            return DistinctUntilChanged(source, v => v, EqualityComparer<T>.Default);
+        }
+
+        public static IPublisher<T> DistinctUntilChanged<T>(this IPublisher<T> source, IEqualityComparer<T> comparer)
+        {
+            return DistinctUntilChanged(source, v => v, comparer);
+        }
+
+        public static IPublisher<T> DistinctUntilChanged<T, K>(this IPublisher<T> source, Func<T, K> keyExtractor)
+        {
+            return DistinctUntilChanged(source, keyExtractor, EqualityComparer<K>.Default);
+        }
+
+        public static IPublisher<T> DistinctUntilChanged<T, K>(this IPublisher<T> source, Func<T, K> keyExtractor, IEqualityComparer<K> comparer)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherDistinctUntilChanged<T, K>(s, keyExtractor, comparer));
+            });
+        }
+
+        public static IPublisher<T> Peek<T>(this IPublisher<T> source,
+            Action<ISubscription> onSubscribeCall = null,
+            Action<T> onNextCall = null,
+            Action<Exception> onErrorCall = null,
+            Action onCompleteCall = null,
+            Action onAfterTerminateCall = null,
+            Action<long> onRequestCall = null,
+            Action onCancelCall = null
+        )
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherPeek<T>(s, onSubscribeCall, onNextCall,
+                    onErrorCall, onCompleteCall, onAfterTerminateCall, 
+                    onRequestCall, onCancelCall));
+            });
+        }
+
+        public static IPublisher<R> ConcatMapEager<T, R>(this IPublisher<T> source,
+            Func<T, IPublisher<R>> mapper)
+        {
+            return ConcatMapEager<T, R>(source, mapper, BufferSize());
+        }
+
+        public static IPublisher<R> ConcatMapEager<T, R>(this IPublisher<T> source, 
+            Func<T, IPublisher<R>> mapper, int bufferSize)
+        {
+            return Create<R>(s =>
+            {
+                source.Subscribe(new PublisherConcatMapEager<T, R>(s, mapper, bufferSize));
+            });
+        }
+
+        public static IPublisher<T> ConcatEager<T>(params IPublisher<T>[] sources)
+        {
+            return FromArray(sources).ConcatMapEager(v => v);
+        }
+
+        public static IPublisher<T> ConcatEager<T>(int bufferSize, params IPublisher<T>[] sources)
+        {
+            return FromArray(sources).ConcatMapEager(v => v, bufferSize);
+        }
+
+        public static IPublisher<T> ConcatEager<T>(this IEnumerable<IPublisher<T>> sources)
+        {
+            return FromEnumerable(sources).ConcatMapEager(v => v);
+        }
+
+        public static IPublisher<T> ConcatEager<T>(this IEnumerable<IPublisher<T>> sources, int bufferSize)
+        {
+            return FromEnumerable(sources).ConcatMapEager(v => v, bufferSize);
+        }
+
+        public static IPublisher<T> ConcatEager<T>(this IPublisher<IPublisher<T>> sources)
+        {
+            return sources.ConcatMapEager(v => v);
+        }
+
+        public static IPublisher<T> ConcatEager<T>(this IPublisher<IPublisher<T>> sources, int bufferSize)
+        {
+            return sources.ConcatMapEager(v => v, bufferSize);
+        }
+
     }
 }

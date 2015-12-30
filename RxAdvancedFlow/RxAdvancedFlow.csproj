@@ -98,11 +98,20 @@
     <Compile Include="internals\publisher\PublisherAll.cs" />
     <Compile Include="internals\publisher\PublisherAmb.cs" />
     <Compile Include="internals\publisher\PublisherBuffer.cs" />
+    <Compile Include="internals\publisher\PublisherCache.cs" />
+    <Compile Include="internals\publisher\PublisherConcatMapEager.cs" />
+    <Compile Include="internals\publisher\PublisherDebounce.cs" />
+    <Compile Include="internals\publisher\PublisherDefaultIfEmpty.cs" />
     <Compile Include="internals\publisher\PublisherDelay.cs" />
     <Compile Include="internals\publisher\PublisherDelaySubscription.cs" />
+    <Compile Include="internals\publisher\PublisherDematerialize.cs" />
+    <Compile Include="internals\publisher\PublisherDistinct.cs" />
+    <Compile Include="internals\publisher\PublisherDistinctUntilChanged.cs" />
     <Compile Include="internals\publisher\PublisherIgnoreElements.cs" />
     <Compile Include="internals\publisher\PublisherIsEmpty.cs" />
     <Compile Include="internals\publisher\PublisherCount.cs" />
+    <Compile Include="internals\publisher\PublisherMaterialize.cs" />
+    <Compile Include="internals\publisher\PublisherPeek.cs" />
     <Compile Include="internals\publisher\PublisherReduce.cs" />
     <Compile Include="internals\publisher\PublisherCollect.cs" />
     <Compile Include="internals\publisher\PublisherCombineLatest.cs" />
@@ -122,6 +131,7 @@
     <Compile Include="internals\publisher\PublisherSequenceEqual.cs" />
     <Compile Include="internals\publisher\PublisherSkip.cs" />
     <Compile Include="internals\publisher\PublisherSkipLast.cs" />
+    <Compile Include="internals\publisher\PublisherSwitchIfEmpty.cs" />
     <Compile Include="internals\publisher\PublisherTakeWhile.cs" />
     <Compile Include="internals\publisher\PublisherSkipWhile.cs" />
     <Compile Include="internals\publisher\PublisherSwitchMap.cs" />
@@ -177,6 +187,7 @@
     <Compile Include="internals\subscriptions\SubscriptionHelper.cs" />
     <Compile Include="internals\subscriptions\EmptySubscription.cs" />
     <Compile Include="processors\SingleProcessor.cs" />
+    <Compile Include="Signal.cs" />
     <Compile Include="subscribers\LatchedSingleSubscriber.cs" />
     <Compile Include="subscribers\LockedSerializedSubscriber.cs" />
     <Compile Include="subscribers\TestSubscriber.cs" />
