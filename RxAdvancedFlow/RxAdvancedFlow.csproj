@@ -52,6 +52,8 @@
     <Compile Include="disposables\ListCompositeDisposable.cs" />
     <Compile Include="disposables\SerialDisposable.cs" />
     <Compile Include="Flowable.cs" />
+    <Compile Include="IConnectablePublisher.cs" />
+    <Compile Include="IGroupedPublisher.cs" />
     <Compile Include="internals\BackpressureHelper.cs" />
     <Compile Include="internals\BasicBackpressureStruct.cs" />
     <Compile Include="internals\completable\AmbCompletableSubscriber.cs" />
@@ -109,6 +111,7 @@
     <Compile Include="internals\publisher\PublisherDistinctUntilChanged.cs" />
     <Compile Include="internals\publisher\PublisherElementAt.cs" />
     <Compile Include="internals\publisher\PublisherFilter.cs" />
+    <Compile Include="internals\publisher\PublisherGroupBy.cs" />
     <Compile Include="internals\publisher\PublisherIgnoreElements.cs" />
     <Compile Include="internals\publisher\PublisherIsEmpty.cs" />
     <Compile Include="internals\publisher\PublisherCount.cs" />

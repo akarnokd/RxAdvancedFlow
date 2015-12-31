@@ -1634,5 +1634,46 @@ namespace RxAdvancedFlow
             return source.Subscribe(onNextCall, onErrorCall, onCompleteCall);
         }
 
+        public static IDisposable Connect<T>(this IConnectablePublisher<T> connectable)
+        {
+            IDisposable d;
+            connectable.Connect(out d);
+            return d;
+        }
+
+        public static IPublisher<IGroupedPublisher<K, T>> GroupBy<T, K>(this IPublisher<T> source, Func<T, K> keyExtractor)
+        {
+            return GroupBy(source, keyExtractor, v => v, EqualityComparer<K>.Default, BufferSize());
+        }
+
+        public static IPublisher<IGroupedPublisher<K, T>> GroupBy<T, K>(
+            this IPublisher<T> source, Func<T, K> keyExtractor, IEqualityComparer<K> keyComparer)
+        {
+            return GroupBy(source, keyExtractor, v => v, keyComparer, BufferSize());
+        }
+
+        public static IPublisher<IGroupedPublisher<K, V>> GroupBy<T, K, V>(
+            this IPublisher<T> source, Func<T, K> keyExtractor, Func<T, V> valueExtractor)
+        {
+            return GroupBy(source, keyExtractor, valueExtractor, EqualityComparer<K>.Default, BufferSize());
+        }
+
+        public static IPublisher<IGroupedPublisher<K, V>> GroupBy<T, K, V>(
+            this IPublisher<T> source, Func<T, K> keyExtractor, Func<T, V> valueExtractor,
+            IEqualityComparer<K> keyComparer)
+        {
+            return GroupBy(source, keyExtractor, valueExtractor, keyComparer, BufferSize());
+        }
+
+        public static IPublisher<IGroupedPublisher<K, V>> GroupBy<T, K, V>(this IPublisher<T> source, 
+            Func<T, K> keyExtractor, Func<T, V> valueExtractor, 
+            IEqualityComparer<K> keyComparer, int bufferSize)
+        {
+            return Create<IGroupedPublisher<K, V>>(s =>
+            {
+                source.Subscribe(new PublisherGroupBy<T, K, V>(s, keyExtractor, valueExtractor, bufferSize, keyComparer));
+            });
+        }
+
     }
 }
