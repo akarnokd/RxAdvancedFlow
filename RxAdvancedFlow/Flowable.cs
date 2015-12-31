@@ -3,6 +3,7 @@ using RxAdvancedFlow.internals;
 using RxAdvancedFlow.internals.completable;
 using RxAdvancedFlow.internals.publisher;
 using RxAdvancedFlow.internals.subscriptions;
+using RxAdvancedFlow.subscribers;
 using RxAdvancedFlow.subscriptions;
 using System;
 using System.Collections.Generic;
@@ -530,6 +531,16 @@ namespace RxAdvancedFlow
             return FromEnumerable(sources).FlatMap(v => v, true, maxConcurrency);
         }
 
+        public static IPublisher<T> Merge<T>(this IPublisher<IPublisher<T>> sources, int maxConcurrency = int.MaxValue)
+        {
+            return sources.FlatMap(v => v, false, maxConcurrency);
+        }
+
+        public static IPublisher<T> MergeDelayError<T>(this IPublisher<IPublisher<T>> sources, int maxConcurrency = int.MaxValue)
+        {
+            return sources.FlatMap(v => v, true, maxConcurrency);
+        }
+
         public static IPublisher<R> FlatMap<T, R>(this IPublisher<T> source, Func<T, IPublisher<R>> mapper, bool delayError = false, int maxConcurrency = int.MaxValue)
         {
             return FlatMap(source, mapper, BufferSize(), delayError, maxConcurrency);
@@ -608,7 +619,8 @@ namespace RxAdvancedFlow
 
         public static IPublisher<R> SwitchMap<T, R>(this IPublisher<T> source, Func<T, IPublisher<R>> mapper)
         {
-            return Create<R>(s => {
+            return Create<R>(s =>
+            {
                 source.Subscribe(new PublisherSwitchMap<T, R>(s, mapper, BufferSize()));
             });
         }
@@ -756,7 +768,7 @@ namespace RxAdvancedFlow
             return Zip(s1, s2, zipper, BufferSize());
         }
         public static IPublisher<R> Zip<T1, T2, R>(
-            IPublisher<T1> s1, IPublisher<T2> s2, 
+            IPublisher<T1> s1, IPublisher<T2> s2,
             Func<T1, T2, R> zipper, int bufferSize)
         {
             return Create<R>(s =>
@@ -1211,7 +1223,7 @@ namespace RxAdvancedFlow
             return Buffer(source, timespan, timespan, scheduler, () => new List<T>());
         }
 
-        public static IPublisher<C> Buffer<T, C>(this IPublisher<T> source, TimeSpan timespan, 
+        public static IPublisher<C> Buffer<T, C>(this IPublisher<T> source, TimeSpan timespan,
             TimeSpan timeskip, IScheduler scheduler, Func<C> bufferFactory) where C : ICollection<T>
         {
             // TODO implement
@@ -1240,19 +1252,19 @@ namespace RxAdvancedFlow
             throw new NotImplementedException();
         }
 
-        public static IPublisher<IList<T>> Buffer<T>(this IPublisher<T> source, 
+        public static IPublisher<IList<T>> Buffer<T>(this IPublisher<T> source,
             TimeSpan timespan, int size, bool restartTimer = false)
         {
             return Buffer(source, timespan, DefaultScheduler.Instance, size, () => new List<T>(), restartTimer);
         }
 
-        public static IPublisher<IList<T>> Buffer<T>(this IPublisher<T> source, 
+        public static IPublisher<IList<T>> Buffer<T>(this IPublisher<T> source,
             TimeSpan timespan, IScheduler scheduler, int size, bool restartTimer = false)
         {
             return Buffer(source, timespan, scheduler, size, () => new List<T>(), restartTimer);
         }
 
-        public static IPublisher<C> Buffer<T, C>(this IPublisher<T> source, 
+        public static IPublisher<C> Buffer<T, C>(this IPublisher<T> source,
             TimeSpan timespan, int size, Func<C> bufferFactory, bool restartTimer = false) where C : ICollection<T>
         {
             return Buffer(source, timespan, DefaultScheduler.Instance, size, bufferFactory, restartTimer);
@@ -1410,7 +1422,7 @@ namespace RxAdvancedFlow
             return Create<T>(s =>
             {
                 source.Subscribe(new PublisherPeek<T>(s, onSubscribeCall, onNextCall,
-                    onErrorCall, onCompleteCall, onAfterTerminateCall, 
+                    onErrorCall, onCompleteCall, onAfterTerminateCall,
                     onRequestCall, onCancelCall));
             });
         }
@@ -1421,7 +1433,7 @@ namespace RxAdvancedFlow
             return ConcatMapEager<T, R>(source, mapper, BufferSize());
         }
 
-        public static IPublisher<R> ConcatMapEager<T, R>(this IPublisher<T> source, 
+        public static IPublisher<R> ConcatMapEager<T, R>(this IPublisher<T> source,
             Func<T, IPublisher<R>> mapper, int bufferSize)
         {
             return Create<R>(s =>
@@ -1458,6 +1470,168 @@ namespace RxAdvancedFlow
         public static IPublisher<T> ConcatEager<T>(this IPublisher<IPublisher<T>> sources, int bufferSize)
         {
             return sources.ConcatMapEager(v => v, bufferSize);
+        }
+
+        public static IPublisher<T> ElementAt<T>(this IPublisher<T> source, long index)
+        {
+            if (index < 0L)
+            {
+                throw new ArgumentOutOfRangeException("index >= required but it was " + index);
+            }
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherElementAt<T>(s, index));
+            });
+        }
+
+        public static IPublisher<T> ElementAt<T>(this IPublisher<T> source, long index, T defaultValue)
+        {
+            if (index < 0L)
+            {
+                throw new ArgumentOutOfRangeException("index >= required but it was " + index);
+            }
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherElementAtDefault<T>(s, index, defaultValue));
+            });
+        }
+
+        public static IPublisher<T> Filter<T>(this IPublisher<T> source, Func<T, bool> predicate)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherFilter<T>(s, predicate));
+            });
+        }
+
+        public static IPublisher<T> Single<T>(this IPublisher<T> source)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherSingle<T>(s));
+            });
+        }
+
+        public static IPublisher<T> Single<T>(this IPublisher<T> source, T defaultValue)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherSingleDefault<T>(s, defaultValue));
+            });
+        }
+
+        public static IPublisher<T> First<T>(this IPublisher<T> source)
+        {
+            return source.Take(1).Single();
+        }
+
+        public static IPublisher<T> First<T>(this IPublisher<T> source, T defaultValue)
+        {
+            return source.Take(1).Single(defaultValue);
+        }
+
+        public static IPublisher<R> FlatMap<T, R>(this IPublisher<T> source,
+            Func<T, IPublisher<R>> onNext, Func<Exception, IPublisher<R>> onError,
+            Func<IPublisher<R>> onComplete, bool delayError = false, int maxConcurrency = int.MaxValue)
+        {
+            return Create<IPublisher<R>>(s =>
+            {
+                source.Subscribe(new PublisherMapNotification<T, R>(s, onNext, onError, onComplete));
+            }).FlatMap(v => v, delayError, maxConcurrency);
+        }
+
+        public static IPublisher<R> FlatMap<T, U, R>(this IPublisher<T> source,
+            Func<T, IPublisher<U>> mapper, Func<T, U, R> combiner, bool delayError = false, int maxConcurrency = int.MaxValue)
+        {
+            return source.FlatMap(t => mapper(t).Map(u => new Pair<T, U>(t, u)), delayError, maxConcurrency)
+                .Map(tu => combiner(tu.first, tu.second));
+        }
+
+        struct Pair<T1, T2>
+        {
+            internal T1 first;
+            internal T2 second;
+            internal Pair(T1 t1, T2 t2)
+            {
+                first = t1;
+                second = t2;
+            }
+        }
+
+        public static IPublisher<R> FlatMap<T, R>(this IPublisher<T> source, Func<T, IEnumerable<R>> mapper, bool delayError = false, int maxConcurrency = int.MaxValue)
+        {
+            return source.FlatMap(v => FromEnumerable(mapper(v)), delayError, maxConcurrency);
+        }
+
+        public static IPublisher<R> FlatMap<T, U, R>(this IPublisher<T> source,
+            Func<T, IEnumerable<U>> mapper, Func<T, U, R> combiner, bool delayError = false, int maxConcurrency = int.MaxValue)
+        {
+            return source.FlatMap(t => FromEnumerable(mapper(t)).Map(u => new Pair<T, U>(t, u)), delayError, maxConcurrency)
+                .Map(tu => combiner(tu.first, tu.second));
+        }
+
+        public static IDisposable Subscribe<T>(this IPublisher<T> source) {
+            LambdaSubscriber<T> ls = new LambdaSubscriber<T>(v => { });
+
+            source.Subscribe(ls);
+
+            return ls;
+        }
+
+        public static IDisposable Subscribe<T>(this IPublisher<T> source, Action<T> onNextCall)
+        {
+            LambdaSubscriber<T> ls = new LambdaSubscriber<T>(onNextCall);
+
+            source.Subscribe(ls);
+
+            return ls;
+        }
+
+        public static IDisposable Subscribe<T>(this IPublisher<T> source, Action<T> onNextCall,
+            Action<Exception> onErrorCall)
+        {
+            LambdaSubscriber<T> ls = new LambdaSubscriber<T>(onNextCall, onErrorCall);
+
+            source.Subscribe(ls);
+
+            return ls;
+        }
+
+        public static IDisposable Subscribe<T>(this IPublisher<T> source, Action<T> onNextCall,
+            Action<Exception> onErrorCall, Action onCompleteCall)
+        {
+            LambdaSubscriber<T> ls = new LambdaSubscriber<T>(onNextCall, onErrorCall, onCompleteCall);
+
+            source.Subscribe(ls);
+
+            return ls;
+        }
+
+        public static IDisposable Subscribe<T>(this IPublisher<T> source, Action<T> onNextCall,
+            Action<Exception> onErrorCall, Action onCompleteCall, Action<ISubscription> onSubscribeCall)
+        {
+            LambdaSubscriber<T> ls = new LambdaSubscriber<T>(onNextCall, onErrorCall, onCompleteCall);
+
+            source.Subscribe(ls);
+
+            return ls;
+        }
+
+        public static IDisposable ForEach<T>(this IPublisher<T> source, Action<T> onNextCall)
+        {
+            return source.Subscribe(onNextCall);
+        }
+
+        public static IDisposable ForEach<T>(this IPublisher<T> source, Action<T> onNextCall,
+            Action<Exception> onErrorCall)
+        {
+            return source.Subscribe(onNextCall, onErrorCall);
+        }
+
+        public static IDisposable ForEach<T>(this IPublisher<T> source, Action<T> onNextCall,
+            Action<Exception> onErrorCall, Action onCompleteCall)
+        {
+            return source.Subscribe(onNextCall, onErrorCall, onCompleteCall);
         }
 
     }

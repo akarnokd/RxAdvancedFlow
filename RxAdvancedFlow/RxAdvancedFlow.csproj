@@ -107,9 +107,12 @@
     <Compile Include="internals\publisher\PublisherDematerialize.cs" />
     <Compile Include="internals\publisher\PublisherDistinct.cs" />
     <Compile Include="internals\publisher\PublisherDistinctUntilChanged.cs" />
+    <Compile Include="internals\publisher\PublisherElementAt.cs" />
+    <Compile Include="internals\publisher\PublisherFilter.cs" />
     <Compile Include="internals\publisher\PublisherIgnoreElements.cs" />
     <Compile Include="internals\publisher\PublisherIsEmpty.cs" />
     <Compile Include="internals\publisher\PublisherCount.cs" />
+    <Compile Include="internals\publisher\PublisherMapNotification.cs" />
     <Compile Include="internals\publisher\PublisherMaterialize.cs" />
     <Compile Include="internals\publisher\PublisherPeek.cs" />
     <Compile Include="internals\publisher\PublisherReduce.cs" />
@@ -129,6 +132,7 @@
     <Compile Include="internals\publisher\PublisherRange.cs" />
     <Compile Include="internals\publisher\PublisherScan.cs" />
     <Compile Include="internals\publisher\PublisherSequenceEqual.cs" />
+    <Compile Include="internals\publisher\PublisherSingle.cs" />
     <Compile Include="internals\publisher\PublisherSkip.cs" />
     <Compile Include="internals\publisher\PublisherSkipLast.cs" />
     <Compile Include="internals\publisher\PublisherSwitchIfEmpty.cs" />
@@ -188,6 +192,7 @@
     <Compile Include="internals\subscriptions\EmptySubscription.cs" />
     <Compile Include="processors\SingleProcessor.cs" />
     <Compile Include="Signal.cs" />
+    <Compile Include="subscribers\LambdaSubscriber.cs" />
     <Compile Include="subscribers\LatchedSingleSubscriber.cs" />
     <Compile Include="subscribers\LockedSerializedSubscriber.cs" />
     <Compile Include="subscribers\TestSubscriber.cs" />

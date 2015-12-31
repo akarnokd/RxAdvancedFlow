@@ -66,7 +66,7 @@ namespace RxAdvancedFlow.internals.subscriptions
 
         /// <summary>
         /// Atomically tries to set the first value on the target field and returns
-        /// false if its not null and not the cancelled instance.
+        /// false if its not null.
         /// </summary>
         /// <param name="field"></param>
         /// <param name="first"></param>
@@ -79,7 +79,7 @@ namespace RxAdvancedFlow.internals.subscriptions
                 if (a == Cancelled)
                 {
                     first?.Cancel();
-                    return true;
+                    return false;
                 }
 
                 if (a != null)
