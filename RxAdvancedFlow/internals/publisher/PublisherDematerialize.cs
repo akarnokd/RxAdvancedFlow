@@ -22,6 +22,8 @@ namespace RxAdvancedFlow.internals.publisher
 
         long requested;
 
+        long produced;
+
         public PublisherDematerialize(ISubscriber<T> actual)
         {
             this.actual = actual;
@@ -39,7 +41,16 @@ namespace RxAdvancedFlow.internals.publisher
                 return;
             }
 
-            BackpressureHelper.ScalarPostComplete(ref requested, value, actual);
+            BackpressureHelper.Produced(ref requested, produced);
+
+            if (hasValue)
+            {
+                BackpressureHelper.ScalarPostComplete(ref requested, value, actual);
+            }
+            else
+            {
+                actual.OnComplete();
+            }
         }
 
         public void OnError(Exception e)
@@ -61,6 +72,8 @@ namespace RxAdvancedFlow.internals.publisher
 
             if (hasValue)
             {
+                produced++;
+
                 T v = value;
 
                 actual.OnNext(v);
@@ -100,7 +113,7 @@ namespace RxAdvancedFlow.internals.publisher
         {
             if (OnSubscribeHelper.ValidateRequest(n))
             {
-                if (BackpressureHelper.ScalarPostCompleteRequest(ref requested, n, value, actual))
+                if (BackpressureHelper.ScalarPostCompleteRequest(ref requested, n, ref value, actual))
                 {
                     s.Request(n);
                 }

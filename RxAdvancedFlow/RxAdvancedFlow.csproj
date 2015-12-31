@@ -96,6 +96,8 @@
     <Compile Include="internals\OnSubscribeHelper.cs" />
     <Compile Include="internals\completable\LambdaCompletableSubscriber.cs" />
     <Compile Include="internals\ProcessorHelper.cs" />
+    <Compile Include="internals\publisher\PublisherAutoConnect.cs" />
+    <Compile Include="internals\publisher\PublisherOnBackpressureDrop.cs" />
     <Compile Include="internals\publisher\PublisherAny.cs" />
     <Compile Include="internals\publisher\PublisherAll.cs" />
     <Compile Include="internals\publisher\PublisherAmb.cs" />
@@ -117,7 +119,13 @@
     <Compile Include="internals\publisher\PublisherCount.cs" />
     <Compile Include="internals\publisher\PublisherMapNotification.cs" />
     <Compile Include="internals\publisher\PublisherMaterialize.cs" />
+    <Compile Include="internals\publisher\PublisherObserveOn.cs" />
+    <Compile Include="internals\publisher\PublisherOnBackpressureBuffer.cs" />
+    <Compile Include="internals\publisher\PublisherOnBackpressureLatest.cs" />
+    <Compile Include="internals\publisher\PublisherOnErrorResumeNext.cs" />
+    <Compile Include="internals\publisher\PublisherOnErrorReturn.cs" />
     <Compile Include="internals\publisher\PublisherPeek.cs" />
+    <Compile Include="internals\publisher\PublisherRedo.cs" />
     <Compile Include="internals\publisher\PublisherReduce.cs" />
     <Compile Include="internals\publisher\PublisherCollect.cs" />
     <Compile Include="internals\publisher\PublisherCombineLatest.cs" />
@@ -133,6 +141,7 @@
     <Compile Include="internals\publisher\PublisherFlatMap.cs" />
     <Compile Include="internals\publisher\PublisherNever.cs" />
     <Compile Include="internals\publisher\PublisherRange.cs" />
+    <Compile Include="internals\publisher\PublisherRedoWhen.cs" />
     <Compile Include="internals\publisher\PublisherScan.cs" />
     <Compile Include="internals\publisher\PublisherSequenceEqual.cs" />
     <Compile Include="internals\publisher\PublisherSingle.cs" />
@@ -193,6 +202,7 @@
     <Compile Include="internals\subscriptions\SingleArbiterStruct.cs" />
     <Compile Include="internals\subscriptions\SubscriptionHelper.cs" />
     <Compile Include="internals\subscriptions\EmptySubscription.cs" />
+    <Compile Include="processors\PublishProcessor.cs" />
     <Compile Include="processors\SingleProcessor.cs" />
     <Compile Include="Signal.cs" />
     <Compile Include="subscribers\LambdaSubscriber.cs" />

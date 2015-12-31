@@ -1,8 +1,10 @@
 ﻿using ReactiveStreamsCS;
 using RxAdvancedFlow.internals;
 using RxAdvancedFlow.internals.completable;
+using RxAdvancedFlow.internals.disposables;
 using RxAdvancedFlow.internals.publisher;
 using RxAdvancedFlow.internals.subscriptions;
+using RxAdvancedFlow.processors;
 using RxAdvancedFlow.subscribers;
 using RxAdvancedFlow.subscriptions;
 using System;
@@ -1536,7 +1538,7 @@ namespace RxAdvancedFlow
         {
             return Create<IPublisher<R>>(s =>
             {
-                source.Subscribe(new PublisherMapNotification<T, R>(s, onNext, onError, onComplete));
+                source.Subscribe(new PublisherMapNotification<T, IPublisher<R>>(s, onNext, onError, onComplete));
             }).FlatMap(v => v, delayError, maxConcurrency);
         }
 
@@ -1636,9 +1638,9 @@ namespace RxAdvancedFlow
 
         public static IDisposable Connect<T>(this IConnectablePublisher<T> connectable)
         {
-            IDisposable d;
-            connectable.Connect(out d);
-            return d;
+            IDisposable[] d = { EmptyDisposable.Instance };
+            connectable.Connect(v => { d[0] = v; });
+            return d[0];
         }
 
         public static IPublisher<IGroupedPublisher<K, T>> GroupBy<T, K>(this IPublisher<T> source, Func<T, K> keyExtractor)
@@ -1672,6 +1674,266 @@ namespace RxAdvancedFlow
             return Create<IGroupedPublisher<K, V>>(s =>
             {
                 source.Subscribe(new PublisherGroupBy<T, K, V>(s, keyExtractor, valueExtractor, bufferSize, keyComparer));
+            });
+        }
+
+        public static IPublisher<T> Last<T>(this IPublisher<T> source)
+        {
+            return source.TakeLast(1).Single();
+        }
+
+        public static IPublisher<T> Last<T>(this IPublisher<T> source, T defaultValue)
+        {
+            return source.TakeLast(1).Single(defaultValue);
+        }
+
+        public static IPublisher<R> MapNotification<T, R>(this IPublisher<T> source,
+            Func<T, R> onNext, Func<Exception, R> onError, Func<R> onComplete)
+        {
+            return Create<R>(s =>
+            {
+                source.Subscribe(new PublisherMapNotification<T, R>(s, onNext, onError, onComplete));
+            });
+        }
+
+        public static IPublisher<T> ObserveOn<T>(this IPublisher<T> source, IScheduler scheduler, bool delayError = false)
+        {
+            return ObserveOn(source, scheduler, delayError, BufferSize());
+        }
+
+        public static IPublisher<T> ObserveOn<T>(this IPublisher<T> source, IScheduler scheduler, bool delayError, int bufferSize)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherObserveOn<T>(s, scheduler.CreateWorker(), delayError, bufferSize));
+            });
+        }
+        
+        public static IPublisher<T> OnBackpressureBufferAll<T>(this IPublisher<T> source)
+        {
+            return OnBackpressureBufferAll(source, BufferSize());
+        }
+
+        public static IPublisher<T> OnBackpressureBufferAll<T>(this IPublisher<T> source, int capacityHint)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherOnBackpressureBufferAll<T>(s, capacityHint));
+            });
+        }
+
+        public static IPublisher<T> OnBackpressureBuffer<T>(this IPublisher<T> source, int maxCapacity, Action onOverflow = null)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherOnBackpressureBufferFixed<T>(s, maxCapacity, onOverflow));
+            });
+        }
+
+        public static IPublisher<T> OnBackpressureDrop<T>(this IPublisher<T> source, Action<T> onDrop = null)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherOnBackpressureDrop<T>(s, onDrop));
+            });
+        }
+
+        public static IPublisher<T> OnBackpressureLatest<T>(this IPublisher<T> source)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherOnBackpressureLatest<T>(s));
+            });
+        }
+
+        public static IPublisher<T> OnErrorResumeNext<T>(this IPublisher<T> source, Func<Exception, IPublisher<T>> resumeFunction)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherOnErrorResumeNext<T>(s, resumeFunction));
+            });
+        }
+
+        public static IPublisher<T> OnErrorResumeNext<T>(this IPublisher<T> source, IPublisher<T> other)
+        {
+            return OnErrorResumeNext(source, e => other);
+        }
+
+        public static IPublisher<T> OnErrorReturn<T>(this IPublisher<T> source, T defaultValue)
+        {
+            return OnErrorReturn(source, e => defaultValue);
+        }
+
+        public static IPublisher<T> OnErrorReturn<T>(this IPublisher<T> source, Func<Exception, T> resumeValue)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherOnErrorReturn<T>(s, resumeValue));
+            });
+        }
+
+        public static IConnectablePublisher<T> Publish<T>(this IPublisher<T> source)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<R> Publish<T, R>(this IPublisher<T> source, Func<IPublisher<T>, IPublisher<R>> function)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<T> AutoConnect<T>(this IConnectablePublisher<T> source)
+        {
+            return AutoConnect<T>(source, 1);
+        }
+
+        public static IPublisher<T> AutoConnect<T>(this IConnectablePublisher<T> source, int n)
+        {
+            return AutoConnect<T>(source, n, d => { });
+        }
+
+        public static IPublisher<T> AutoConnect<T>(this IConnectablePublisher<T> source, int n, Action<IDisposable> onConnect)
+        {
+            if (n < 0)
+            {
+                throw new ArgumentOutOfRangeException("n >= 0 required but it was " + n);
+            }
+            else
+            if (n == 0)
+            {
+                source.Connect(onConnect);
+            }
+            return new PublisherAutoConnect<T>(source, n, onConnect);
+        }
+
+        public static IPublisher<T> RefCount<T>(this IConnectablePublisher<T> source)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<T> Repeat<T>(this IPublisher<T> source)
+        {
+            return Repeat(source, long.MaxValue);
+        }
+
+        public static IPublisher<T> Repeat<T>(this IPublisher<T> source, long times)
+        {
+            if (times < 0)
+            {
+                throw new ArgumentOutOfRangeException("times >= 0 required but it was " + times);
+            }
+            return Create<T>(s =>
+            {
+                PublisherRedo<T> parent = new PublisherRedo<T>(s, false, times, source);
+                parent.Resubscribe();
+            });
+        }
+
+        public static IPublisher<T> Retry<T>(this IPublisher<T> source)
+        {
+            return Retry(source, long.MaxValue);
+        }
+
+        public static IPublisher<T> Retry<T>(this IPublisher<T> source, long times)
+        {
+            if (times < 0)
+            {
+                throw new ArgumentOutOfRangeException("times >= 0 required but it was " + times);
+            }
+            return Create<T>(s =>
+            {
+                PublisherRedo<T> parent = new PublisherRedo<T>(s, true, times, source);
+                parent.Resubscribe();
+            });
+        }
+
+        public static IPublisher<T> RepeatWhen<T>(this IPublisher<T> source, Func<IPublisher<object>, IPublisher<object>> when)
+        {
+            return Create<T>(s =>
+            {
+                PublishProcessor<object> ps = new PublishProcessor<object>();
+
+                IPublisher<object> p;
+
+                try
+                {
+                    p = when(ps);
+                }
+                catch (Exception ex)
+                {
+                    EmptySubscription.Error(s, ex);
+                    return;
+                }
+
+                if (p == null)
+                {
+                    EmptySubscription.Error(s, new NullReferenceException("The when returned a null Publisher"));
+                    return;
+                }
+
+                PublisherRedoSignaller<T, object> signaller = new PublisherRedoSignaller<T, object>(s);
+
+                PublisherRedoWhen<T> main = new PublisherRedoWhen<T>(s, source, 
+                    () => {
+                        signaller.Request(1);
+
+                        ps.OnNext(PublisherRedoWhen<T>.NEXT);
+                    }, RxAdvancedFlowPlugins.OnError, signaller.Cancel, false);
+
+                signaller.SetResubscribe(main.Resubscribe);
+
+                s.OnSubscribe(main);
+
+                p.Subscribe(signaller);
+
+                main.Resubscribe();
+            });
+        }
+
+        public static IPublisher<T> RetryWhen<T>(this IPublisher<T> source, Func<IPublisher<object>, IPublisher<object>> when)
+        {
+            return Create<T>(s =>
+            {
+                PublishProcessor<Exception> ps = new PublishProcessor<Exception>();
+
+                IPublisher<object> p;
+
+                try
+                {
+                    p = when(ps);
+                }
+                catch (Exception ex)
+                {
+                    EmptySubscription.Error(s, ex);
+                    return;
+                }
+
+                if (p == null)
+                {
+                    EmptySubscription.Error(s, new NullReferenceException("The when returned a null Publisher"));
+                    return;
+                }
+
+                PublisherRedoSignaller<T, object> signaller = new PublisherRedoSignaller<T, object>(s);
+
+                PublisherRedoWhen<T> main = new PublisherRedoWhen<T>(s, source,
+                    () => { }, e =>
+                    {
+                        signaller.Request(1);
+
+                        ps.OnNext(e);
+                    }, signaller.Cancel, false);
+
+                signaller.SetResubscribe(main.Resubscribe);
+
+                s.OnSubscribe(main);
+
+                p.Subscribe(signaller);
+
+                main.Resubscribe();
             });
         }
 

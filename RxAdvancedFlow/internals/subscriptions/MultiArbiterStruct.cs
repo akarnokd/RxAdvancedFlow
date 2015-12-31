@@ -89,7 +89,7 @@ namespace RxAdvancedFlow.internals.subscriptions
         }
 
         /// <summary>
-        /// Request from the current actual ISubscriber.
+        /// Request from the current actual ISubscriber (validated).
         /// </summary>
         /// <param name="n">The request amount. Validated</param>
         public void Request(long n)

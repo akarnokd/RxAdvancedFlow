@@ -23,6 +23,11 @@ namespace RxAdvancedFlow.internals.subscriptions
             return BackpressureHelper.SingleSetSubscription(ref this.s, ref requested, s);
         }
 
+        /// <summary>
+        /// Requests the specified amount immediately or once the actual
+        /// subscription arrives (validated).
+        /// </summary>
+        /// <param name="n"></param>
         public void Request(long n)
         {
             if (OnSubscribeHelper.ValidateRequest(n))

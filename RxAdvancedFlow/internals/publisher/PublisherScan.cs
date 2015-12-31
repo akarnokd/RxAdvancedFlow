@@ -38,11 +38,8 @@ namespace RxAdvancedFlow.internals.publisher
 
         public void OnComplete()
         {
-            long p = produced;
-            if (p != 0L && Volatile.Read(ref requested) != long.MaxValue)
-            {
-                Interlocked.Add(ref requested, -p);
-            }
+            BackpressureHelper.Produced(ref requested, produced);
+
             BackpressureHelper.ScalarPostComplete(ref requested, value, actual);
         }
 
@@ -95,7 +92,7 @@ namespace RxAdvancedFlow.internals.publisher
         {
             if (OnSubscribeHelper.ValidateRequest(n))
             {
-                BackpressureHelper.ScalarPostCompleteRequest(ref requested, n, value, actual);
+                BackpressureHelper.ScalarPostCompleteRequest(ref requested, n, ref value, actual);
             }
         }
     }

@@ -13,6 +13,6 @@ namespace RxAdvancedFlow
     /// <typeparam name="T"></typeparam>
     public interface IConnectablePublisher<T> : IPublisher<T>
     {
-        void Connect(out IDisposable cancel);
+        void Connect(Action<IDisposable> onConnect);
     }
 }

@@ -3,32 +3,36 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.publisher
 {
     sealed class PublisherMapNotification<T, R> : ISubscriber<T>, ISubscription
     {
-        readonly ISubscriber<IPublisher<R>> actual;
+        readonly ISubscriber<R> actual;
 
-        readonly Func<T, IPublisher<R>> onNextCall;
+        readonly Func<T, R> onNextCall;
 
-        readonly Func<Exception, IPublisher<R>> onErrorCall;
+        readonly Func<Exception, R> onErrorCall;
 
-        readonly Func<IPublisher<R>> onCompleteCall;
+        readonly Func<R> onCompleteCall;
 
         long requested;
+
+        long produced;
 
         bool done;
 
         ISubscription s;
 
-        IPublisher<R> last;
+        R last;
 
-        public PublisherMapNotification(ISubscriber<IPublisher<R>> actual,
-            Func<T, IPublisher<R>> onNextCall,
-            Func<Exception, IPublisher<R>> onErrorCall,
-            Func<IPublisher<R>> onCompleteCall
+        public PublisherMapNotification(
+            ISubscriber<R> actual,
+            Func<T, R> onNextCall,
+            Func<Exception, R> onErrorCall,
+            Func<R> onCompleteCall
             )
         {
             this.actual = actual;
@@ -49,11 +53,11 @@ namespace RxAdvancedFlow.internals.publisher
                 return;
             }
 
-            IPublisher<R> p;
+            R v;
 
             try
             {
-                p = onCompleteCall();
+                v = onCompleteCall();
             }
             catch (Exception e)
             {
@@ -61,14 +65,10 @@ namespace RxAdvancedFlow.internals.publisher
                 return;
             }
 
-            if (p == null)
-            {
-                actual.OnError(new NullReferenceException("The onCompleteCall returned a null Publisher"));
-                return;
-            }
+            BackpressureHelper.Produced(ref requested, produced);
 
-            last = p;
-            BackpressureHelper.ScalarPostComplete(ref requested, p, actual);
+            last = v;
+            BackpressureHelper.ScalarPostComplete(ref requested, v, actual);
         }
 
         public void OnError(Exception e)
@@ -78,11 +78,11 @@ namespace RxAdvancedFlow.internals.publisher
                 return;
             }
 
-            IPublisher<R> p;
+            R v;
 
             try
             {
-                p = onErrorCall(e);
+                v = onErrorCall(e);
             }
             catch (Exception ex)
             {
@@ -90,14 +90,10 @@ namespace RxAdvancedFlow.internals.publisher
                 return;
             }
 
-            if (p == null)
-            {
-                actual.OnError(new NullReferenceException("The onCompleteCall returned a null Publisher"));
-                return;
-            }
+            BackpressureHelper.Produced(ref requested, produced);
 
-            last = p;
-            BackpressureHelper.ScalarPostComplete(ref requested, p, actual);
+            last = v;
+            BackpressureHelper.ScalarPostComplete(ref requested, v, actual);
         }
 
         public void OnNext(T t)
@@ -107,7 +103,7 @@ namespace RxAdvancedFlow.internals.publisher
                 return;
             }
 
-            IPublisher<R> p;
+            R p;
 
             try
             {
@@ -122,14 +118,7 @@ namespace RxAdvancedFlow.internals.publisher
                 return;
             }
 
-            if (p == null)
-            {
-                done = true;
-                s.Cancel();
-
-                actual.OnError(new NullReferenceException("The onCompleteCall returned a null Publisher"));
-                return;
-            }
+            produced++;
 
             actual.OnNext(p);
         }
@@ -146,7 +135,7 @@ namespace RxAdvancedFlow.internals.publisher
         {
             if (OnSubscribeHelper.ValidateRequest(n))
             {
-                if (BackpressureHelper.ScalarPostCompleteRequest(ref requested, n, last, actual))
+                if (BackpressureHelper.ScalarPostCompleteRequest(ref requested, n, ref last, actual))
                 {
                     s.Request(n);
                 }

@@ -366,7 +366,7 @@ namespace RxAdvancedFlow.internals
         }
 
         /// <summary>
-        /// Atomically adds the request amount and returns false if in a post-complete state
+        /// Atomically adds the request amount (not validated) and returns false if in a post-complete state
         /// the value could and was emitted.
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -375,7 +375,7 @@ namespace RxAdvancedFlow.internals
         /// <param name="value"></param>
         /// <param name="actual"></param>
         /// <returns></returns>
-        public static bool ScalarPostCompleteRequest<T>(ref long requested, long n, T value, ISubscriber<T> actual)
+        public static bool ScalarPostCompleteRequest<T>(ref long requested, long n, ref T value, ISubscriber<T> actual)
         {
             for (;;)
             {
@@ -401,6 +401,59 @@ namespace RxAdvancedFlow.internals
                 {
                     return true;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Atomically adds the request amount (not validated) and returns false if in a post-complete state
+        /// the value could and was emitted.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="requested"></param>
+        /// <param name="n"></param>
+        /// <param name="value"></param>
+        /// <param name="actual"></param>
+        /// <returns></returns>
+        public static bool ScalarConstPostCompleteRequest<T>(ref long requested, long n, T value, ISubscriber<T> actual)
+        {
+            for (;;)
+            {
+                long r = Volatile.Read(ref requested);
+
+                if (r == COMPLETED_MASK)
+                {
+                    if (Interlocked.CompareExchange(ref requested, r + 1, r) == r)
+                    {
+                        actual.OnNext(value);
+                        actual.OnComplete();
+                    }
+                    return false;
+                }
+
+                if (r < 0)
+                {
+                    return false;
+                }
+
+                long u = AddCap(r, n);
+                if (Interlocked.CompareExchange(ref requested, u, r) == r)
+                {
+                    return true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Deduces the produced amount from the requested field if its non-zero
+        /// and the requested field is not long.MaxValue.
+        /// </summary>
+        /// <param name="requested"></param>
+        /// <param name="produced"></param>
+        public static void Produced(ref long requested, long produced)
+        {
+            if (produced != 0L && Volatile.Read(ref requested) != long.MaxValue)
+            {
+                Interlocked.Add(ref requested, produced);
             }
         }
     }
