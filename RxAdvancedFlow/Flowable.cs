@@ -1846,8 +1846,7 @@ namespace RxAdvancedFlow
 
         public static IPublisher<T> RefCount<T>(this IConnectablePublisher<T> source)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return new PublisherRefCount<T>(source);
         }
 
         public static IPublisher<T> Share<T>(this IPublisher<T> source)

@@ -143,6 +143,8 @@
     <Compile Include="internals\publisher\PublisherNever.cs" />
     <Compile Include="internals\publisher\PublisherRange.cs" />
     <Compile Include="internals\publisher\PublisherRedoWhen.cs" />
+    <Compile Include="internals\publisher\PublisherRefCount.cs" />
+    <Compile Include="internals\publisher\PublisherReplay.cs" />
     <Compile Include="internals\publisher\PublisherScan.cs" />
     <Compile Include="internals\publisher\PublisherSequenceEqual.cs" />
     <Compile Include="internals\publisher\PublisherSingle.cs" />
