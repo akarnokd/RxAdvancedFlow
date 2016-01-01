@@ -45,6 +45,7 @@ namespace RxAdvancedFlow.internals.publisher
         public void Cancel()
         {
             arbiter.Cancel();
+            terminateRegular();
         }
 
         public void OnComplete()

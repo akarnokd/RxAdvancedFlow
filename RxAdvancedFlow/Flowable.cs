@@ -3,6 +3,7 @@ using RxAdvancedFlow.internals;
 using RxAdvancedFlow.internals.completable;
 using RxAdvancedFlow.internals.disposables;
 using RxAdvancedFlow.internals.publisher;
+using RxAdvancedFlow.internals.subscribers;
 using RxAdvancedFlow.internals.subscriptions;
 using RxAdvancedFlow.processors;
 using RxAdvancedFlow.subscribers;
@@ -1774,14 +1775,49 @@ namespace RxAdvancedFlow
 
         public static IConnectablePublisher<T> Publish<T>(this IPublisher<T> source)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return Publish(source, BufferSize());
+        }
+
+        public static IConnectablePublisher<T> Publish<T>(this IPublisher<T> source, int bufferSize)
+        {
+            return new PublisherPublish<T>(source, bufferSize);
         }
 
         public static IPublisher<R> Publish<T, R>(this IPublisher<T> source, Func<IPublisher<T>, IPublisher<R>> function)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return Publish(source, function, BufferSize());
+        }
+
+        public static IPublisher<R> Publish<T, R>(this IPublisher<T> source, Func<IPublisher<T>, IPublisher<R>> function, int bufferSize)
+        {
+            return Create<R>(s =>
+            {
+                IConnectablePublisher<T> co = source.Publish(bufferSize);
+
+                IPublisher<R> p;
+
+                try
+                {
+                    p = function(co);
+                }
+                catch (Exception e)
+                {
+                    EmptySubscription.Error(s, e);
+                    return;
+                }
+
+                if (p == null)
+                {
+                    EmptySubscription.Error(s, new NullReferenceException("The function returned a null Publisher"));
+                    return;
+                }
+
+                var rs = new ResourceSubscriber<R>(s);
+
+                p.Subscribe(rs);
+
+                co.Connect(rs.Set);
+            });
         }
 
         public static IPublisher<T> AutoConnect<T>(this IConnectablePublisher<T> source)
@@ -1812,6 +1848,11 @@ namespace RxAdvancedFlow
         {
             // TODO implement
             throw new NotImplementedException();
+        }
+
+        public static IPublisher<T> Share<T>(this IPublisher<T> source)
+        {
+            return source.Publish().RefCount();
         }
 
         public static IPublisher<T> Repeat<T>(this IPublisher<T> source)
@@ -1893,7 +1934,7 @@ namespace RxAdvancedFlow
             });
         }
 
-        public static IPublisher<T> RetryWhen<T>(this IPublisher<T> source, Func<IPublisher<object>, IPublisher<object>> when)
+        public static IPublisher<T> RetryWhen<T>(this IPublisher<T> source, Func<IPublisher<Exception>, IPublisher<object>> when)
         {
             return Create<T>(s =>
             {

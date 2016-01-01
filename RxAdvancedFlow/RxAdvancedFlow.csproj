@@ -125,6 +125,7 @@
     <Compile Include="internals\publisher\PublisherOnErrorResumeNext.cs" />
     <Compile Include="internals\publisher\PublisherOnErrorReturn.cs" />
     <Compile Include="internals\publisher\PublisherPeek.cs" />
+    <Compile Include="internals\publisher\PublisherPublish.cs" />
     <Compile Include="internals\publisher\PublisherRedo.cs" />
     <Compile Include="internals\publisher\PublisherReduce.cs" />
     <Compile Include="internals\publisher\PublisherCollect.cs" />
@@ -198,6 +199,7 @@
     <Compile Include="internals\subscribers\CancelledSubscriber.cs" />
     <Compile Include="internals\subscribers\EmptySubscriber.cs" />
     <Compile Include="internals\subscribers\LockedSerializedSubscriberStruct.cs" />
+    <Compile Include="internals\subscribers\ResourceSubscriber.cs" />
     <Compile Include="internals\subscriptions\MultiArbiterStruct.cs" />
     <Compile Include="internals\subscriptions\SingleArbiterStruct.cs" />
     <Compile Include="internals\subscriptions\SubscriptionHelper.cs" />

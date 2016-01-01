@@ -372,8 +372,7 @@ namespace RxAdvancedFlow
 
         public static ICompletable RepeatWhen(this ICompletable source, Func<IPublisher<object>, IPublisher<object>> whenFunction)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return source.ToPublisher<object>().RepeatWhen(whenFunction).ToCompletable();
         }
 
         public static ICompletable Retry(this ICompletable source)
@@ -414,8 +413,7 @@ namespace RxAdvancedFlow
 
         public static ICompletable RetryWhen(this ICompletable source, Func<IPublisher<Exception>, IPublisher<object>> whenFunction)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return source.ToPublisher<object>().RetryWhen(whenFunction).ToCompletable();
         }
 
         public static IObservable<T> ToObservable<T>(this ICompletable source)
