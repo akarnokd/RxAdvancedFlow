@@ -98,7 +98,12 @@ namespace RxAdvancedFlow.internals
 
         public int Leave(int actions)
         {
-            return Interlocked.Add(ref wip, -actions);
+            int m = Volatile.Read(ref wip);
+            if (m == actions)
+            {
+                return Interlocked.Add(ref wip, -actions);
+            }
+            return m;
         }
 
         public bool TryLeave(ref int missed)

@@ -348,10 +348,9 @@ namespace RxAdvancedFlow.internals.publisher
                 {
                     if (Volatile.Read(ref once) == 0 && Interlocked.CompareExchange(ref once, 1, 0) == 0)
                     {
-                        long u = BackpressureHelper.MultiplyCap(size, n);
-                        long v = BackpressureHelper.MultiplyCap(skip - size, n - 1);
-                        long w = BackpressureHelper.AddCap(u, v);
-                        s.Request(w);
+                        long u = BackpressureHelper.MultiplyCap(skip, n - 1);
+                        long v = BackpressureHelper.AddCap(size, u);
+                        s.Request(v);
                     }
                     else
                     {

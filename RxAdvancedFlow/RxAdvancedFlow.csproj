@@ -169,7 +169,10 @@
     <Compile Include="internals\publisher\PublisherTimeout.cs" />
     <Compile Include="internals\publisher\PublisherTimer.cs" />
     <Compile Include="internals\publisher\PublisherToEnumerable.cs" />
+    <Compile Include="internals\publisher\PublisherUnsubscribeOn.cs" />
     <Compile Include="internals\publisher\PublisherUsing.cs" />
+    <Compile Include="internals\publisher\PublisherWindow.cs" />
+    <Compile Include="internals\publisher\PublisherWithLatestFrom.cs" />
     <Compile Include="internals\publisher\PublisherZip.cs" />
     <Compile Include="internals\queues\ArrayQueue.cs" />
     <Compile Include="internals\queues\IQueue.cs" />
@@ -220,6 +223,7 @@
     <Compile Include="internals\subscriptions\EmptySubscription.cs" />
     <Compile Include="processors\PublishProcessor.cs" />
     <Compile Include="processors\SingleProcessor.cs" />
+    <Compile Include="processors\UnicastProcessor.cs" />
     <Compile Include="Signal.cs" />
     <Compile Include="subscribers\LambdaSubscriber.cs" />
     <Compile Include="subscribers\LatchedSingleSubscriber.cs" />

@@ -2444,5 +2444,207 @@ namespace RxAdvancedFlow
         {
             return new PublisherToEnumerable<T>(source, prefetch);
         }
+
+        public static IPublisher<IList<T>> ToList<T>(this IPublisher<T> source)
+        {
+            return source.Collect(() => new List<T>(), (a, b) => a.Add(b));
+        }
+
+        public static IPublisher<IList<T>> ToList<T>(this IPublisher<T> source, int capacityHint)
+        {
+            return source.Collect(() => new List<T>(capacityHint), (a, b) => a.Add(b));
+        }
+
+        public static IPublisher<IDictionary<K, T>> ToDictionary<T, K>(this IPublisher<T> source,
+            Func<T, K> keyExtractor)
+        {
+            return source.Collect(() => new Dictionary<K, T>(), (a, b) =>
+            {
+                K k = keyExtractor(b);
+                if (!a.ContainsKey(k))
+                {
+                    a.Add(k, b);
+                }
+            });
+        }
+
+        public static IPublisher<IDictionary<K, T>> ToDictionary<T, K>(this IPublisher<T> source,
+            Func<T, K> keyExtractor, IEqualityComparer<K> keyComparer)
+        {
+            return source.Collect(() => new Dictionary<K, T>(keyComparer), (a, b) =>
+            {
+                K k = keyExtractor(b);
+                if (!a.ContainsKey(k))
+                {
+                    a.Add(k, b);
+                }
+            });
+        }
+
+        public static IPublisher<IDictionary<K, V>> ToDictionary<T, K, V>(this IPublisher<T> source,
+            Func<T, K> keyExtractor, Func<T, V> valueExtractor)
+        {
+            return source.Collect(() => new Dictionary<K, V>(), (a, b) =>
+            {
+                K k = keyExtractor(b);
+                if (!a.ContainsKey(k))
+                {
+                    a.Add(k, valueExtractor(b));
+                }
+            });
+        }
+
+        public static IPublisher<IDictionary<K, V>> ToDictionary<T, K, V>(this IPublisher<T> source,
+            Func<T, K> keyExtractor, Func<T, V> valueExtractor, IEqualityComparer<K> keyComparer)
+        {
+            return source.Collect(() => new Dictionary<K, V>(keyComparer), (a, b) =>
+            {
+                K k = keyExtractor(b);
+                if (!a.ContainsKey(k))
+                {
+                    a.Add(k, valueExtractor(b));
+                }
+            });
+        }
+
+        public static IPublisher<IList<T>> ToSortedList<T>(this IPublisher<T> source)
+        {
+            return Collect(source, () => new List<T>(), (a, b) => a.Add(b))
+                .Map(v => { v.Sort(); return v; });
+        }
+
+        public static IPublisher<IList<T>> ToSortedList<T>(this IPublisher<T> source, int capacityHint)
+        {
+            return Collect(source, () => new List<T>(capacityHint), (a, b) => a.Add(b))
+                .Map(v => { v.Sort(); return v; });
+        }
+
+        public static IPublisher<IList<T>> ToSortedList<T>(this IPublisher<T> source, Comparison<T> comparer)
+        {
+            return Collect(source, () => new List<T>(), (a, b) => a.Add(b))
+                .Map(v => { v.Sort(comparer); return v; });
+        }
+
+        public static IPublisher<IList<T>> ToSortedList<T>(this IPublisher<T> source, Comparison<T> comparer, int capacityHint)
+        {
+            return Collect(source, () => new List<T>(capacityHint), (a, b) => a.Add(b))
+                .Map(v => { v.Sort(comparer); return v; });
+        }
+
+        public static IPublisher<T> UnsubscribeOn<T>(this IPublisher<T> source, IScheduler scheduler)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherUnsubscribeOn<T>(s, scheduler));
+            });
+        }
+
+        public static IPublisher<R> WithLatestFrom<T, U, R>(this IPublisher<T> source, IPublisher<U> other, Func<T, U, R> combiner)
+        {
+            return Create<R>(s =>
+            {
+                var op = new PublisherWithLatestFrom<T, U, R>(s, combiner);
+                s.OnSubscribe(op);
+
+                other.Subscribe(op.GetOther());
+
+                source.Subscribe(op);
+            });
+        }
+
+        public static IPublisher<IPublisher<T>> Window<T>(this IPublisher<T> source, int size)
+        {
+            return Create<IPublisher<T>>(s =>
+            {
+                source.Subscribe(new PublisherWindowExact<T>(s, size));
+            });
+        }
+
+        public static IPublisher<IPublisher<T>> Window<T>(this IPublisher<T> source, int size, int skip)
+        {
+            if (size == skip)
+            {
+                return Window(source, size);
+            }
+            else
+            if (size < skip)
+            {
+                return Create<IPublisher<T>>(s =>
+                {
+                    source.Subscribe(new PublisherWindowSkip<T>(s, size, skip));
+                });
+            }
+            return Create<IPublisher<T>>(s =>
+            {
+                source.Subscribe(new PublisherWindowOverlap<T>(s, size, skip));
+            });
+        }
+
+        public static IPublisher<IPublisher<T>> Window<T>(this IPublisher<T> source, TimeSpan timespan)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<IPublisher<T>> Window<T>(this IPublisher<T> source, TimeSpan timespan, TimeSpan timeskip)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<IPublisher<T>> Window<T>(this IPublisher<T> source, TimeSpan timespan, IScheduler scheduler)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<IPublisher<T>> Window<T>(this IPublisher<T> source, TimeSpan timespan, TimeSpan timeskip, IScheduler scheduler)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<IPublisher<T>> Window<T>(this IPublisher<T> source, TimeSpan timespan, int size)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<IPublisher<T>> Window<T>(this IPublisher<T> source, TimeSpan timespan, IScheduler scheduler, int size)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<IPublisher<T>> Window<T>(this IPublisher<T> source, TimeSpan timespan, TimeSpan timeskip, int size)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<IPublisher<T>> Window<T>(this IPublisher<T> source, TimeSpan timespan, TimeSpan timeskip, IScheduler scheduler, int size)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<IPublisher<T>> Window<T, B>(this IPublisher<T> source, IPublisher<B> boundary)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<IPublisher<T>> Window<T, O, C>(this IPublisher<T> source, 
+            IPublisher<O> openings, Func<O, IPublisher<C>> closings)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<R> ZipWith<T, U, R>(this IPublisher<T> source, IEnumerable<U> other, Func<T, U, R> zipper)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
     }
 }
