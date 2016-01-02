@@ -1,9 +1,11 @@
 ﻿using ReactiveStreamsCS;
 using RxAdvancedFlow.internals.queues;
+using RxAdvancedFlow.internals.subscribers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.publisher
@@ -67,4 +69,70 @@ namespace RxAdvancedFlow.internals.publisher
             s.Request(n);
         }
     }
+
+    sealed class PublisherSkipLastTimed<T> : ISubscriber<T>, ISubscription
+    {
+        HalfSerializedSubscriberStruct<T> actual;
+
+        readonly IWorker worker;
+
+        readonly TimeSpan time;
+
+        ISubscription s;
+
+        bool cancelled;
+
+        public PublisherSkipLastTimed(ISubscriber<T> actual, TimeSpan time, IWorker worker)
+        {
+            this.actual.Init(actual);
+            this.worker = worker;
+            this.time = time;
+        }
+
+        public void OnSubscribe(ISubscription s)
+        {
+            if (OnSubscribeHelper.SetSubscription(ref this.s, s))
+            {
+                actual.OnSubscribe(this);
+            }
+        }
+
+        public void OnNext(T t)
+        {
+            worker.Schedule(() => actual.OnNext(t), time);
+        }
+
+        public void OnError(Exception e)
+        {
+            worker.Dispose();
+
+            actual.OnError(e);
+        }
+
+        public void OnComplete()
+        {
+            worker.Dispose();
+
+            actual.OnComplete();
+        }
+
+        public void Request(long n)
+        {
+            s.Request(n);
+        }
+
+        public void Cancel()
+        {
+            worker.Dispose();
+
+            s.Cancel();
+        }
+
+        struct TimedValue
+        {
+            internal T value;
+            internal long timestamp;
+        }
+    }
+
 }

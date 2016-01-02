@@ -133,4 +133,105 @@ namespace RxAdvancedFlow.internals.publisher
             sds.Request(n, actual);
         }
     }
+
+    sealed class PublisherTakeLastTimed<T> : ISubscriber<T>, ISubscription
+    {
+        readonly ISubscriber<T> actual;
+
+        readonly IScheduler scheduler;
+
+        readonly ArrayQueue<TimedValue> q;
+
+        readonly long maxAge;
+
+        ISubscription s;
+
+        long requested;
+
+        bool cancelled;
+
+        public PublisherTakeLastTimed(ISubscriber<T> actual, long maxAge, IScheduler scheduler)
+        {
+            this.actual = actual;
+            this.scheduler = scheduler;
+            this.maxAge = maxAge;
+            this.q = new ArrayQueue<TimedValue>();
+        }
+
+        public void OnSubscribe(ISubscription s)
+        {
+            if (OnSubscribeHelper.SetSubscription(ref this.s, s))
+            {
+                actual.OnSubscribe(this);
+
+                s.Request(long.MaxValue);
+            }
+        }
+
+        public void OnNext(T t)
+        {
+            long now = scheduler.NowUtc();
+
+            Trim(now);
+
+            TimedValue v = new TimedValue();
+            v.value = t;
+            v.timestamp = now + maxAge;
+            q.Offer(v);
+        }
+
+        void Trim(long now)
+        {
+            for (;;)
+            {
+                TimedValue v;
+                if (!q.Peek(out v))
+                {
+                    break;
+                }
+
+                if (v.timestamp < now)
+                {
+                    q.Drop();
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+        }
+
+        public void OnError(Exception e)
+        {
+            q.Clear();
+
+            actual.OnError(e);
+        }
+
+        public void OnComplete()
+        {
+            Trim(scheduler.NowUtc());
+
+            BackpressureHelper.PostComplete(ref requested, q, actual, ref cancelled, v => v.value);
+        }
+
+        public void Request(long n)
+        {
+            BackpressureHelper.PostCompleteRequest(ref requested, n, q,
+                            actual, ref cancelled, v => v.value);
+        }
+
+        public void Cancel()
+        {
+            Volatile.Write(ref cancelled, true);
+        }
+
+        struct TimedValue
+        {
+            internal T value;
+            internal long timestamp;
+        }
+    }
+
 }

@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BackpressureStrategy.cs" />
     <Compile Include="Completable.cs" />
     <Compile Include="DefaultScheduler.cs" />
     <Compile Include="disposables\ICompositeDisposable.cs" />
@@ -93,8 +94,10 @@
     <Compile Include="internals\ExceptionHelper.cs" />
     <Compile Include="internals\InfiniteRepeat.cs" />
     <Compile Include="internals\LambdaHelper.cs" />
+    <Compile Include="internals\ObservableFromFunc.cs" />
     <Compile Include="internals\OnSubscribeHelper.cs" />
     <Compile Include="internals\completable\LambdaCompletableSubscriber.cs" />
+    <Compile Include="internals\PaddedLong.cs" />
     <Compile Include="internals\ProcessorHelper.cs" />
     <Compile Include="internals\publisher\PublisherAutoConnect.cs" />
     <Compile Include="internals\publisher\PublisherOnBackpressureDrop.cs" />
@@ -121,11 +124,13 @@
     <Compile Include="internals\publisher\PublisherMaterialize.cs" />
     <Compile Include="internals\publisher\PublisherObserveOn.cs" />
     <Compile Include="internals\publisher\PublisherOnBackpressureBuffer.cs" />
+    <Compile Include="internals\publisher\PublisherOnBackpressureError.cs" />
     <Compile Include="internals\publisher\PublisherOnBackpressureLatest.cs" />
     <Compile Include="internals\publisher\PublisherOnErrorResumeNext.cs" />
     <Compile Include="internals\publisher\PublisherOnErrorReturn.cs" />
     <Compile Include="internals\publisher\PublisherPeek.cs" />
     <Compile Include="internals\publisher\PublisherPublish.cs" />
+    <Compile Include="internals\publisher\PublisherRetry.cs" />
     <Compile Include="internals\publisher\PublisherRedo.cs" />
     <Compile Include="internals\publisher\PublisherReduce.cs" />
     <Compile Include="internals\publisher\PublisherCollect.cs" />
@@ -145,11 +150,13 @@
     <Compile Include="internals\publisher\PublisherRedoWhen.cs" />
     <Compile Include="internals\publisher\PublisherRefCount.cs" />
     <Compile Include="internals\publisher\PublisherReplay.cs" />
+    <Compile Include="internals\publisher\PublisherSample.cs" />
     <Compile Include="internals\publisher\PublisherScan.cs" />
     <Compile Include="internals\publisher\PublisherSequenceEqual.cs" />
     <Compile Include="internals\publisher\PublisherSingle.cs" />
     <Compile Include="internals\publisher\PublisherSkip.cs" />
     <Compile Include="internals\publisher\PublisherSkipLast.cs" />
+    <Compile Include="internals\publisher\PublisherSubscribeOn.cs" />
     <Compile Include="internals\publisher\PublisherSwitchIfEmpty.cs" />
     <Compile Include="internals\publisher\PublisherTakeWhile.cs" />
     <Compile Include="internals\publisher\PublisherSkipWhile.cs" />
@@ -158,6 +165,7 @@
     <Compile Include="internals\publisher\PublisherTakeLast.cs" />
     <Compile Include="internals\publisher\PublisherSkipUntil.cs" />
     <Compile Include="internals\publisher\PublisherTakeUntil.cs" />
+    <Compile Include="internals\publisher\PublisherThrottleFirst.cs" />
     <Compile Include="internals\publisher\PublisherTimer.cs" />
     <Compile Include="internals\publisher\PublisherUsing.cs" />
     <Compile Include="internals\publisher\PublisherZip.cs" />
@@ -200,8 +208,10 @@
     <Compile Include="internals\single\SingleToObservable.cs" />
     <Compile Include="internals\subscribers\CancelledSubscriber.cs" />
     <Compile Include="internals\subscribers\EmptySubscriber.cs" />
+    <Compile Include="internals\subscribers\HalfSerializedSubscriberStruct.cs" />
     <Compile Include="internals\subscribers\LockedSerializedSubscriberStruct.cs" />
     <Compile Include="internals\subscribers\ResourceSubscriber.cs" />
+    <Compile Include="internals\subscribers\SubscriberObserver.cs" />
     <Compile Include="internals\subscriptions\MultiArbiterStruct.cs" />
     <Compile Include="internals\subscriptions\SingleArbiterStruct.cs" />
     <Compile Include="internals\subscriptions\SubscriptionHelper.cs" />
@@ -212,6 +222,7 @@
     <Compile Include="subscribers\LambdaSubscriber.cs" />
     <Compile Include="subscribers\LatchedSingleSubscriber.cs" />
     <Compile Include="subscribers\LockedSerializedSubscriber.cs" />
+    <Compile Include="subscribers\ObserverSubscriber.cs" />
     <Compile Include="subscribers\TestSubscriber.cs" />
     <Compile Include="subscriptions\ScalarDelayedSubscription.cs" />
     <Compile Include="subscriptions\ScalarDelayedSubscriptionStruct.cs" />
@@ -224,6 +235,7 @@
     <Compile Include="Single.cs" />
     <Compile Include="subscribers\AbstractCompletableSubscriber.cs" />
     <Compile Include="subscribers\LatchedCompletableSubscriber.cs" />
+    <Compile Include="Timed.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

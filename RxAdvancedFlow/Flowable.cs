@@ -1668,8 +1668,8 @@ namespace RxAdvancedFlow
             return GroupBy(source, keyExtractor, valueExtractor, keyComparer, BufferSize());
         }
 
-        public static IPublisher<IGroupedPublisher<K, V>> GroupBy<T, K, V>(this IPublisher<T> source, 
-            Func<T, K> keyExtractor, Func<T, V> valueExtractor, 
+        public static IPublisher<IGroupedPublisher<K, V>> GroupBy<T, K, V>(this IPublisher<T> source,
+            Func<T, K> keyExtractor, Func<T, V> valueExtractor,
             IEqualityComparer<K> keyComparer, int bufferSize)
         {
             return Create<IGroupedPublisher<K, V>>(s =>
@@ -1709,7 +1709,7 @@ namespace RxAdvancedFlow
                 source.Subscribe(new PublisherObserveOn<T>(s, scheduler.CreateWorker(), delayError, bufferSize));
             });
         }
-        
+
         public static IPublisher<T> OnBackpressureBufferAll<T>(this IPublisher<T> source)
         {
             return OnBackpressureBufferAll(source, BufferSize());
@@ -1773,26 +1773,29 @@ namespace RxAdvancedFlow
             });
         }
 
-        public static IConnectablePublisher<T> Publish<T>(this IPublisher<T> source)
-        {
-            return Publish(source, BufferSize());
-        }
-
-        public static IConnectablePublisher<T> Publish<T>(this IPublisher<T> source, int bufferSize)
-        {
-            return new PublisherPublish<T>(source, bufferSize);
-        }
-
-        public static IPublisher<R> Publish<T, R>(this IPublisher<T> source, Func<IPublisher<T>, IPublisher<R>> function)
-        {
-            return Publish(source, function, BufferSize());
-        }
-
-        public static IPublisher<R> Publish<T, R>(this IPublisher<T> source, Func<IPublisher<T>, IPublisher<R>> function, int bufferSize)
+        public static IPublisher<R> Multicast<T, U, R>(this IPublisher<T> source,
+    Func<IPublisher<T>, IConnectablePublisher<U>> connectableSupplier,
+    Func<IPublisher<U>, IPublisher<R>> function)
         {
             return Create<R>(s =>
             {
-                IConnectablePublisher<T> co = source.Publish(bufferSize);
+                IConnectablePublisher<U> co;
+
+                try
+                {
+                    co = connectableSupplier(source);
+                }
+                catch (Exception e)
+                {
+                    EmptySubscription.Error(s, e);
+                    return;
+                }
+
+                if (co == null)
+                {
+                    EmptySubscription.Error(s, new NullReferenceException("The connectableSupplier returned null"));
+                    return;
+                }
 
                 IPublisher<R> p;
 
@@ -1818,6 +1821,26 @@ namespace RxAdvancedFlow
 
                 co.Connect(rs.Set);
             });
+        }
+
+        public static IConnectablePublisher<T> Publish<T>(this IPublisher<T> source)
+        {
+            return Publish(source, BufferSize());
+        }
+
+        public static IConnectablePublisher<T> Publish<T>(this IPublisher<T> source, int bufferSize)
+        {
+            return new PublisherPublish<T>(source, bufferSize);
+        }
+
+        public static IPublisher<R> Publish<T, R>(this IPublisher<T> source, Func<IPublisher<T>, IPublisher<R>> function)
+        {
+            return Publish(source, function, BufferSize());
+        }
+
+        public static IPublisher<R> Publish<T, R>(this IPublisher<T> source, Func<IPublisher<T>, IPublisher<R>> function, int bufferSize)
+        {
+            return Multicast(source, s => s.Publish(bufferSize), function);
         }
 
         public static IPublisher<T> AutoConnect<T>(this IConnectablePublisher<T> source)
@@ -1868,6 +1891,9 @@ namespace RxAdvancedFlow
             return Create<T>(s =>
             {
                 PublisherRedo<T> parent = new PublisherRedo<T>(s, false, times, source);
+
+                s.OnSubscribe(parent);
+
                 parent.Resubscribe();
             });
         }
@@ -1886,6 +1912,9 @@ namespace RxAdvancedFlow
             return Create<T>(s =>
             {
                 PublisherRedo<T> parent = new PublisherRedo<T>(s, true, times, source);
+
+                s.OnSubscribe(parent);
+
                 parent.Resubscribe();
             });
         }
@@ -1916,7 +1945,7 @@ namespace RxAdvancedFlow
 
                 PublisherRedoSignaller<T, object> signaller = new PublisherRedoSignaller<T, object>(s);
 
-                PublisherRedoWhen<T> main = new PublisherRedoWhen<T>(s, source, 
+                PublisherRedoWhen<T> main = new PublisherRedoWhen<T>(s, source,
                     () => {
                         signaller.Request(1);
 
@@ -1977,5 +2006,343 @@ namespace RxAdvancedFlow
             });
         }
 
+        public static IConnectablePublisher<T> Replay<T>(this IPublisher<T> source)
+        {
+            return ReplayAll(source, 16);
+        }
+
+        public static IConnectablePublisher<T> ReplayAll<T>(this IPublisher<T> source, int capacityHint)
+        {
+            return new PublisherReplay<T>(source, capacityHint);
+        }
+
+        public static IPublisher<R> Replay<T, R>(this IPublisher<T> source, Func<IPublisher<T>, IPublisher<R>> function)
+        {
+            return ReplayAll(source, function, 16);
+        }
+
+        public static IPublisher<R> ReplayAll<T, R>(this IPublisher<T> source, Func<IPublisher<T>, IPublisher<R>> function, int capacityHint)
+        {
+            return Multicast(source, s => s.ReplayAll(capacityHint), function);
+        }
+
+        public static IConnectablePublisher<T> Replay<T>(this IPublisher<T> source, int maxSize)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static IConnectablePublisher<T> Replay<T>(this IPublisher<T> source, TimeSpan maxAge)
+        {
+            return Replay(source, maxAge, DefaultScheduler.Instance);
+        }
+
+        public static IConnectablePublisher<T> Replay<T>(this IPublisher<T> source, TimeSpan maxAge, IScheduler scheduler)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static IConnectablePublisher<T> Replay<T>(this IPublisher<T> source, TimeSpan maxAge, int maxSize)
+        {
+            return Replay(source, maxAge, DefaultScheduler.Instance, maxSize);
+        }
+
+        public static IConnectablePublisher<T> Replay<T>(this IPublisher<T> source, TimeSpan maxAge, IScheduler scheduler, int maxSize)
+        {
+            // TODO implement
+            throw new NotImplementedException();
+        }
+
+        public static IPublisher<R> Replay<T, R>(this IPublisher<T> source, Func<IPublisher<T>, IPublisher<R>> function, int maxSize)
+        {
+            return Multicast(source, s => s.Replay(maxSize), function);
+        }
+
+        public static IPublisher<R> Replay<T, R>(this IPublisher<T> source, Func<IPublisher<T>, IPublisher<R>> function, TimeSpan maxAge)
+        {
+            return Multicast(source, s => s.Replay(maxAge), function);
+        }
+
+        public static IPublisher<R> Replay<T, R>(this IPublisher<T> source, Func<IPublisher<T>, IPublisher<R>> function, TimeSpan maxAge, IScheduler scheduler)
+        {
+            return Multicast(source, s => s.Replay(maxAge, scheduler), function);
+        }
+
+        public static IPublisher<R> Replay<T, R>(this IPublisher<T> source, Func<IPublisher<T>, IPublisher<R>> function, TimeSpan maxAge, int maxSize)
+        {
+            return Multicast(source, s => s.Replay(maxAge, maxSize), function);
+        }
+
+        public static IPublisher<R> Replay<T, R>(this IPublisher<T> source, Func<IPublisher<T>, IPublisher<R>> function, TimeSpan maxAge, IScheduler scheduler, int maxSize)
+        {
+            return Multicast(source, s => s.Replay(maxAge, scheduler, maxSize), function);
+        }
+
+        public static IPublisher<T> Retry<T>(this IPublisher<T> source, Func<Exception, bool> predicate)
+        {
+            return Create<T>(s =>
+            {
+                var op = new PublisherRetry<T>(s, predicate, long.MaxValue, source);
+
+                s.OnSubscribe(op);
+
+                op.Resubscribe();
+            });
+        }
+
+        public static IPublisher<T> Sample<T>(this IPublisher<T> source, TimeSpan time)
+        {
+            return Sample(source, time, DefaultScheduler.Instance);
+        }
+
+        public static IPublisher<T> Sample<T>(this IPublisher<T> source, TimeSpan time, IScheduler scheduler)
+        {
+            return Create<T>(s =>
+            {
+                var op = new PublisherSampleMain<T>(s);
+
+                var d = scheduler.SchedulePeriodicallyDirect(op.Run, time, time);
+
+                op.Set(d);
+
+                source.Subscribe(op);
+            });
+        }
+
+        public static IPublisher<T> Sample<T, U>(this IPublisher<T> source, IPublisher<U> other)
+        {
+            return Create<T>(s =>
+            {
+                var op = new PublisherSampleMain<T>(s);
+
+                var d = new PublisherSampleOther<T, U>(op);
+
+                op.Set(d);
+
+                other.Subscribe(d);
+
+                source.Subscribe(op);
+            });
+        }
+
+        public static IPublisher<T> Serialize<T>(this IPublisher<T> source)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new LockedSerializedSubscriber<T>(s));
+            });
+        }
+
+        public static IPublisher<T> Skip<T>(this IPublisher<T> source, TimeSpan time)
+        {
+            return Skip<T>(source, time, DefaultScheduler.Instance);
+        }
+
+        public static IPublisher<T> Skip<T>(this IPublisher<T> source, TimeSpan time, IScheduler scheduler)
+        {
+            return Create<T>(s =>
+            {
+                var op = new PublisherSkipTimed<T>(s);
+
+                var d = scheduler.ScheduleDirect(op.Run, time);
+
+                op.Set(d);
+
+                source.Subscribe(op);
+            });
+        }
+
+        public static IPublisher<T> TakeLast<T>(this IPublisher<T> source, TimeSpan time)
+        {
+            return TakeLast(source, time, DefaultScheduler.Instance);
+        }
+
+        public static IPublisher<T> TakeLast<T>(this IPublisher<T> source, TimeSpan time, IScheduler scheduler)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherTakeLastTimed<T>(s, (long)time.TotalMilliseconds, scheduler));
+            });
+        }
+
+        public static IPublisher<T> SkipLast<T>(this IPublisher<T> source, TimeSpan time)
+        {
+            return SkipLast(source, time, DefaultScheduler.Instance);
+        }
+
+        public static IPublisher<T> SkipLast<T>(this IPublisher<T> source, TimeSpan time, IScheduler scheduler)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherSkipLastTimed<T>(s, time, scheduler.CreateWorker()));
+            });
+        }
+
+        public static IDisposable Subscribe<T>(this IPublisher<T> source, IObserver<T> observer)
+        {
+            var s = new ObserverSubscriber<T>(observer);
+
+            source.Subscribe(s);
+
+            return s;
+        }
+
+        public static IObservable<T> ToObservable<T>(this IPublisher<T> source)
+        {
+            return new ObservableFromFunc<T>(s =>
+            {
+                return source.Subscribe(s);
+            });
+        }
+
+        public static IPublisher<T> OnBackpressureError<T>(this IPublisher<T> source)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherOnBackpressureError<T>(s));
+            });
+        }
+
+        public static IPublisher<T> ToPublisher<T>(this IObservable<T> source, 
+            BackpressureStrategy strategy = BackpressureStrategy.Buffer, 
+            int bufferSize = int.MaxValue)
+        {
+            IPublisher<T> result = Create<T>(s =>
+            {
+                var o = new SubscriberObserver<T>(s);
+
+                s.OnSubscribe(o);
+
+                var d = source.Subscribe(o);
+
+                o.Set(d);
+            });
+
+            switch (strategy)
+            {
+                case BackpressureStrategy.Buffer:
+                    {
+                        if (bufferSize == int.MaxValue)
+                        {
+                            return result.OnBackpressureBufferAll();
+                        }
+                        return result.OnBackpressureBuffer(bufferSize);
+                    }
+                case BackpressureStrategy.Drop:
+                    {
+                        return result.OnBackpressureDrop();
+                    }
+                case BackpressureStrategy.Latest:
+                    {
+                        return result.OnBackpressureLatest();
+                    }
+                default:
+                    {
+                        return result.OnBackpressureError();
+                    }
+            }
+        }
+
+        public static IPublisher<T> SubscribeOn<T>(this IPublisher<T> source, IScheduler scheduler, bool requestOn = true)
+        {
+            return Create<T>(s =>
+            {
+                if (requestOn)
+                {
+                    var op = new PublisherSubscribeOnRequest<T>(s, scheduler.CreateWorker());
+                    s.OnSubscribe(op);
+
+                    var d = scheduler.ScheduleDirect(() =>
+                    {
+                        source.Subscribe(op);
+                    });
+                }
+                else
+                {
+                    var op = new PublisherSubscribeOn<T>(s);
+                    s.OnSubscribe(op);
+
+                    var d = scheduler.ScheduleDirect(() =>
+                    {
+                        op.Clear();
+                        source.Subscribe(op);
+                    });
+
+                    op.Set(d);
+                }
+
+            });
+        }
+
+        public static IPublisher<T> ThrottleFirst<T>(this IPublisher<T> source, TimeSpan time)
+        {
+            return ThrottleFirst(source, time, DefaultScheduler.Instance);
+        }
+
+        public static IPublisher<T> ThrottleFirst<T>(this IPublisher<T> source, TimeSpan time, IScheduler scheduler)
+        {
+            return Create<T>(s =>
+            {
+                source.Subscribe(new PublisherThrottleFirst<T>(s, scheduler.CreateWorker(), time));
+            });
+        }
+
+        public static IPublisher<T> ThrottleLast<T>(this IPublisher<T> source, TimeSpan time)
+        {
+            return Sample(source, time);
+        }
+
+        public static IPublisher<T> ThrottleLast<T>(this IPublisher<T> source, TimeSpan time, IScheduler scheduler)
+        {
+            return Sample(source, time, scheduler);
+        }
+
+        public static IPublisher<T> ThrottleTimeout<T>(this IPublisher<T> source, TimeSpan time)
+        {
+            return Debounce(source, time);
+        }
+
+        public static IPublisher<T> ThrottleTimeout<T>(this IPublisher<T> source, TimeSpan time, IScheduler scheduler)
+        {
+            return Debounce(source, time, scheduler);
+        }
+
+        public static IPublisher<Timed<T>> TimeInterval<T>(this IPublisher<T> source)
+        {
+            return TimeInterval(source, DefaultScheduler.Instance);
+        }
+
+        public static IPublisher<Timed<T>> TimeInterval<T>(this IPublisher<T> source, IScheduler scheduler)
+        {
+            return Create<Timed<T>>(s =>
+            {
+                long[] currentTime = { scheduler.NowUtc() };
+
+                source.Map(v =>
+                {
+                    long t = scheduler.NowUtc();
+                    long e = currentTime[0];
+
+                    return new Timed<T>(v, t - e);
+                }).Subscribe(s);
+
+            });
+        }
+
+        public static IPublisher<Timed<T>> TimeStamped<T>(this IPublisher<T> source)
+        {
+            return TimeStamped(source, DefaultScheduler.Instance);
+        }
+
+        public static IPublisher<Timed<T>> TimeStamped<T>(this IPublisher<T> source, IScheduler scheduler)
+        {
+            return source.Map(v => new Timed<T>(v, scheduler.NowUtc()));
+        }
+
+        public static IPublisher<T> UnwrapTimed<T>(this IPublisher<Timed<T>> source)
+        {
+            return source.Map(t => t.value);
+        }
     }
 }

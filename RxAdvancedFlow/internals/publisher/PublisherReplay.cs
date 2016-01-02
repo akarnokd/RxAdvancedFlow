@@ -25,15 +25,49 @@ namespace RxAdvancedFlow.internals.publisher
 
         public void Connect(Action<IDisposable> onConnect)
         {
-            throw new NotImplementedException();
+
+            for (;;)
+            {
+                var current = Volatile.Read(ref main);
+
+                if (current == null || current.IsTerminated())
+                {
+                    var next = new PublisherReplayMain(bufferSize);
+                    if (Interlocked.CompareExchange(ref main, next, current) != current)
+                    {
+                        continue;
+                    }
+                    current = next;
+                }
+
+                onConnect(current);
+
+                if (current.TryConnect())
+                {
+                    source.Subscribe(current);
+                }
+            }
         }
 
         public void Subscribe(ISubscriber<T> s)
         {
-            throw new NotImplementedException();
+            var current = Volatile.Read(ref main);
+
+            if (current == null)
+            {
+                var next = new PublisherReplayMain(bufferSize);
+
+                current = Interlocked.CompareExchange(ref main, next, null);
+                if (current == null)
+                {
+                    current = next;
+                }
+            }
+
+            current.Subscribe(s);
         }
 
-        sealed class PublisherReplayMain : ISubscriber<T>
+        sealed class PublisherReplayMain : ISubscriber<T>, IDisposable
         {
             readonly int bufferSize;
 
@@ -51,6 +85,8 @@ namespace RxAdvancedFlow.internals.publisher
             static readonly PublisherReplayInner[] Empty = new PublisherReplayInner[0];
             static readonly PublisherReplayInner[] Terminated = new PublisherReplayInner[0];
 
+            int connected;
+
             public PublisherReplayMain(int bufferSize)
             {
                 arbiter.InitRequest(long.MaxValue);
@@ -59,7 +95,17 @@ namespace RxAdvancedFlow.internals.publisher
                 tail = h;
             }
 
-            public void Cancel()
+            internal bool IsTerminated()
+            {
+                return Volatile.Read(ref subscribers) == Terminated;
+            }
+
+            internal bool TryConnect()
+            {
+                return Volatile.Read(ref connected) == 0 && Interlocked.CompareExchange(ref connected, 1, 0) == 0;
+            }
+
+            public void Dispose()
             {
                 arbiter.Cancel();
             }
@@ -102,6 +148,24 @@ namespace RxAdvancedFlow.internals.publisher
                 }
 
                 foreach (var inner in Volatile.Read(ref subscribers))
+                {
+                    Drain(inner);
+                }
+            }
+
+            internal void Subscribe(ISubscriber<T> s)
+            {
+                PublisherReplayInner inner = new PublisherReplayInner(s, this);
+
+                s.OnSubscribe(inner);
+
+                Add(inner);
+
+                if (inner.IsCancelled())
+                {
+                    Remove(inner);
+                }
+                else
                 {
                     Drain(inner);
                 }
@@ -323,6 +387,7 @@ namespace RxAdvancedFlow.internals.publisher
                 public void Request(long n)
                 {
                     bp.Request(n);
+                    parent.Drain(this);
                 }
 
                 public long Requested()

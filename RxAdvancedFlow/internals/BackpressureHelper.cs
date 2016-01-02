@@ -456,5 +456,118 @@ namespace RxAdvancedFlow.internals
                 Interlocked.Add(ref requested, produced);
             }
         }
+
+        public static void PostComplete<T, R>(ref long requested, IQueue<T> queue,
+            ISubscriber<R> actual, ref bool cancelled, Func<T, R> mapper)
+        {
+            for (;;)
+            {
+                long r = Volatile.Read(ref requested);
+                if ((r & COMPLETED_MASK) != 0)
+                {
+                    return;
+                }
+                long u = r | COMPLETED_MASK;
+
+                if (Interlocked.CompareExchange(ref requested, u, r) == r)
+                {
+                    if ((r & REQUESTED_MASK) != 0)
+                    {
+                        PostCompleteDrain(ref requested, u, queue, actual, ref cancelled, mapper);
+                    }
+                    return;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Increment a requested amount and account for a post-complete state.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="requested"></param>
+        /// <param name="n"></param>
+        /// <param name="queue"></param>
+        /// <param name="actual"></param>
+        /// <param name="cancelled"></param>
+        /// <param name="mapper"></param>
+        /// <returns>False if in the post-complete state.</returns>
+        public static bool PostCompleteRequest<T, R>(
+            ref long requested, long n, IQueue<T> queue,
+            ISubscriber<R> actual, ref bool cancelled, Func<T, R> mapper)
+        {
+            for (;;)
+            {
+                long r = Volatile.Read(ref requested);
+
+                long u = (r & REQUESTED_MASK) + n;
+                if (u < 0L)
+                {
+                    u = long.MaxValue;
+                }
+                u |= r & COMPLETED_MASK;
+                if (Interlocked.CompareExchange(ref requested, u, r) == r)
+                {
+                    if ((r & REQUESTED_MASK) == 0)
+                    {
+                        PostCompleteDrain(ref requested, u, queue, actual, ref cancelled, mapper);
+                    }
+                    return r >= 0L;
+                }
+            }
+        }
+
+        static void PostCompleteDrain<T, R>(ref long requested, long n,
+            IQueue<T> queue, ISubscriber<R> actual, ref bool cancelled, Func<T, R> mapper)
+        {
+            long e = n & COMPLETED_MASK;
+            for (;;)
+            {
+                while (n != e)
+                {
+                    if (Volatile.Read(ref cancelled))
+                    {
+                        return;
+                    }
+
+                    T t;
+
+                    bool empty = !queue.Poll(out t);
+
+                    if (empty)
+                    {
+                        actual.OnComplete();
+                        return;
+                    }
+
+                    actual.OnNext(mapper(t));
+
+                    e++;
+                }
+
+                if (Volatile.Read(ref cancelled))
+                {
+                    return;
+                }
+
+                if (queue.IsEmpty())
+                {
+                    actual.OnComplete();
+                    return;
+                }
+
+                n = Volatile.Read(ref requested);
+                if (n == e)
+                {
+                    n = Interlocked.Add(ref requested, -(e & REQUESTED_MASK));
+                    if ((n & REQUESTED_MASK) == 0)
+                    {
+                        break;
+                    }
+                    e = n & COMPLETED_MASK;
+                }
+            }
+        }
+
     }
+
 }
