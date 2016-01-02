@@ -166,7 +166,9 @@
     <Compile Include="internals\publisher\PublisherSkipUntil.cs" />
     <Compile Include="internals\publisher\PublisherTakeUntil.cs" />
     <Compile Include="internals\publisher\PublisherThrottleFirst.cs" />
+    <Compile Include="internals\publisher\PublisherTimeout.cs" />
     <Compile Include="internals\publisher\PublisherTimer.cs" />
+    <Compile Include="internals\publisher\PublisherToEnumerable.cs" />
     <Compile Include="internals\publisher\PublisherUsing.cs" />
     <Compile Include="internals\publisher\PublisherZip.cs" />
     <Compile Include="internals\queues\ArrayQueue.cs" />

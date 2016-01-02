@@ -2323,6 +2323,7 @@ namespace RxAdvancedFlow
                 {
                     long t = scheduler.NowUtc();
                     long e = currentTime[0];
+                    currentTime[0] = t;
 
                     return new Timed<T>(v, t - e);
                 }).Subscribe(s);
@@ -2343,6 +2344,105 @@ namespace RxAdvancedFlow
         public static IPublisher<T> UnwrapTimed<T>(this IPublisher<Timed<T>> source)
         {
             return source.Map(t => t.value);
+        }
+
+        public static IPublisher<T> Timeout<T>(this IPublisher<T> source, TimeSpan time)
+        {
+            return Timeout(source, time, DefaultScheduler.Instance);
+        }
+
+        public static IPublisher<T> Timeout<T>(this IPublisher<T> source, TimeSpan time, 
+            IScheduler scheduler)
+        {
+            return Create<T>(s =>
+            {
+                var op = new PublisherTimeout<T>(s, scheduler.CreateWorker(), time, null);
+                s.OnSubscribe(op);
+                op.ScheduleFirst();
+                source.Subscribe(op);
+            });
+        }
+
+        public static IPublisher<T> Timeout<T>(this IPublisher<T> source, TimeSpan time, 
+            IPublisher<T> other)
+        {
+            return Timeout(source, time, DefaultScheduler.Instance, other);
+        }
+
+        public static IPublisher<T> Timeout<T>(this IPublisher<T> source, TimeSpan time, 
+            IScheduler scheduler, IPublisher<T> other)
+        {
+            return Create<T>(s =>
+            {
+                var op = new PublisherTimeout<T>(s, scheduler.CreateWorker(), time, other);
+                s.OnSubscribe(op);
+                op.ScheduleFirst();
+                source.Subscribe(op);
+            });
+        }
+
+        public static IPublisher<T> Timeout<T, U>(this IPublisher<T> source, 
+            Func<T, IPublisher<U>> timeoutSupplier)
+        {
+            return Create<T>(s =>
+            {
+                var op = new PublisherTimeoutSelector<T, U, U>(s, timeoutSupplier, null);
+                s.OnSubscribe(op);
+
+                source.Subscribe(op);
+            });
+        }
+
+        public static IPublisher<T> Timeout<T, U>(this IPublisher<T> source, 
+            Func<T, IPublisher<U>> timeoutSupplier, IPublisher<T> other)
+        {
+            return Create<T>(s =>
+            {
+                var op = new PublisherTimeoutSelector<T, U, U>(s, timeoutSupplier, other);
+                s.OnSubscribe(op);
+
+                source.Subscribe(op);
+            });
+        }
+
+        public static IPublisher<T> Timeout<T, U, V>(this IPublisher<T> source, 
+            IPublisher<U> firstTimeout, Func<T, IPublisher<V>> timeoutSupplier)
+        {
+            return Create<T>(s =>
+            {
+                var op = new PublisherTimeoutSelector<T, U, V>(s, timeoutSupplier, null);
+                s.OnSubscribe(op);
+
+                op.SubscribeFirst(firstTimeout);
+
+                source.Subscribe(op);
+            });
+
+        }
+
+        public static IPublisher<T> Timeout<T, U, V>(this IPublisher<T> source, 
+            IPublisher<U> firstTimeout, Func<T, IPublisher<V>> timeoutSupplier, 
+            IPublisher<T> other)
+        {
+            return Create<T>(s =>
+            {
+                var op = new PublisherTimeoutSelector<T, U, V>(s, timeoutSupplier, other);
+                s.OnSubscribe(op);
+
+                op.SubscribeFirst(firstTimeout);
+
+                source.Subscribe(op);
+            });
+        }
+
+        public static IEnumerable<T> ToEnumerable<T>(this IPublisher<T> source)
+        {
+            return new PublisherToEnumerable<T>(source, BufferSize());
+        }
+
+        public static IEnumerable<T> ToEnumerable<T>(this IPublisher<T> source, int prefetch)
+        {
+            return new PublisherToEnumerable<T>(source, prefetch);
         }
     }
 }
