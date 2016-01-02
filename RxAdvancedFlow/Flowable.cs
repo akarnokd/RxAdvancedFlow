@@ -2580,55 +2580,87 @@ namespace RxAdvancedFlow
             });
         }
 
-        public static IPublisher<IPublisher<T>> Window<T>(this IPublisher<T> source, TimeSpan timespan)
+        public static IPublisher<IPublisher<T>> Window<T>(this IPublisher<T> source, 
+            TimeSpan timespan)
+        {
+            return Window(source, timespan, DefaultScheduler.Instance);
+        }
+
+        public static IPublisher<IPublisher<T>> Window<T>(this IPublisher<T> source, 
+            TimeSpan timespan, TimeSpan timeskip)
+        {
+            return Window(source, timespan, timeskip, DefaultScheduler.Instance);
+        }
+
+        public static IPublisher<IPublisher<T>> Window<T>(this IPublisher<T> source, 
+            TimeSpan timespan, IScheduler scheduler)
+        {
+            return Create<IPublisher<T>>(s =>
+            {
+                var op = new PublisherWindowTimedExact<T>(s, BufferSize(), timespan, scheduler);
+                s.OnSubscribe(op);
+
+                source.Subscribe(op);
+            });
+        }
+
+        public static IPublisher<IPublisher<T>> Window<T>(this IPublisher<T> source, 
+            TimeSpan timespan, TimeSpan timeskip, IScheduler scheduler)
+        {
+            if (timespan.Equals(timeskip))
+            {
+                return Window(source, timespan, scheduler);
+            }
+            if (timespan.CompareTo(timeskip) < 0)
+            {
+                return Create<IPublisher<T>>(s =>
+                {
+                    var op = new PublisherWindowTimedSkip<T>(s, timespan, timeskip, scheduler.CreateWorker(), BufferSize());
+
+                    s.OnSubscribe(op);
+
+                    source.Subscribe(op);
+                });
+            }
+            return Create<IPublisher<T>>(s =>
+            {
+                var op = new PublisherWindowTimedOverlap<T>(s, timespan, timeskip, scheduler.CreateWorker(), BufferSize());
+
+                s.OnSubscribe(op);
+
+                source.Subscribe(op);
+            });
+        }
+
+        public static IPublisher<IPublisher<T>> Window<T>(this IPublisher<T> source, 
+            TimeSpan timespan, int size, bool restartTimer = false)
+        {
+            return Window(source, timespan, DefaultScheduler.Instance, size, restartTimer);
+        }
+
+        public static IPublisher<IPublisher<T>> Window<T>(this IPublisher<T> source, 
+            TimeSpan timespan, IScheduler scheduler, int size, bool restartTimer = false)
         {
             // TODO implement
             throw new NotImplementedException();
         }
 
-        public static IPublisher<IPublisher<T>> Window<T>(this IPublisher<T> source, TimeSpan timespan, TimeSpan timeskip)
+        public static IPublisher<IPublisher<T>> Window<T>(this IPublisher<T> source, 
+            TimeSpan timespan, TimeSpan timeskip, int size, bool restartTimer = false)
+        {
+            return Window(source, timespan, timeskip, DefaultScheduler.Instance, size, restartTimer);
+        }
+
+        public static IPublisher<IPublisher<T>> Window<T>(this IPublisher<T> source, 
+            TimeSpan timespan, TimeSpan timeskip, IScheduler scheduler, 
+            int size, bool restartTimer = false)
         {
             // TODO implement
             throw new NotImplementedException();
         }
 
-        public static IPublisher<IPublisher<T>> Window<T>(this IPublisher<T> source, TimeSpan timespan, IScheduler scheduler)
-        {
-            // TODO implement
-            throw new NotImplementedException();
-        }
-
-        public static IPublisher<IPublisher<T>> Window<T>(this IPublisher<T> source, TimeSpan timespan, TimeSpan timeskip, IScheduler scheduler)
-        {
-            // TODO implement
-            throw new NotImplementedException();
-        }
-
-        public static IPublisher<IPublisher<T>> Window<T>(this IPublisher<T> source, TimeSpan timespan, int size)
-        {
-            // TODO implement
-            throw new NotImplementedException();
-        }
-
-        public static IPublisher<IPublisher<T>> Window<T>(this IPublisher<T> source, TimeSpan timespan, IScheduler scheduler, int size)
-        {
-            // TODO implement
-            throw new NotImplementedException();
-        }
-
-        public static IPublisher<IPublisher<T>> Window<T>(this IPublisher<T> source, TimeSpan timespan, TimeSpan timeskip, int size)
-        {
-            // TODO implement
-            throw new NotImplementedException();
-        }
-
-        public static IPublisher<IPublisher<T>> Window<T>(this IPublisher<T> source, TimeSpan timespan, TimeSpan timeskip, IScheduler scheduler, int size)
-        {
-            // TODO implement
-            throw new NotImplementedException();
-        }
-
-        public static IPublisher<IPublisher<T>> Window<T, B>(this IPublisher<T> source, IPublisher<B> boundary)
+        public static IPublisher<IPublisher<T>> Window<T, B>(this IPublisher<T> source, 
+            IPublisher<B> boundary)
         {
             // TODO implement
             throw new NotImplementedException();

@@ -299,7 +299,7 @@ namespace RxAdvancedFlow.internals.publisher
         public void OnNext(T t)
         {
             int i = index;
-            if (i == 0)
+            if (i == 0 && !Volatile.Read(ref cancelled))
             {
                 Interlocked.Increment(ref wip);
 

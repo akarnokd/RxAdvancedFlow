@@ -172,6 +172,7 @@
     <Compile Include="internals\publisher\PublisherUnsubscribeOn.cs" />
     <Compile Include="internals\publisher\PublisherUsing.cs" />
     <Compile Include="internals\publisher\PublisherWindow.cs" />
+    <Compile Include="internals\publisher\PublisherWindowTimed.cs" />
     <Compile Include="internals\publisher\PublisherWithLatestFrom.cs" />
     <Compile Include="internals\publisher\PublisherZip.cs" />
     <Compile Include="internals\queues\ArrayQueue.cs" />
