@@ -32,6 +32,8 @@ namespace RxAdvancedFlow.internals.publisher
         {
             this.actual = actual;
             this.worker = worker;
+            this.other = other;
+            this.time = time;
         }
 
         public void Cancel()

@@ -54,6 +54,7 @@ namespace RxAdvancedFlow.internals.publisher
 
         public void OnError(Exception e)
         {
+            error = e;
             Volatile.Write(ref done, true);
             Schedule();
         }

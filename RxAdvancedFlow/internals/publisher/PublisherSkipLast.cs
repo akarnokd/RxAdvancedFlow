@@ -23,6 +23,7 @@ namespace RxAdvancedFlow.internals.publisher
         public PublisherSkipLast(ISubscriber<T> actual, int n)
         {
             this.actual = actual;
+            this.queue = new ArrayQueue<T>();
             this.n = n;
         }
 

@@ -13,7 +13,7 @@ namespace RxAdvancedFlow.internals.subscribers
     /// events. This can be used to safely stop a sequence of OnNext
     /// events via an OnError or OnComplete.
     /// </summary>
-    sealed class HalfSerializedSubscriberStruct<T>
+    struct HalfSerializedSubscriberStruct<T>
     {
         ISubscriber<T> actual;
 

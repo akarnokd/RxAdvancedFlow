@@ -90,6 +90,7 @@ namespace RxAdvancedFlow.internals.publisher
             public PublisherReplayMain(int bufferSize)
             {
                 arbiter.InitRequest(long.MaxValue);
+                this.bufferSize = bufferSize;
                 Node h = new Node(bufferSize);
                 head = h;
                 tail = h;

@@ -47,7 +47,16 @@ namespace RxAdvancedFlow.internals.publisher
 
             K k;
 
-            k = keyExtractor(t);
+            try {
+                k = keyExtractor(t);
+            } catch (Exception e)
+            {
+                done = true;
+                s.Cancel();
+
+                actual.OnError(e);
+                return;
+            }
 
             if (!once)
             {

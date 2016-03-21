@@ -319,8 +319,6 @@ namespace RxAdvancedFlow.internals.publisher
 
             bool done;
 
-            Exception error;
-
             SpscArrayQueueStruct<R> q;
 
             long produced;

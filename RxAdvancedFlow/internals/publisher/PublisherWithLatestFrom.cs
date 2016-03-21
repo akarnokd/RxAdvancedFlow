@@ -99,7 +99,17 @@ namespace RxAdvancedFlow.internals.publisher
             {
                 R r;
 
-                r = combiner(t, n.value);
+                try {
+                    r = combiner(t, n.value);
+                } catch (Exception e)
+                {
+                    done = true;
+                    s.Cancel();
+
+                    actual.OnError(e);
+                    return;
+                }
+                actual.OnNext(r);
             }
             else
             {

@@ -25,6 +25,7 @@ namespace RxAdvancedFlow.internals.publisher
         {
             this.actual = actual;
             this.worker = worker;
+            this.delay = delay;
         }
 
         public void Cancel()
@@ -83,6 +84,7 @@ namespace RxAdvancedFlow.internals.publisher
         {
             this.actual.Init(actual);
             this.worker = worker;
+            this.delay = delay;
         }
 
         public void Cancel()
