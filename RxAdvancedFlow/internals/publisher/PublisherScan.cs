@@ -151,6 +151,7 @@ namespace RxAdvancedFlow.internals.publisher
 
             if (!hasValue)
             {
+                hasValue = true;
                 value = t;
                 actual.OnNext(t);
             }

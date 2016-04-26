@@ -14,7 +14,7 @@ namespace RxAdvancedFlow.internals.publisher
     {
         LockedSerializedSubscriberStruct<T> actual;
 
-        SingleSubscriptionArbiter main;
+        SingleArbiterStruct main;
 
         ISubscription other;
 

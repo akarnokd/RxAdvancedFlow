@@ -275,8 +275,6 @@ namespace RxAdvancedFlow.internals.publisher
 
         int index;
 
-        long requested;
-
         bool cancelled;
 
         public PublisherWindowOverlap(ISubscriber<IPublisher<T>> actual, int size, int skip)

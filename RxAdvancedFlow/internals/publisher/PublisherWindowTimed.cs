@@ -378,7 +378,9 @@ namespace RxAdvancedFlow.internals.publisher
 
         readonly int bufferSize;
 
-        readonly ArrayQueue<IProcessor<T, T>> q;
+        ArrayQueue<UnicastProcessor<T>> q;
+
+        List<UnicastProcessor<T>> list;
 
         ISubscription s;
 
@@ -396,14 +398,15 @@ namespace RxAdvancedFlow.internals.publisher
             this.timeskip = timeskip;
             this.worker = worker;
             this.bufferSize = bufferSize;
-            this.q = new ArrayQueue<IProcessor<T, T>>();
+            this.q = new ArrayQueue<UnicastProcessor<T>>();
+            this.list = new List<UnicastProcessor<T>>();
             this.wip = 1;
         }
 
 
         public void Cancel()
         {
-            if (Interlocked.CompareExchange(ref wip, 1, 0) == 0)
+            if (Interlocked.CompareExchange(ref once, 1, 0) == 0)
             {
                 InnerDone();
             }
@@ -420,28 +423,49 @@ namespace RxAdvancedFlow.internals.publisher
 
         public void OnComplete()
         {
-            throw new NotImplementedException();
+            worker.Dispose();
+            ArrayQueue<UnicastProcessor<T>> queue;
+
+            lock (this)
+            {
+                queue = q;
+                q = null;
+            }
+
+            queue.ForEach(w => w.OnComplete());
+            actual.OnComplete();
         }
 
         public void OnError(Exception e)
         {
-            throw new NotImplementedException();
+            worker.Dispose();
+            ArrayQueue<UnicastProcessor<T>> queue;
+
+            lock (this)
+            {
+                queue = q;
+                q = null;
+            }
+
+            queue.ForEach(w => w.OnError(e));
+            actual.OnError(e);
         }
 
         public void OnNext(T t)
         {
-            throw new NotImplementedException();
+            list.Clear();
+            lock (this)
+            {
+                q.ForEach(w =>list.Add(w));
+            }
+
+            list.ForEach(w => w.OnNext(t));
         }
 
         public void OnSubscribe(ISubscription s)
         {
             if (SubscriptionHelper.SetOnce(ref this.s, s))
             {
-
-                IProcessor<T, T> w = new UnicastProcessor<T>(bufferSize, InnerDone);
-                q.Offer(w);
-
-                Emit(w);
 
                 worker.SchedulePeriodically(StartWindow, timeskip, timeskip);
                 worker.SchedulePeriodically(EndWindow, timespan, timespan);
@@ -465,23 +489,42 @@ namespace RxAdvancedFlow.internals.publisher
             {
                 Cancel();
 
-                actual.OnError(BackpressureHelper.MissingBackpressureException());
+                OnError(BackpressureHelper.MissingBackpressureException());
             }
-        }
-
-        void Drain()
-        {
-
         }
 
         void StartWindow()
         {
+            UnicastProcessor<T> up = new UnicastProcessor<T>(bufferSize, this.InnerDone);
 
+            lock (this)
+            {
+                var queue = q;
+                if (queue == null)
+                {
+                    return;
+                }
+                Interlocked.Increment(ref wip);
+
+                queue.Offer(up);
+            }
+
+            Emit(up);
         }
 
         void EndWindow()
         {
+            UnicastProcessor<T> up;
+            lock (this)
+            {
+                var queue = q;
+                if (queue == null || !queue.Poll(out up))
+                {
+                    return;
+                }
+            }
 
+            up.OnComplete();
         }
 
         public void Request(long n)

@@ -12,9 +12,21 @@ namespace RxAdvancedFlow
     /// </summary>
     public enum BackpressureStrategy
     {
+        /// <summary>
+        /// Signals an OnError with an MissingBackpressureException if the downstream can't keep up.
+        /// </summary>
         Error,
+        /// <summary>
+        /// Drops OnNext signals (oldest or latest) if the downstream can't keep up.
+        /// </summary>
         Drop,
+        /// <summary>
+        /// Buffers OnNext signals (bounded or unbounded) if the downstream can't keep up.
+        /// </summary>
         Buffer,
+        /// <summary>
+        /// Keeps only the latest OnNext signal (evicting an unclaimed previous signal) if the downstream can't keep up.
+        /// </summary>
         Latest
     }
 }

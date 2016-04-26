@@ -19,6 +19,11 @@ namespace RxAdvancedFlow
     /// </summary>
     public static class Completable
     {
+        /// <summary>
+        /// Creates an ICompletable instance where the Subscribe() call is delegated to the given Action.
+        /// </summary>
+        /// <param name="onSubscribe">The Action called for each Subscribe() call.</param>
+        /// <returns>An ICompletable instance.</returns>
         public static ICompletable Create(Action<ICompletableSubscriber> onSubscribe)
         {
             return new CompletableFromAction(onSubscribe);
@@ -366,8 +371,7 @@ namespace RxAdvancedFlow
 
         public static ICompletable RepeatWhen(this ICompletable source, Func<IObservable<object>, IObservable<object>> whenFunction)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return source.ToPublisher<object>().RepeatWhen(p => whenFunction(p.ToObservable()).ToPublisher()).ToCompletable();
         }
 
         public static ICompletable RepeatWhen(this ICompletable source, Func<IPublisher<object>, IPublisher<object>> whenFunction)
@@ -407,8 +411,7 @@ namespace RxAdvancedFlow
 
         public static ICompletable RetryWhen(this ICompletable source, Func<IObservable<Exception>, IObservable<object>> whenFunction)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return source.ToPublisher<object>().RetryWhen(p => whenFunction(p.ToObservable()).ToPublisher()).ToCompletable();
         }
 
         public static ICompletable RetryWhen(this ICompletable source, Func<IPublisher<Exception>, IPublisher<object>> whenFunction)
@@ -618,50 +621,54 @@ namespace RxAdvancedFlow
 
         public static ICompletable Concat(this IObservable<ICompletable> sources)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return sources.ToPublisher().OnBackpressureBufferAll().ConcatMap(c => c.ToPublisher<object>()).ToCompletable();
         }
 
         public static ICompletable Concat(this IPublisher<ICompletable> sources)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return sources.ConcatMap(c => c.ToPublisher<object>()).ToCompletable();
         }
 
         public static ICompletable Merge(this IObservable<ICompletable> sources, int maxConcurrency = int.MaxValue)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            if (maxConcurrency != int.MaxValue)
+            {
+                return sources.ToPublisher()
+                    .OnBackpressureBufferAll()
+                    .FlatMap(c => c.ToPublisher<object>(), false, maxConcurrency).ToCompletable();
+            }
+            return sources.ToPublisher().FlatMap(c => c.ToPublisher<object>(), false, maxConcurrency).ToCompletable();
         }
 
         public static ICompletable Merge(this IPublisher<ICompletable> sources, int maxConcurrency = int.MaxValue)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return sources.FlatMap(c => c.ToPublisher<object>(), false, maxConcurrency).ToCompletable();
         }
 
         public static ICompletable MergeDelayError(this ICompletable[] sources, int maxConcurrency = int.MaxValue)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return Flowable.FromArray(sources).FlatMap(c => c.ToPublisher<object>(), true, maxConcurrency).ToCompletable();
         }
 
         public static ICompletable MergeDelayError(this IEnumerable<ICompletable> sources, int maxConcurrency = int.MaxValue)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return Flowable.FromEnumerable(sources).FlatMap(c => c.ToPublisher<object>(), true, maxConcurrency).ToCompletable();
         }
 
         public static ICompletable MergeDelayError(this IObservable<ICompletable> sources, int maxConcurrency = int.MaxValue)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            if (maxConcurrency != int.MaxValue)
+            {
+                return sources.ToPublisher()
+                    .OnBackpressureBufferAll()
+                    .FlatMap(c => c.ToPublisher<object>(), true, maxConcurrency).ToCompletable();
+            }
+            return sources.ToPublisher().FlatMap(c => c.ToPublisher<object>(), true, maxConcurrency).ToCompletable();
         }
 
         public static ICompletable MergeDelayError(this IPublisher<ICompletable> sources, int maxConcurrency = int.MaxValue)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return sources.FlatMap(c => c.ToPublisher<object>(), true, maxConcurrency).ToCompletable();
         }
 
         public static ICompletable DelaySubscription(this ICompletable source, TimeSpan delay)
@@ -687,14 +694,12 @@ namespace RxAdvancedFlow
 
         public static ICompletable DelaySubscription<T>(this ICompletable source, IObservable<T> other)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return new CompletableDelaySubscriptionViaObservable<T>(source, other);
         }
 
         public static ICompletable DelaySubscription<T>(this ICompletable source, IPublisher<T> other)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return new CompletableDelaySubscriptionViaPublisher<T>(source, other);
         }
     }
 }

@@ -33,7 +33,8 @@ namespace RxAdvancedFlow.internals.completable
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            DisposableHelper.Terminate(ref task);
+            DisposableHelper.Terminate(ref d);
         }
 
         public void OnComplete()

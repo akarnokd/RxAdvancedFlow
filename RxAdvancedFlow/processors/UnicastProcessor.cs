@@ -236,7 +236,7 @@ namespace RxAdvancedFlow.processors
             return false;
         }
 
-        void Cancel()
+        internal void Cancel()
         {
             bp.Cancel();
             SignalDone();

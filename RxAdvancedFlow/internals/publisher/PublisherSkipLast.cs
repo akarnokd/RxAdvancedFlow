@@ -75,19 +75,20 @@ namespace RxAdvancedFlow.internals.publisher
     {
         HalfSerializedSubscriberStruct<T> actual;
 
-        readonly IWorker worker;
+        readonly IScheduler scheduler;
 
         readonly TimeSpan time;
 
         ISubscription s;
 
-        bool cancelled;
+        ArrayQueue<TimedValue> queue;
 
-        public PublisherSkipLastTimed(ISubscriber<T> actual, TimeSpan time, IWorker worker)
+        public PublisherSkipLastTimed(ISubscriber<T> actual, TimeSpan time, IScheduler scheduler)
         {
             this.actual.Init(actual);
-            this.worker = worker;
+            this.scheduler = scheduler;
             this.time = time;
+            this.queue = new ArrayQueue<TimedValue>();
         }
 
         public void OnSubscribe(ISubscription s)
@@ -100,21 +101,49 @@ namespace RxAdvancedFlow.internals.publisher
 
         public void OnNext(T t)
         {
-            worker.Schedule(() => actual.OnNext(t), time);
+            long now = scheduler.NowUtc();
+
+            TimedValue tv = new TimedValue();
+            tv.timestamp = now;
+            tv.value = t;
+
+            queue.Offer(tv);
+
+            drainOld(now);
         }
 
         public void OnError(Exception e)
         {
-            worker.Dispose();
-
+            queue.Clear();
             actual.OnError(e);
         }
 
         public void OnComplete()
         {
-            worker.Dispose();
-
+            drainOld(scheduler.NowUtc());
+            queue.Clear();
             actual.OnComplete();
+        }
+
+        void drainOld(long now)
+        {
+            now -= (long)time.TotalMilliseconds;
+
+            TimedValue tv;
+
+            for (;;)
+            {
+                if (!queue.Peek(out tv))
+                {
+                    break;
+                }
+
+                if (tv.timestamp < now)
+                {
+                    queue.Poll(out tv);
+                    actual.OnNext(tv.value);
+                }
+            }
         }
 
         public void Request(long n)
@@ -124,8 +153,6 @@ namespace RxAdvancedFlow.internals.publisher
 
         public void Cancel()
         {
-            worker.Dispose();
-
             s.Cancel();
         }
 

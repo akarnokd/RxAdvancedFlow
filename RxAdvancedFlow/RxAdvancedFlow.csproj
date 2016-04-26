@@ -63,6 +63,7 @@
     <Compile Include="internals\completable\CompletableAndThenObservable.cs" />
     <Compile Include="internals\completable\CompletableAndThenPublisher.cs" />
     <Compile Include="internals\completable\CompletableAndThenSingle.cs" />
+    <Compile Include="internals\completable\CompletableDelaySubscription.cs" />
     <Compile Include="internals\completable\CompletableFromAction.cs" />
     <Compile Include="internals\completable\CompletableLift.cs" />
     <Compile Include="internals\completable\CompletablePublisher.cs" />

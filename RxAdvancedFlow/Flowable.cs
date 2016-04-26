@@ -2175,7 +2175,7 @@ namespace RxAdvancedFlow
         {
             return Create<T>(s =>
             {
-                source.Subscribe(new PublisherSkipLastTimed<T>(s, time, scheduler.CreateWorker()));
+                source.Subscribe(new PublisherSkipLastTimed<T>(s, time, scheduler));
             });
         }
 
