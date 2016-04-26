@@ -8,7 +8,12 @@ using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.processors
 {
-    public sealed class CompletableProcessor : ICompletableSubscriber, ICompletable
+    /// <summary>
+    /// Represents a hot Completable instance which is also a CompletableSubscriber and
+    /// let's one imperatively terminate this instance and relay the termination event to
+    /// current and future CompletableSubscribers.
+    /// </summary>
+    public sealed class CompletableProcessor : ICompletableProcessor
     {
 
         CompletableInnerDisposable[] subscribers;

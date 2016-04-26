@@ -37,7 +37,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ReactiveStreamsCS, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ReactiveStreamsCS.0.1.0\lib\ReactiveStreamsCS.dll</HintPath>
+      <HintPath>..\packages\ReactiveStreamsCS.0.2.0\lib\ReactiveStreamsCS.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />

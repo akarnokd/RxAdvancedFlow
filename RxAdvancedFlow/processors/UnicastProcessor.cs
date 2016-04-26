@@ -14,7 +14,7 @@ namespace RxAdvancedFlow.processors
     /// A processor implementation that allows only a single Subscriber
     /// and buffers values until one arrives.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="T">The input and output value type.</typeparam>
     public sealed class UnicastProcessor<T> : IProcessor<T, T>
     {
         Action onDone;

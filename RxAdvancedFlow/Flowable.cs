@@ -3,6 +3,7 @@ using RxAdvancedFlow.internals;
 using RxAdvancedFlow.internals.completable;
 using RxAdvancedFlow.internals.disposables;
 using RxAdvancedFlow.internals.publisher;
+using RxAdvancedFlow.internals.single;
 using RxAdvancedFlow.internals.subscribers;
 using RxAdvancedFlow.internals.subscriptions;
 using RxAdvancedFlow.processors;
@@ -1898,6 +1899,18 @@ namespace RxAdvancedFlow
             });
         }
 
+        public static IPublisher<T> Repeat<T>(this IPublisher<T> source, Func<Boolean> shouldRepeat)
+        {
+            return Create<T>(s =>
+            {
+                PublisherRedoConditional<T> parent = new PublisherRedoConditional<T>(s, false, shouldRepeat, source);
+
+                s.OnSubscribe(parent);
+
+                parent.Resubscribe();
+            });
+        }
+
         public static IPublisher<T> Retry<T>(this IPublisher<T> source)
         {
             return Retry(source, long.MaxValue);
@@ -2196,6 +2209,18 @@ namespace RxAdvancedFlow
             });
         }
 
+        /// <summary>
+        /// Converts a IPublisher into a Single which emits a single value, 
+        /// IndexOutOfRangeException if the publisher is empty or has more than one value.
+        /// </summary>
+        /// <typeparam name="T">The value type</typeparam>
+        /// <param name="publisher">The source publisher instance.</param>
+        /// <returns></returns>
+        public static ISingle<T> ToSingle<T>(this IPublisher<T> publisher)
+        {
+            return new SingleFromPublisher<T>(publisher);
+        }
+
         public static IPublisher<T> OnBackpressureError<T>(this IPublisher<T> source)
         {
             return Create<T>(s =>
@@ -2204,6 +2229,15 @@ namespace RxAdvancedFlow
             });
         }
 
+        /// <summary>
+        /// Transforms the IObservable instance into an IPublisher with the
+        /// specified backpressure strategy and maximum buffer size.
+        /// </summary>
+        /// <typeparam name="T">The value type.</typeparam>
+        /// <param name="source">The source IObservable instance</param>
+        /// <param name="strategy">The backpressure stategy: Buffer(default), Error, Latest, Drop</param>
+        /// <param name="bufferSize">The maximum buffer size before signalling overflow error in case <paramref name="strategy"/> is Buffer.</param>
+        /// <returns>The IPublisher instance.</returns>
         public static IPublisher<T> ToPublisher<T>(this IObservable<T> source, 
             BackpressureStrategy strategy = BackpressureStrategy.Buffer, 
             int bufferSize = int.MaxValue)

@@ -32,7 +32,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ReactiveStreamsCS, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ReactiveStreamsCS.0.1.0\lib\ReactiveStreamsCS.dll</HintPath>
+      <HintPath>..\packages\ReactiveStreamsCS.0.2.0\lib\ReactiveStreamsCS.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -132,6 +132,7 @@
     <Compile Include="internals\publisher\PublisherOnErrorReturn.cs" />
     <Compile Include="internals\publisher\PublisherPeek.cs" />
     <Compile Include="internals\publisher\PublisherPublish.cs" />
+    <Compile Include="internals\publisher\PublisherRedoConditional.cs" />
     <Compile Include="internals\publisher\PublisherRetry.cs" />
     <Compile Include="internals\publisher\PublisherRedo.cs" />
     <Compile Include="internals\publisher\PublisherReduce.cs" />
@@ -203,6 +204,7 @@
     <Compile Include="internals\single\RetryIfSingleSubscriber.cs" />
     <Compile Include="internals\single\RetryInfiniteSingleSubscriber.cs" />
     <Compile Include="internals\single\SingleCache.cs" />
+    <Compile Include="internals\single\SingleFromPublisher.cs" />
     <Compile Include="internals\single\SingleSubscriberWrapper.cs" />
     <Compile Include="internals\single\TimeoutSingleSubscriber.cs" />
     <Compile Include="internals\single\UnsubscribeOnSingleSubscriber.cs" />
@@ -249,7 +251,6 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

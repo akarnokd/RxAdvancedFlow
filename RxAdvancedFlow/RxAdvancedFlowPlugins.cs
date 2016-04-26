@@ -15,6 +15,9 @@ namespace RxAdvancedFlow
 
         static volatile bool lockdown;
 
+        /// <summary>
+        /// Prevents modifying the plugin actions.
+        /// </summary>
         public static void Lockdown()
         {
             lockdown = true;
@@ -28,6 +31,14 @@ namespace RxAdvancedFlow
             }
         }
 
+        /// <summary>
+        /// Static sink for exceptions that can't be delivered to a consumer
+        /// due to protocol reasons.
+        /// </summary>
+        /// <remarks>
+        /// Use SetOnErrorAction to change the default behavior, which is to write to the console.
+        /// </remarks>
+        /// <param name="e">The Exception instance</param>
         public static void OnError(Exception e)
         {
             if (OnErrorAction == null)

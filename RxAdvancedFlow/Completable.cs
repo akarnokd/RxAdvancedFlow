@@ -621,7 +621,7 @@ namespace RxAdvancedFlow
 
         public static ICompletable Concat(this IObservable<ICompletable> sources)
         {
-            return sources.ToPublisher().OnBackpressureBufferAll().ConcatMap(c => c.ToPublisher<object>()).ToCompletable();
+            return sources.ToPublisher().ConcatMap(c => c.ToPublisher<object>()).ToCompletable();
         }
 
         public static ICompletable Concat(this IPublisher<ICompletable> sources)
@@ -631,12 +631,6 @@ namespace RxAdvancedFlow
 
         public static ICompletable Merge(this IObservable<ICompletable> sources, int maxConcurrency = int.MaxValue)
         {
-            if (maxConcurrency != int.MaxValue)
-            {
-                return sources.ToPublisher()
-                    .OnBackpressureBufferAll()
-                    .FlatMap(c => c.ToPublisher<object>(), false, maxConcurrency).ToCompletable();
-            }
             return sources.ToPublisher().FlatMap(c => c.ToPublisher<object>(), false, maxConcurrency).ToCompletable();
         }
 
@@ -657,12 +651,6 @@ namespace RxAdvancedFlow
 
         public static ICompletable MergeDelayError(this IObservable<ICompletable> sources, int maxConcurrency = int.MaxValue)
         {
-            if (maxConcurrency != int.MaxValue)
-            {
-                return sources.ToPublisher()
-                    .OnBackpressureBufferAll()
-                    .FlatMap(c => c.ToPublisher<object>(), true, maxConcurrency).ToCompletable();
-            }
             return sources.ToPublisher().FlatMap(c => c.ToPublisher<object>(), true, maxConcurrency).ToCompletable();
         }
 

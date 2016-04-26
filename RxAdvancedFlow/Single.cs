@@ -203,74 +203,62 @@ namespace RxAdvancedFlow
 
         public static IPublisher<T> Concat<T>(this ISingle<T>[] sources)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return Flowable.FromArray(sources).ConcatMap(s => s.ToPublisher());
         }
 
         public static IPublisher<T> Concat<T>(this IEnumerable<ISingle<T>> sources)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return Flowable.FromEnumerable(sources).ConcatMap(s => s.ToPublisher());
         }
 
         public static IPublisher<T> Concat<T>(this IObservable<ISingle<T>> sources)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return sources.ToPublisher().ConcatMap(s => s.ToPublisher());
         }
 
         public static IPublisher<T> Concat<T>(this IPublisher<ISingle<T>> sources)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return sources.ConcatMap(s => s.ToPublisher());
         }
 
         public static IPublisher<T> Merge<T>(this ISingle<T>[] sources, int maxConcurrency = int.MaxValue)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return Flowable.FromArray(sources).FlatMap(s => s.ToPublisher(), false, maxConcurrency);
         }
 
         public static IPublisher<T> Merge<T>(this IEnumerable<ISingle<T>> sources, int maxConcurrency = int.MaxValue)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return Flowable.FromEnumerable(sources).FlatMap(s => s.ToPublisher(), false, maxConcurrency);
         }
 
         public static IPublisher<T> Merge<T>(this IObservable<ISingle<T>> sources, int maxConcurrency = int.MaxValue)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return sources.ToPublisher().FlatMap(s => s.ToPublisher(), false, maxConcurrency);
         }
 
         public static IPublisher<T> Merge<T>(this IPublisher<ISingle<T>> sources, int maxConcurrency = int.MaxValue)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return sources.FlatMap(s => s.ToPublisher(), false, maxConcurrency);
         }
 
         public static IPublisher<T> MergeDelayError<T>(this ISingle<T>[] sources, int maxConcurrency = int.MaxValue)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return Flowable.FromArray(sources).FlatMap(s => s.ToPublisher(), true, maxConcurrency);
         }
 
         public static IPublisher<T> MergeDelayError<T>(this IEnumerable<ISingle<T>> sources, int maxConcurrency = int.MaxValue)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return Flowable.FromEnumerable(sources).FlatMap(s => s.ToPublisher(), false, maxConcurrency);
         }
 
         public static IPublisher<T> MergeDelayError<T>(this IObservable<ISingle<T>> sources, int maxConcurrency = int.MaxValue)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return sources.ToPublisher().FlatMap(s => s.ToPublisher(), true, maxConcurrency);
         }
 
         public static IPublisher<T> MergeDelayError<T>(this IPublisher<ISingle<T>> sources, int maxConcurrency = int.MaxValue)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return sources.FlatMap(s => s.ToPublisher(), true, maxConcurrency);
         }
 
         public static ISingle<T> Defer<T>(Func<ISingle<T>> singleSupplier)
@@ -784,34 +772,29 @@ namespace RxAdvancedFlow
 
         public static IPublisher<T> Repeat<T>(this ISingle<T> source)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return source.ToPublisher().Repeat();
         }
 
         public static IPublisher<T> Repeat<T>(this ISingle<T> source, long times)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return source.ToPublisher().Repeat(times);
         }
 
         public static IPublisher<T> Repeat<T>(this ISingle<T> source, Func<bool> shouldRepeat)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return source.ToPublisher().Repeat(shouldRepeat);
         }
 
         public static IPublisher<T> RepeatWhen<T>(this ISingle<T> source, 
             Func<IObservable<object>, IObservable<object>> whenFunction)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return source.ToPublisher().RepeatWhen(f => whenFunction(f.ToObservable()).ToPublisher());
         }
 
         public static IPublisher<T> RepeatWhen<T>(this ISingle<T> source,
             Func<IPublisher<object>, IPublisher<object>> whenFunction)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return source.ToPublisher().RepeatWhen(whenFunction);
         }
 
         public static ISingle<T> Retry<T>(this ISingle<T> source)
@@ -847,15 +830,13 @@ namespace RxAdvancedFlow
         public static ISingle<T> RetryWhen<T>(this ISingle<T> source, 
             Func<IObservable<Exception>, IObservable<object>> whenFunction)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return source.ToPublisher().RetryWhen(f => whenFunction(f.ToObservable()).ToPublisher()).ToSingle();
         }
 
         public static ISingle<T> RetryWhen<T>(this ISingle<T> source,
             Func<IPublisher<Exception>, IPublisher<object>> whenFunction)
         {
-            // TODO implement
-            throw new NotImplementedException();
+            return source.ToPublisher().RetryWhen(whenFunction).ToSingle();
         }
 
         public static IDisposable Subscribe<T>(this ISingle<T> source)

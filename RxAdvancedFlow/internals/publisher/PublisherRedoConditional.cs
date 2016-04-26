@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.publisher
 {
-    sealed class PublisherRedo<T> : ISubscriber<T>, ISubscription
+    sealed class PublisherRedoConditional<T> : ISubscriber<T>, ISubscription
     {
         readonly ISubscriber<T> actual;
 
@@ -17,7 +17,7 @@ namespace RxAdvancedFlow.internals.publisher
 
         readonly bool errorMode;
 
-        long remaining;
+        readonly Func<bool> shouldRepeat;
 
         MultiArbiterStruct arbiter;
 
@@ -25,12 +25,12 @@ namespace RxAdvancedFlow.internals.publisher
 
         int wip;
 
-        public PublisherRedo(ISubscriber<T> actual, bool error, long times, IPublisher<T> source)
+        public PublisherRedoConditional(ISubscriber<T> actual, bool error, Func<bool> shouldRepeat, IPublisher<T> source)
         {
             this.actual = actual;
             this.errorMode = error;
             this.source = source;
-            this.remaining = times;
+            this.shouldRepeat = shouldRepeat;
         }
 
         public void Cancel()
@@ -46,17 +46,12 @@ namespace RxAdvancedFlow.internals.publisher
             }
             else
             {
-                long r = remaining;
+                bool b = shouldRepeat();
 
-                if (r == 0)
+                if (!b)
                 {
                     actual.OnComplete();
                     return;
-                }
-
-                if (r != long.MaxValue)
-                {
-                    remaining = r - 1;
                 }
 
                 long p = produced;
@@ -74,17 +69,12 @@ namespace RxAdvancedFlow.internals.publisher
         {
             if (errorMode)
             {
-                long r = remaining;
+                bool b = shouldRepeat();
 
-                if (r == 0)
+                if (!b)
                 {
                     actual.OnError(e);
                     return;
-                }
-
-                if (r != long.MaxValue)
-                {
-                    remaining = r - 1;
                 }
 
                 long p = produced;
