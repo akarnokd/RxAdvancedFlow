@@ -1,9 +1,5 @@
-﻿using ReactiveStreamsCS;
+﻿using Reactive.Streams;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.publisher
 {
@@ -151,6 +147,11 @@ namespace RxAdvancedFlow.internals.publisher
             }
 
             s.Request(n);
+        }
+
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
         }
     }
 }

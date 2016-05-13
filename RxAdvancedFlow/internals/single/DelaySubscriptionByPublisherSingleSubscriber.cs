@@ -1,11 +1,7 @@
-﻿using ReactiveStreamsCS;
+﻿using Reactive.Streams;
 using RxAdvancedFlow.internals.disposables;
 using RxAdvancedFlow.internals.subscriptions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.single
 {
@@ -91,6 +87,11 @@ namespace RxAdvancedFlow.internals.single
                 s.Cancel();
                 OnSubscribeHelper.ReportSubscriptionSet();
             }
+        }
+
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
         }
     }
 }

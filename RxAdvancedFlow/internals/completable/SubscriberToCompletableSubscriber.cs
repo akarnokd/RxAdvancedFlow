@@ -1,10 +1,5 @@
-﻿using ReactiveStreamsCS;
-using RxAdvancedFlow.internals.disposables;
+﻿using Reactive.Streams;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.completable
 {
@@ -32,6 +27,11 @@ namespace RxAdvancedFlow.internals.completable
         public void OnError(Exception e)
         {
             cs.OnError(e);
+        }
+
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
         }
 
         public void OnNext(T t)

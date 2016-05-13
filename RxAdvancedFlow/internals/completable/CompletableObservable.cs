@@ -1,10 +1,5 @@
-﻿using ReactiveStreamsCS;
-using RxAdvancedFlow.subscribers;
+﻿using RxAdvancedFlow.subscribers;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.completable
 {

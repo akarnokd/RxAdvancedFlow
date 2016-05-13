@@ -1,13 +1,8 @@
-﻿using ReactiveStreamsCS;
+﻿using Reactive.Streams;
 using RxAdvancedFlow.internals.queues;
 using RxAdvancedFlow.internals.subscriptions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.publisher
 {
@@ -348,6 +343,11 @@ namespace RxAdvancedFlow.internals.publisher
             public void OnComplete()
             {
                 parent.Complete(index);
+            }
+
+            public void OnNext(object element)
+            {
+                throw new NotImplementedException();
             }
         }
 

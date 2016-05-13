@@ -1,13 +1,11 @@
-﻿using ReactiveStreamsCS;
+﻿using Reactive.Streams;
 using RxAdvancedFlow.internals;
 using RxAdvancedFlow.internals.subscribers;
 using RxAdvancedFlow.internals.subscriptions;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.subscribers
 {
@@ -506,6 +504,11 @@ namespace RxAdvancedFlow.subscribers
         public int Subscriptions()
         {
             return subscriptions;
+        }
+
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
         }
     }
 }

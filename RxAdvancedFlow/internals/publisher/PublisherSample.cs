@@ -1,14 +1,9 @@
-﻿using ReactiveStreamsCS;
+﻿using Reactive.Streams;
 using RxAdvancedFlow.internals.disposables;
-using RxAdvancedFlow.internals.publisher;
 using RxAdvancedFlow.internals.subscribers;
 using RxAdvancedFlow.internals.subscriptions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.publisher
 {
@@ -126,6 +121,11 @@ namespace RxAdvancedFlow.internals.publisher
                 BackpressureHelper.Add(ref requested, n);
             }
         }
+
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     sealed class RefValue<T>
@@ -162,6 +162,11 @@ namespace RxAdvancedFlow.internals.publisher
         public void OnError(Exception e)
         {
             actual.OtherError(e);
+        }
+
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
         }
 
         public void OnNext(U t)

@@ -1,10 +1,5 @@
-﻿using ReactiveStreamsCS;
+﻿using Reactive.Streams;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.publisher
 {
@@ -94,6 +89,11 @@ namespace RxAdvancedFlow.internals.publisher
             {
                 BackpressureHelper.ScalarPostCompleteRequest(ref requested, n, ref value, actual);
             }
+        }
+
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -186,6 +186,11 @@ namespace RxAdvancedFlow.internals.publisher
         public void Request(long n)
         {
             s.Request(n);
+        }
+
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
         }
     }
 

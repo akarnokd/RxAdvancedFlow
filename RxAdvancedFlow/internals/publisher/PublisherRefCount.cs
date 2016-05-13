@@ -1,4 +1,4 @@
-﻿using ReactiveStreamsCS;
+﻿using Reactive.Streams;
 using RxAdvancedFlow.internals.disposables;
 using System;
 using System.Threading;
@@ -55,6 +55,11 @@ namespace RxAdvancedFlow.internals.publisher
 
                 break;
             }
+        }
+
+        public void Subscribe(ISubscriber subscriber)
+        {
+            throw new NotImplementedException();
         }
 
         sealed class PublisherRefCountConnection
@@ -170,6 +175,11 @@ namespace RxAdvancedFlow.internals.publisher
             public void Request(long n)
             {
                 s.Request(n);
+            }
+
+            public void OnNext(object element)
+            {
+                throw new NotImplementedException();
             }
         }
     }

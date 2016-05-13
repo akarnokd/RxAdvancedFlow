@@ -1,12 +1,8 @@
-﻿using ReactiveStreamsCS;
+﻿using Reactive.Streams;
 using RxAdvancedFlow.internals.disposables;
 using RxAdvancedFlow.internals.subscriptions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.completable
 {
@@ -23,6 +19,11 @@ namespace RxAdvancedFlow.internals.completable
         }
 
         public void Subscribe(ISubscriber<T> s)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Subscribe(ISubscriber s)
         {
             throw new NotImplementedException();
         }
@@ -149,6 +150,11 @@ namespace RxAdvancedFlow.internals.completable
                 }
 
                 public void OnComplete()
+                {
+                    throw new NotImplementedException();
+                }
+
+                public void OnNext(object element)
                 {
                     throw new NotImplementedException();
                 }

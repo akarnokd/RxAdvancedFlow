@@ -1,14 +1,8 @@
-﻿using ReactiveStreamsCS;
-using RxAdvancedFlow.disposables;
+﻿using Reactive.Streams;
 using RxAdvancedFlow.internals.queues;
-using RxAdvancedFlow.internals.subscribers;
 using RxAdvancedFlow.internals.subscriptions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.publisher
 {
@@ -309,6 +303,11 @@ namespace RxAdvancedFlow.internals.publisher
             }
         }
 
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
+        }
+
         sealed class PublisherConcatMapEagerInner : ISubscriber<R>, ISubscription
         {
             readonly PublisherConcatMapEager<T, R> parent;
@@ -400,6 +399,11 @@ namespace RxAdvancedFlow.internals.publisher
             internal bool Poll(out R value)
             {
                 return q.Poll(out value);
+            }
+
+            public void OnNext(object element)
+            {
+                throw new NotImplementedException();
             }
         }
     }

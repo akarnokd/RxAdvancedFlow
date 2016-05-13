@@ -1,9 +1,5 @@
-﻿using ReactiveStreamsCS;
+﻿using Reactive.Streams;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.publisher
 {
@@ -85,6 +81,11 @@ namespace RxAdvancedFlow.internals.publisher
         {
             s.Cancel();
         }
+
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     sealed class PublisherSingleDefault<T> : ISubscriber<T>, ISubscription
@@ -161,6 +162,11 @@ namespace RxAdvancedFlow.internals.publisher
         public void Cancel()
         {
             s.Cancel();
+        }
+
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
         }
     }
 }

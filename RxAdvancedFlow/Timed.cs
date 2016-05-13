@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RxAdvancedFlow
+﻿namespace RxAdvancedFlow
 {
     /// <summary>
     /// A structure consisting of a value and an associated time.

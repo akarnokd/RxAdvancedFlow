@@ -1,9 +1,5 @@
-﻿using ReactiveStreamsCS;
+﻿using Reactive.Streams;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.publisher
 {
@@ -14,6 +10,11 @@ namespace RxAdvancedFlow.internals.publisher
         public PublisherFromAction(Action<ISubscriber<T>> action)
         {
             this.action = action;
+        }
+
+        public void Subscribe(ISubscriber subscriber)
+        {
+            throw new NotImplementedException();
         }
 
         public void Subscribe(ISubscriber<T> s)

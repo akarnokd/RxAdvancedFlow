@@ -1,10 +1,6 @@
-﻿using ReactiveStreamsCS;
+﻿using Reactive.Streams;
 using RxAdvancedFlow.internals.disposables;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.subscribers
 {
@@ -62,6 +58,11 @@ namespace RxAdvancedFlow.internals.subscribers
         {
             DisposableHelper.Terminate(ref resource);
             s.Cancel();
+        }
+
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
         }
     }
 }

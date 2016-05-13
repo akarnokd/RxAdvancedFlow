@@ -1,12 +1,8 @@
-﻿using ReactiveStreamsCS;
+﻿using Reactive.Streams;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Collections;
 using RxAdvancedFlow.internals.subscriptions;
-using System.Collections.Concurrent;
 using System.Threading;
 using RxAdvancedFlow.internals.queues;
 
@@ -183,6 +179,11 @@ namespace RxAdvancedFlow.internals.publisher
             public void Reset()
             {
                 throw new InvalidOperationException();
+            }
+
+            public void OnNext(object element)
+            {
+                throw new NotImplementedException();
             }
         }
     }

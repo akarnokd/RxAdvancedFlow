@@ -28,11 +28,11 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\RxAdvancedFlow.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\RxAdvancedFlow.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ReactiveStreamsCS, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ReactiveStreamsCS.0.2.0\lib\ReactiveStreamsCS.dll</HintPath>
+    <Reference Include="Reactive.Streams, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Reactive.Streams.1.0.0\lib\net40\Reactive.Streams.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -56,6 +56,7 @@
     <Compile Include="Flowable.cs" />
     <Compile Include="IConnectablePublisher.cs" />
     <Compile Include="IGroupedPublisher.cs" />
+    <Compile Include="RsExtras.cs" />
     <Compile Include="internals\BackpressureHelper.cs" />
     <Compile Include="internals\BasicBackpressureStruct.cs" />
     <Compile Include="internals\completable\AmbCompletableSubscriber.cs" />

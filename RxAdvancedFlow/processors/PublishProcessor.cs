@@ -1,11 +1,7 @@
-﻿using ReactiveStreamsCS;
+﻿using Reactive.Streams;
 using RxAdvancedFlow.internals;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.processors
 {
@@ -91,6 +87,16 @@ namespace RxAdvancedFlow.processors
         bool Add(PublishProcessorInner inner)
         {
             return ProcessorHelper.Add(ref subscribers, inner, Terminated);
+        }
+
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Subscribe(ISubscriber subscriber)
+        {
+            throw new NotImplementedException();
         }
 
         sealed class PublishProcessorInner : ISubscription

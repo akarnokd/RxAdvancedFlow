@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RxAdvancedFlow.internals.queues
+﻿namespace RxAdvancedFlow.internals.queues
 {
     /// <summary>
     /// A base interface for Queues with standard methods.

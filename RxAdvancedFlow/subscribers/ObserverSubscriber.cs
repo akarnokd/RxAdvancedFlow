@@ -1,10 +1,6 @@
-﻿using ReactiveStreamsCS;
+﻿using Reactive.Streams;
 using RxAdvancedFlow.internals.subscriptions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.subscribers
 {
@@ -38,6 +34,11 @@ namespace RxAdvancedFlow.subscribers
         public void OnError(Exception e)
         {
             actual.OnError(e);
+        }
+
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
         }
 
         public void OnNext(T t)

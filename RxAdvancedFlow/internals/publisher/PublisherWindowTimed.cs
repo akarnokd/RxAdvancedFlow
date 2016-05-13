@@ -1,4 +1,4 @@
-﻿using ReactiveStreamsCS;
+﻿using Reactive.Streams;
 using RxAdvancedFlow.internals.disposables;
 using RxAdvancedFlow.internals.queues;
 using RxAdvancedFlow.internals.subscribers;
@@ -6,10 +6,7 @@ using RxAdvancedFlow.internals.subscriptions;
 using RxAdvancedFlow.processors;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.publisher
 {
@@ -202,6 +199,11 @@ namespace RxAdvancedFlow.internals.publisher
                 SubscriptionHelper.Terminate(ref s);
             }
         }
+
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     sealed class PublisherWindowTimedSkip<T> : ISubscriber<T>, ISubscription
@@ -363,6 +365,11 @@ namespace RxAdvancedFlow.internals.publisher
             {
                 BackpressureHelper.Add(ref requested, n);
             }
+        }
+
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -530,6 +537,11 @@ namespace RxAdvancedFlow.internals.publisher
         public void Request(long n)
         {
             bp.Request(n);
+        }
+
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
         }
     }
 }

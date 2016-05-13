@@ -1,11 +1,7 @@
-﻿using ReactiveStreamsCS;
+﻿using Reactive.Streams;
 using RxAdvancedFlow.internals.subscriptions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.publisher
 {
@@ -174,6 +170,11 @@ namespace RxAdvancedFlow.internals.publisher
             public void Request(long n)
             {
                 BackpressureHelper.SingleRequest(ref this.s, ref requested, n);
+            }
+
+            public void OnNext(object element)
+            {
+                throw new NotImplementedException();
             }
         }
     }

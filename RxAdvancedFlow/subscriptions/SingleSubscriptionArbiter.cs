@@ -1,12 +1,5 @@
-﻿using ReactiveStreamsCS;
-using RxAdvancedFlow.internals;
+﻿using Reactive.Streams;
 using RxAdvancedFlow.internals.subscriptions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.subscriptions
 {

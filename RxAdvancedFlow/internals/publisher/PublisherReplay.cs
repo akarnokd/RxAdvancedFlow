@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ReactiveStreamsCS;
+using Reactive.Streams;
 using RxAdvancedFlow.internals.subscriptions;
 using System.Threading;
 
@@ -65,6 +61,11 @@ namespace RxAdvancedFlow.internals.publisher
             }
 
             current.Subscribe(s);
+        }
+
+        public void Subscribe(ISubscriber subscriber)
+        {
+            throw new NotImplementedException();
         }
 
         sealed class PublisherReplayMain : ISubscriber<T>, IDisposable
@@ -307,6 +308,11 @@ namespace RxAdvancedFlow.internals.publisher
             void Remove(PublisherReplayInner inner)
             {
                 ProcessorHelper.Remove(ref subscribers, inner, Terminated, Empty);
+            }
+
+            public void OnNext(object element)
+            {
+                throw new NotImplementedException();
             }
 
             sealed class Node

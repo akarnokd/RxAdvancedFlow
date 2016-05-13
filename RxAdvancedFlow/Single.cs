@@ -1,4 +1,4 @@
-﻿using ReactiveStreamsCS;
+﻿using Reactive.Streams;
 using RxAdvancedFlow.disposables;
 using RxAdvancedFlow.internals;
 using RxAdvancedFlow.internals.completable;
@@ -7,8 +7,6 @@ using RxAdvancedFlow.internals.single;
 using RxAdvancedFlow.subscribers;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace RxAdvancedFlow

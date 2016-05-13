@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ReactiveStreamsCS;
+using Reactive.Streams;
 using RxAdvancedFlow.internals.queues;
 using System.Threading;
 using RxAdvancedFlow.internals.subscriptions;
@@ -87,6 +83,11 @@ namespace RxAdvancedFlow.internals.publisher
         void ClearCurrent(PublisherPublishMain inner)
         {
             Interlocked.CompareExchange(ref main, null, inner);
+        }
+
+        public void Subscribe(ISubscriber subscriber)
+        {
+            throw new NotImplementedException();
         }
 
         sealed class PublisherPublishMain : ISubscriber<T>, IDisposable
@@ -302,6 +303,11 @@ namespace RxAdvancedFlow.internals.publisher
                 }
 
                 return false;
+            }
+
+            public void OnNext(object element)
+            {
+                throw new NotImplementedException();
             }
         }
 

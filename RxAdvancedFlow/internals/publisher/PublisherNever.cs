@@ -1,10 +1,6 @@
-﻿using ReactiveStreamsCS;
+﻿using System;
+using Reactive.Streams;
 using RxAdvancedFlow.internals.subscriptions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.publisher
 {
@@ -16,6 +12,11 @@ namespace RxAdvancedFlow.internals.publisher
         private PublisherNever()
         {
 
+        }
+
+        public void Subscribe(ISubscriber subscriber)
+        {
+            throw new NotImplementedException();
         }
 
         public void Subscribe(ISubscriber<T> s)

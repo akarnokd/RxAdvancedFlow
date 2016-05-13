@@ -1,10 +1,6 @@
-﻿using ReactiveStreamsCS;
+﻿using Reactive.Streams;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.publisher
 {
@@ -132,6 +128,16 @@ namespace RxAdvancedFlow.internals.publisher
         Exception Error()
         {
             return error;
+        }
+
+        public void Subscribe(ISubscriber subscriber)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
         }
 
         sealed class PublisherCacheItem

@@ -1,11 +1,6 @@
-﻿using ReactiveStreamsCS;
-using RxAdvancedFlow.internals.subscriptions;
+﻿using Reactive.Streams;
 using RxAdvancedFlow.subscriptions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.publisher
 {
@@ -90,6 +85,11 @@ namespace RxAdvancedFlow.internals.publisher
         public void Request(long n)
         {
             sds.Request(n, actual);
+        }
+
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -190,6 +190,11 @@ namespace RxAdvancedFlow.internals.publisher
         public void Request(long n)
         {
             sds.Request(n, actual);
+        }
+
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
         }
     }
 

@@ -1,12 +1,8 @@
-﻿using ReactiveStreamsCS;
+﻿using Reactive.Streams;
 using RxAdvancedFlow.internals.disposables;
 using RxAdvancedFlow.internals.subscriptions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.publisher
 {
@@ -135,6 +131,11 @@ namespace RxAdvancedFlow.internals.publisher
             arbiter.Set(s);
         }
 
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
+        }
+
         sealed class PublisherTimeoutOther : ISubscriber<T>
         {
             readonly ISubscriber<T> actual;
@@ -155,6 +156,11 @@ namespace RxAdvancedFlow.internals.publisher
             public void OnError(Exception e)
             {
                 actual.OnError(e);
+            }
+
+            public void OnNext(object element)
+            {
+                throw new NotImplementedException();
             }
 
             public void OnNext(T t)
@@ -332,6 +338,11 @@ namespace RxAdvancedFlow.internals.publisher
             }
         }
 
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
+        }
+
         sealed class PublisherTimeoutSelectorTimeout<W> : ISubscriber<W>, IDisposable
         {
             readonly PublisherTimeoutSelector<T, U, V> parent;
@@ -379,6 +390,11 @@ namespace RxAdvancedFlow.internals.publisher
             {
                 arbiter.Cancel();
             }
+
+            public void OnNext(object element)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         sealed class PublisherTimeoutSelectorOther : ISubscriber<T>
@@ -401,6 +417,11 @@ namespace RxAdvancedFlow.internals.publisher
             public void OnError(Exception e)
             {
                 actual.OnError(e);
+            }
+
+            public void OnNext(object element)
+            {
+                throw new NotImplementedException();
             }
 
             public void OnNext(T t)

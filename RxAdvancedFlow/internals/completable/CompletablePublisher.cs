@@ -1,11 +1,6 @@
-﻿using ReactiveStreamsCS;
+﻿using Reactive.Streams;
 using RxAdvancedFlow.internals.disposables;
-using RxAdvancedFlow.subscribers;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.completable
 {
@@ -16,6 +11,11 @@ namespace RxAdvancedFlow.internals.completable
         public CompletablePublisher(ICompletable source)
         {
             this.source = source;
+        }
+
+        public void Subscribe(ISubscriber subscriber)
+        {
+            throw new NotImplementedException();
         }
 
         public void Subscribe(ISubscriber<T> s)

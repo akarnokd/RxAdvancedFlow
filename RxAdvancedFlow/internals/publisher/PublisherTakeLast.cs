@@ -1,12 +1,8 @@
-﻿using ReactiveStreamsCS;
+﻿using Reactive.Streams;
 using RxAdvancedFlow.internals.queues;
 using RxAdvancedFlow.subscriptions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.publisher
 {
@@ -74,6 +70,11 @@ namespace RxAdvancedFlow.internals.publisher
                 BackpressureHelper.PostCompleteRequest(ref requested, n, queue, actual, ref cancelled);
             }
         }
+
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     sealed class PublisherTakeLastOne<T> : ISubscriber<T>, ISubscription
@@ -131,6 +132,11 @@ namespace RxAdvancedFlow.internals.publisher
         public void Request(long n)
         {
             sds.Request(n, actual);
+        }
+
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -225,6 +231,11 @@ namespace RxAdvancedFlow.internals.publisher
         public void Cancel()
         {
             Volatile.Write(ref cancelled, true);
+        }
+
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
         }
 
         struct TimedValue

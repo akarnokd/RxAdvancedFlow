@@ -1,13 +1,8 @@
-﻿using ReactiveStreamsCS;
+﻿using Reactive.Streams;
 using RxAdvancedFlow.internals.subscribers;
 using RxAdvancedFlow.internals.subscriptions;
-using RxAdvancedFlow.subscriptions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.publisher
 {
@@ -96,6 +91,11 @@ namespace RxAdvancedFlow.internals.publisher
             return new PublisherSkipUntilOther(this); 
         }
 
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
+        }
+
         sealed class PublisherSkipUntilOther : ISubscriber<U>
         {
             readonly PublisherSkipUntil<T, U> main;
@@ -113,6 +113,11 @@ namespace RxAdvancedFlow.internals.publisher
             public void OnError(Exception e)
             {
                 main.OnErrorOther(e);
+            }
+
+            public void OnNext(object element)
+            {
+                throw new NotImplementedException();
             }
 
             public void OnNext(U t)

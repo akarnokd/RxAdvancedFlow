@@ -1,13 +1,9 @@
-﻿using ReactiveStreamsCS;
+﻿using Reactive.Streams;
 using RxAdvancedFlow.internals.disposables;
 using RxAdvancedFlow.internals.subscribers;
 using RxAdvancedFlow.internals.subscriptions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.publisher
 {
@@ -104,6 +100,11 @@ namespace RxAdvancedFlow.internals.publisher
 
                 actual.OnError(BackpressureHelper.MissingBackpressureException());
             }
+        }
+
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
         }
 
         sealed class PublisherDebounceEmitter : IDisposable
@@ -251,6 +252,11 @@ namespace RxAdvancedFlow.internals.publisher
             }
         }
 
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
+        }
+
         sealed class PublisherDebounceInner : ISubscriber<U>, IDisposable
         {
             readonly PublisherDebounceSelector<T, U> parent;
@@ -313,6 +319,11 @@ namespace RxAdvancedFlow.internals.publisher
             public void OnSubscribe(ISubscription s)
             {
                 arbiter.Set(s);
+            }
+
+            public void OnNext(object element)
+            {
+                throw new NotImplementedException();
             }
         }
     }

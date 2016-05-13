@@ -1,11 +1,6 @@
-﻿using ReactiveStreamsCS;
-using RxAdvancedFlow.internals;
+﻿using Reactive.Streams;
 using RxAdvancedFlow.internals.subscriptions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.subscribers
 {
@@ -146,6 +141,11 @@ namespace RxAdvancedFlow.subscribers
         public void Dispose()
         {
             SubscriptionHelper.Terminate(ref s);
+        }
+
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
         }
     }
 }

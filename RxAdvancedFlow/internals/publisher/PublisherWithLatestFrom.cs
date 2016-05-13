@@ -1,13 +1,8 @@
-﻿using ReactiveStreamsCS;
-using RxAdvancedFlow.internals.disposables;
+﻿using Reactive.Streams;
 using RxAdvancedFlow.internals.subscribers;
 using RxAdvancedFlow.internals.subscriptions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.internals.publisher
 {
@@ -148,6 +143,11 @@ namespace RxAdvancedFlow.internals.publisher
             Volatile.Write(ref node, new RefNode(u));
         }
 
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
+        }
+
         sealed class PublisherWithLatestFromOther : ISubscriber<U>
         {
             readonly PublisherWithLatestFrom<T, U, R> parent;
@@ -193,6 +193,11 @@ namespace RxAdvancedFlow.internals.publisher
             internal void Dispose()
             {
                 arbiter.Cancel();
+            }
+
+            public void OnNext(object element)
+            {
+                throw new NotImplementedException();
             }
         }
     }

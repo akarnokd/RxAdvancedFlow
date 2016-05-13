@@ -1,12 +1,8 @@
-﻿using ReactiveStreamsCS;
+﻿using Reactive.Streams;
 using RxAdvancedFlow.internals;
 using RxAdvancedFlow.internals.queues;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace RxAdvancedFlow.processors
 {
@@ -258,6 +254,16 @@ namespace RxAdvancedFlow.processors
                 bp.Request(n);
                 Drain();
             }
+        }
+
+        public void OnNext(object element)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Subscribe(ISubscriber subscriber)
+        {
+            throw new NotImplementedException();
         }
 
         sealed class UnicastSubscription : ISubscription
