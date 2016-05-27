@@ -36,11 +36,6 @@ namespace RxAdvancedFlow.subscribers
             actual.OnError(e);
         }
 
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
-
         public void OnNext(T t)
         {
             actual.OnNext(t);

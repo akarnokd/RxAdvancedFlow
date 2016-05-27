@@ -64,10 +64,5 @@ namespace RxAdvancedFlow.internals.publisher
                 scheduler.ScheduleDirect(s.Cancel);
             }
         }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

@@ -22,11 +22,6 @@ namespace RxAdvancedFlow.internals.publisher
             actual.OnError(e);
         }
 
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
-
         public void OnNext(T t)
         {
             // deliberately ignored

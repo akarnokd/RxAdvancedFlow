@@ -103,11 +103,6 @@ namespace RxAdvancedFlow.internals.publisher
         {
             s.Cancel();
         }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
     }
 
     sealed class PublisherBufferSkip<T, C> : ISubscriber<T>, ISubscription where C : ICollection<T>
@@ -225,11 +220,6 @@ namespace RxAdvancedFlow.internals.publisher
         public void Cancel()
         {
             s.Cancel();
-        }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
         }
     }
 
@@ -372,11 +362,6 @@ namespace RxAdvancedFlow.internals.publisher
         {
             Volatile.Write(ref cancelled, true);
             s.Cancel();
-        }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
         }
     }
 }

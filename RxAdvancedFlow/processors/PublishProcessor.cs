@@ -89,16 +89,6 @@ namespace RxAdvancedFlow.processors
             return ProcessorHelper.Add(ref subscribers, inner, Terminated);
         }
 
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Subscribe(ISubscriber subscriber)
-        {
-            throw new NotImplementedException();
-        }
-
         sealed class PublishProcessorInner : ISubscription
         {
             readonly ISubscriber<T> actual;

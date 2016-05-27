@@ -81,11 +81,6 @@ namespace RxAdvancedFlow.internals.publisher
         {
             s.Cancel();
         }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
     }
 
     sealed class PublisherSingleDefault<T> : ISubscriber<T>, ISubscription
@@ -162,11 +157,6 @@ namespace RxAdvancedFlow.internals.publisher
         public void Cancel()
         {
             s.Cancel();
-        }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
         }
     }
 }

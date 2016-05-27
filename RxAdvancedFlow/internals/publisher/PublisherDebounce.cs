@@ -102,11 +102,6 @@ namespace RxAdvancedFlow.internals.publisher
             }
         }
 
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
-
         sealed class PublisherDebounceEmitter : IDisposable
         {
             readonly long index;
@@ -252,11 +247,6 @@ namespace RxAdvancedFlow.internals.publisher
             }
         }
 
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
-
         sealed class PublisherDebounceInner : ISubscriber<U>, IDisposable
         {
             readonly PublisherDebounceSelector<T, U> parent;
@@ -319,11 +309,6 @@ namespace RxAdvancedFlow.internals.publisher
             public void OnSubscribe(ISubscription s)
             {
                 arbiter.Set(s);
-            }
-
-            public void OnNext(object element)
-            {
-                throw new NotImplementedException();
             }
         }
     }

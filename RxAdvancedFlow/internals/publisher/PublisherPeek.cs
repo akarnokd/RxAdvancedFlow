@@ -148,10 +148,5 @@ namespace RxAdvancedFlow.internals.publisher
 
             s.Request(n);
         }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

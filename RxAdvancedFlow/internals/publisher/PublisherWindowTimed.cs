@@ -199,11 +199,6 @@ namespace RxAdvancedFlow.internals.publisher
                 SubscriptionHelper.Terminate(ref s);
             }
         }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
     }
 
     sealed class PublisherWindowTimedSkip<T> : ISubscriber<T>, ISubscription
@@ -365,11 +360,6 @@ namespace RxAdvancedFlow.internals.publisher
             {
                 BackpressureHelper.Add(ref requested, n);
             }
-        }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
         }
     }
 
@@ -537,11 +527,6 @@ namespace RxAdvancedFlow.internals.publisher
         public void Request(long n)
         {
             bp.Request(n);
-        }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
         }
     }
 }

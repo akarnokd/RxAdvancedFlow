@@ -142,10 +142,5 @@ namespace RxAdvancedFlow.subscribers
         {
             SubscriptionHelper.Terminate(ref s);
         }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

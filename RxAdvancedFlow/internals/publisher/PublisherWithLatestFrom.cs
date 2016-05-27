@@ -143,11 +143,6 @@ namespace RxAdvancedFlow.internals.publisher
             Volatile.Write(ref node, new RefNode(u));
         }
 
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
-
         sealed class PublisherWithLatestFromOther : ISubscriber<U>
         {
             readonly PublisherWithLatestFrom<T, U, R> parent;
@@ -193,11 +188,6 @@ namespace RxAdvancedFlow.internals.publisher
             internal void Dispose()
             {
                 arbiter.Cancel();
-            }
-
-            public void OnNext(object element)
-            {
-                throw new NotImplementedException();
             }
         }
     }

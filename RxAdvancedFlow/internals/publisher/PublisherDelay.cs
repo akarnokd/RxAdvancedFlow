@@ -64,11 +64,6 @@ namespace RxAdvancedFlow.internals.publisher
         {
             s.Request(n);
         }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
     }
 
     sealed class PublisherDelayNormal<T> : ISubscriber<T>, ISubscription
@@ -129,11 +124,6 @@ namespace RxAdvancedFlow.internals.publisher
         public void Request(long n)
         {
             s.Request(n);
-        }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
         }
     }
 
@@ -253,11 +243,6 @@ namespace RxAdvancedFlow.internals.publisher
             set.Dispose();
         }
 
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
-
         sealed class PublisherDelaySelectorInner : ISubscriber<U>, IDisposable
         {
             readonly PublisherDelaySelector<T, U> parent;
@@ -311,11 +296,6 @@ namespace RxAdvancedFlow.internals.publisher
             public void Dispose()
             {
                 SubscriptionHelper.Terminate(ref s);
-            }
-
-            public void OnNext(object element)
-            {
-                throw new NotImplementedException();
             }
         }
     }

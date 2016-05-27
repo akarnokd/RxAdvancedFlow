@@ -303,11 +303,6 @@ namespace RxAdvancedFlow.internals.publisher
             }
         }
 
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
-
         sealed class PublisherConcatMapEagerInner : ISubscriber<R>, ISubscription
         {
             readonly PublisherConcatMapEager<T, R> parent;
@@ -399,11 +394,6 @@ namespace RxAdvancedFlow.internals.publisher
             internal bool Poll(out R value)
             {
                 return q.Poll(out value);
-            }
-
-            public void OnNext(object element)
-            {
-                throw new NotImplementedException();
             }
         }
     }

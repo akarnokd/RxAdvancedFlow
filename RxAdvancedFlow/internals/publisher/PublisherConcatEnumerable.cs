@@ -101,10 +101,5 @@ namespace RxAdvancedFlow.internals.publisher
         {
             arbiter.Request(n);
         }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

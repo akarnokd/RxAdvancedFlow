@@ -12,11 +12,6 @@ namespace RxAdvancedFlow.internals.publisher
             this.action = action;
         }
 
-        public void Subscribe(ISubscriber subscriber)
-        {
-            throw new NotImplementedException();
-        }
-
         public void Subscribe(ISubscriber<T> s)
         {
             try

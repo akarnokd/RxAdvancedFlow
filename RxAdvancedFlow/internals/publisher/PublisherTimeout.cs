@@ -131,11 +131,6 @@ namespace RxAdvancedFlow.internals.publisher
             arbiter.Set(s);
         }
 
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
-
         sealed class PublisherTimeoutOther : ISubscriber<T>
         {
             readonly ISubscriber<T> actual;
@@ -156,11 +151,6 @@ namespace RxAdvancedFlow.internals.publisher
             public void OnError(Exception e)
             {
                 actual.OnError(e);
-            }
-
-            public void OnNext(object element)
-            {
-                throw new NotImplementedException();
             }
 
             public void OnNext(T t)
@@ -200,7 +190,7 @@ namespace RxAdvancedFlow.internals.publisher
 
         public void OnSubscribe(ISubscription s)
         {
-            throw new NotImplementedException();
+            arbiter.Set(s);
         }
 
         public void OnNext(T t)
@@ -338,11 +328,6 @@ namespace RxAdvancedFlow.internals.publisher
             }
         }
 
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
-
         sealed class PublisherTimeoutSelectorTimeout<W> : ISubscriber<W>, IDisposable
         {
             readonly PublisherTimeoutSelector<T, U, V> parent;
@@ -390,11 +375,6 @@ namespace RxAdvancedFlow.internals.publisher
             {
                 arbiter.Cancel();
             }
-
-            public void OnNext(object element)
-            {
-                throw new NotImplementedException();
-            }
         }
 
         sealed class PublisherTimeoutSelectorOther : ISubscriber<T>
@@ -417,11 +397,6 @@ namespace RxAdvancedFlow.internals.publisher
             public void OnError(Exception e)
             {
                 actual.OnError(e);
-            }
-
-            public void OnNext(object element)
-            {
-                throw new NotImplementedException();
             }
 
             public void OnNext(T t)

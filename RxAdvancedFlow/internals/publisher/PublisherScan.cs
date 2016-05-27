@@ -90,11 +90,6 @@ namespace RxAdvancedFlow.internals.publisher
                 BackpressureHelper.ScalarPostCompleteRequest(ref requested, n, ref value, actual);
             }
         }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
     }
 
     sealed class PublisherScan<T> : ISubscriber<T>
@@ -186,11 +181,6 @@ namespace RxAdvancedFlow.internals.publisher
         public void Request(long n)
         {
             s.Request(n);
-        }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
         }
     }
 

@@ -82,11 +82,6 @@ namespace RxAdvancedFlow.internals.publisher
             arbiter.Set(s);
         }
 
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
-
         sealed class PublisherOnErrorResumeNextInner : ISubscriber<T>
         {
 
@@ -118,11 +113,6 @@ namespace RxAdvancedFlow.internals.publisher
             public void OnSubscribe(ISubscription s)
             {
                 parent.Set(s);
-            }
-
-            public void OnNext(object element)
-            {
-                throw new NotImplementedException();
             }
         }
     }

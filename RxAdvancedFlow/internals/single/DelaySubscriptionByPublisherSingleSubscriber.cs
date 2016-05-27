@@ -88,10 +88,5 @@ namespace RxAdvancedFlow.internals.single
                 OnSubscribeHelper.ReportSubscriptionSet();
             }
         }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

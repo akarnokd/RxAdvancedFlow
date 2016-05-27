@@ -171,11 +171,6 @@ namespace RxAdvancedFlow.internals.publisher
             {
                 BackpressureHelper.SingleRequest(ref this.s, ref requested, n);
             }
-
-            public void OnNext(object element)
-            {
-                throw new NotImplementedException();
-            }
         }
     }
 }

@@ -86,11 +86,6 @@ namespace RxAdvancedFlow.internals.publisher
         {
             sds.Request(n, actual);
         }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
     }
 
     sealed class PublisherReduce<T> : ISubscriber<T>, ISubscription
@@ -190,11 +185,6 @@ namespace RxAdvancedFlow.internals.publisher
         public void Request(long n)
         {
             sds.Request(n, actual);
-        }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
         }
     }
 

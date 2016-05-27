@@ -30,10 +30,5 @@ namespace RxAdvancedFlow.internals.publisher
                 source.Connect(onConnect);
             }
         }
-
-        public void Subscribe(ISubscriber subscriber)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

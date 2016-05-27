@@ -87,11 +87,6 @@ namespace RxAdvancedFlow.internals.publisher
             arbiter.Set(s);
         }
 
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
-
         sealed class PublisherDelaySubscriptionActual : ISubscriber<T>
         {
             readonly PublisherDelaySubscription<T, U> parent;
@@ -122,11 +117,6 @@ namespace RxAdvancedFlow.internals.publisher
             public void OnComplete()
             {
                 actual.OnComplete();
-            }
-
-            public void OnNext(object element)
-            {
-                throw new NotImplementedException();
             }
         }
     }
@@ -178,11 +168,6 @@ namespace RxAdvancedFlow.internals.publisher
         {
             arbiter.Cancel();
             DisposableHelper.Terminate(ref d);
-        }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
         }
     }
 

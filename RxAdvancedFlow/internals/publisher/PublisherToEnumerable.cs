@@ -22,15 +22,19 @@ namespace RxAdvancedFlow.internals.publisher
 
         public IEnumerator<T> GetEnumerator()
         {
-            throw new NotImplementedException();
+            var o = new PublisherToEnumerableInner(prefetch);
+            source.Subscribe(o);
+            return o;
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return GetEnumerator();
+            var o = new PublisherToEnumerableInner(prefetch);
+            source.Subscribe(o);
+            return o;
         }
 
-        sealed class PublisherToEnumerableInner : ISubscriber<T>, IEnumerator<T>
+        sealed class PublisherToEnumerableInner : ISubscriber<T>, IEnumerator<T>, IEnumerator
         {
             readonly int prefetch;
 
@@ -179,11 +183,6 @@ namespace RxAdvancedFlow.internals.publisher
             public void Reset()
             {
                 throw new InvalidOperationException();
-            }
-
-            public void OnNext(object element)
-            {
-                throw new NotImplementedException();
             }
         }
     }

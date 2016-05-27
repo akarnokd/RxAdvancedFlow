@@ -96,10 +96,5 @@ namespace RxAdvancedFlow.internals.publisher
                 sds.Complete(false, actual);
             }
         }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

@@ -14,7 +14,7 @@ namespace RxAdvancedFlow.internals.single
 
         public void Subscribe(ISingleSubscriber<T> s)
         {
-            throw new NotImplementedException();
+            source.Subscribe(new SinglePublisherSubscriber(s));
         }
 
         sealed class SinglePublisherSubscriber : ISubscriber<T>, IDisposable
@@ -26,6 +26,11 @@ namespace RxAdvancedFlow.internals.single
             T value;
 
             ISubscription s;
+
+            internal SinglePublisherSubscriber(ISingleSubscriber<T> actual)
+            {
+                this.actual = actual;
+            }
 
             public void Dispose()
             {
@@ -76,11 +81,6 @@ namespace RxAdvancedFlow.internals.single
 
                     s.Request(long.MaxValue);
                 }
-            }
-
-            public void OnNext(object element)
-            {
-                throw new NotImplementedException();
             }
         }
     }

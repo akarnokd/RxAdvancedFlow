@@ -65,10 +65,5 @@ namespace RxAdvancedFlow.internals.publisher
                 actual.OnSubscribe(s);
             }
         }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

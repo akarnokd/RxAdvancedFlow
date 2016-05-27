@@ -68,10 +68,5 @@ namespace RxAdvancedFlow.internals.publisher
             sds.Cancel();
             s.Cancel();
         }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

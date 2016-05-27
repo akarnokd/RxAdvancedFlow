@@ -344,11 +344,6 @@ namespace RxAdvancedFlow.internals.publisher
             {
                 parent.Complete(index);
             }
-
-            public void OnNext(object element)
-            {
-                throw new NotImplementedException();
-            }
         }
 
         struct CombineEntry

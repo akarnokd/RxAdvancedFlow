@@ -14,11 +14,6 @@ namespace RxAdvancedFlow.internals.publisher
 
         }
 
-        public void Subscribe(ISubscriber subscriber)
-        {
-            throw new NotImplementedException();
-        }
-
         public void Subscribe(ISubscriber<T> s)
         {
             s.OnSubscribe(EmptySubscription.Instance);

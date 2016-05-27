@@ -280,11 +280,6 @@ namespace RxAdvancedFlow.internals.publisher
             Drain();
         }
 
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
-
         struct PublisherSwitchMapStruct
         {
             internal PublisherSwitchMapSubscriber sender;
@@ -362,11 +357,6 @@ namespace RxAdvancedFlow.internals.publisher
             internal void Request(long n)
             {
                 arbiter.Request(n);
-            }
-
-            public void OnNext(object element)
-            {
-                throw new NotImplementedException();
             }
         }
     }

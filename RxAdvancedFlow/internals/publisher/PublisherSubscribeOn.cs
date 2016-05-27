@@ -89,11 +89,6 @@ namespace RxAdvancedFlow.internals.publisher
             arbiter.Request(n);
         }
 
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
-
         sealed class FinishedDisposable : IDisposable
         {
             public void Dispose()
@@ -153,11 +148,6 @@ namespace RxAdvancedFlow.internals.publisher
             {
                 arbiter.Request(n);
             });
-        }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
         }
     }
 

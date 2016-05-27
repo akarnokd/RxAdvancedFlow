@@ -84,10 +84,5 @@ namespace RxAdvancedFlow.internals.publisher
                 requested.AddCap(n);
             }
         }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

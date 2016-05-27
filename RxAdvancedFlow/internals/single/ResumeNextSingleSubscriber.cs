@@ -51,7 +51,7 @@ namespace RxAdvancedFlow.internals.single
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            DisposableHelper.Terminate(ref d);
         }
     }
 }

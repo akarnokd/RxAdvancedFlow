@@ -94,10 +94,5 @@ namespace RxAdvancedFlow.internals.publisher
                 BackpressureHelper.Add(ref requested, n);
             }
         }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

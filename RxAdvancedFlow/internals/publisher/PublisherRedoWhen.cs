@@ -114,11 +114,6 @@ namespace RxAdvancedFlow.internals.publisher
                 while (Interlocked.Decrement(ref wip) != 0);
             }
         }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
     }
 
     sealed class PublisherRedoSignaller<T, U> : ISubscriber<U>, ISubscription
@@ -167,11 +162,6 @@ namespace RxAdvancedFlow.internals.publisher
         public void Request(long n)
         {
             arbiter.Request(n);
-        }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
         }
     }
 }

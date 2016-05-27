@@ -23,11 +23,6 @@ namespace RxAdvancedFlow.internals.completable
             throw new NotImplementedException();
         }
 
-        public void Subscribe(ISubscriber s)
-        {
-            throw new NotImplementedException();
-        }
-
         sealed class FirstSubscriber : ICompletableSubscriber, ISubscription
         {
             readonly ISubscriber<T> actual;
@@ -154,10 +149,6 @@ namespace RxAdvancedFlow.internals.completable
                     throw new NotImplementedException();
                 }
 
-                public void OnNext(object element)
-                {
-                    throw new NotImplementedException();
-                }
             }
         }
     }

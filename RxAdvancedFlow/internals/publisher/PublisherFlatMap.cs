@@ -524,11 +524,6 @@ namespace RxAdvancedFlow.internals.publisher
             }
         }
 
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
-
         sealed class PublisherMergeInner : ISubscriber<R>
         {
             readonly long id;
@@ -629,11 +624,6 @@ namespace RxAdvancedFlow.internals.publisher
             internal bool Poll(out R value)
             {
                 return q.Poll(out value);
-            }
-
-            public void OnNext(object element)
-            {
-                throw new NotImplementedException();
             }
         }
     }

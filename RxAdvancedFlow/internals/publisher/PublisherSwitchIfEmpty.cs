@@ -63,10 +63,5 @@ namespace RxAdvancedFlow.internals.publisher
         {
             arbiter.Cancel();
         }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

@@ -91,11 +91,6 @@ namespace RxAdvancedFlow.internals.publisher
             return new PublisherSkipUntilOther(this); 
         }
 
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
-
         sealed class PublisherSkipUntilOther : ISubscriber<U>
         {
             readonly PublisherSkipUntil<T, U> main;
@@ -113,11 +108,6 @@ namespace RxAdvancedFlow.internals.publisher
             public void OnError(Exception e)
             {
                 main.OnErrorOther(e);
-            }
-
-            public void OnNext(object element)
-            {
-                throw new NotImplementedException();
             }
 
             public void OnNext(U t)

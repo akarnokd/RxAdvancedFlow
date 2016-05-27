@@ -158,11 +158,6 @@ namespace RxAdvancedFlow.internals.publisher
             return Volatile.Read(ref done);
         }
 
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
-
         sealed class RefItem
         {
             internal readonly T value;

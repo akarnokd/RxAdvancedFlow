@@ -479,11 +479,6 @@ namespace RxAdvancedFlow.internals.publisher
         {
             return q.IsEmpty();
         }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
     }
 
 }

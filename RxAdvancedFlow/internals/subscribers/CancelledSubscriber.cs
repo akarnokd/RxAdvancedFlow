@@ -17,11 +17,6 @@ namespace RxAdvancedFlow.internals.subscribers
         {
         }
 
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
-
         public void OnNext(T t)
         {
         }

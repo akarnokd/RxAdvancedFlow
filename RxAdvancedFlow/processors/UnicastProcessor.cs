@@ -256,16 +256,6 @@ namespace RxAdvancedFlow.processors
             }
         }
 
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Subscribe(ISubscriber subscriber)
-        {
-            throw new NotImplementedException();
-        }
-
         sealed class UnicastSubscription : ISubscription
         {
             readonly UnicastProcessor<T> parent;

@@ -59,10 +59,5 @@ namespace RxAdvancedFlow.internals.subscribers
             DisposableHelper.Terminate(ref resource);
             s.Cancel();
         }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

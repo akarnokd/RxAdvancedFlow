@@ -13,15 +13,9 @@ namespace RxAdvancedFlow.internals.completable
             this.source = source;
         }
 
-        public void Subscribe(ISubscriber subscriber)
+        public void Subscribe(ISubscriber<T> subscriber)
         {
-            throw new NotImplementedException();
-        }
-
-        public void Subscribe(ISubscriber<T> s)
-        {
-
-            source.Subscribe(new InnerCompletableSubscriber(s));
+            source.Subscribe(new InnerCompletableSubscriber(subscriber));
         }
 
         sealed class InnerCompletableSubscriber : ICompletableSubscriber

@@ -97,10 +97,5 @@ namespace RxAdvancedFlow.internals.publisher
 
             actual.OnComplete();
         }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

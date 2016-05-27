@@ -57,11 +57,6 @@ namespace RxAdvancedFlow.internals.publisher
             }
         }
 
-        public void Subscribe(ISubscriber subscriber)
-        {
-            throw new NotImplementedException();
-        }
-
         sealed class PublisherRefCountConnection
         {
             IDisposable d;
@@ -175,11 +170,6 @@ namespace RxAdvancedFlow.internals.publisher
             public void Request(long n)
             {
                 s.Request(n);
-            }
-
-            public void OnNext(object element)
-            {
-                throw new NotImplementedException();
             }
         }
     }

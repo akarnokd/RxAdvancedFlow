@@ -120,10 +120,5 @@ namespace RxAdvancedFlow.internals.publisher
                 while (Interlocked.Decrement(ref wip) != 0);
             }
         }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

@@ -30,11 +30,6 @@ namespace RxAdvancedFlow.internals.publisher
             actual.OnError(e);
         }
 
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
-
         public void OnNext(T t)
         {
             long r = remaining;
@@ -138,11 +133,6 @@ namespace RxAdvancedFlow.internals.publisher
         internal void Run()
         {
             Volatile.Write(ref gate, true);
-        }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
         }
     }
 }

@@ -211,10 +211,5 @@ namespace RxAdvancedFlow.internals.publisher
             }
             return false;
         }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

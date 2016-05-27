@@ -108,11 +108,6 @@ namespace RxAdvancedFlow.internals.publisher
                 s.Cancel();
             }
         }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
     }
 
 
@@ -250,11 +245,6 @@ namespace RxAdvancedFlow.internals.publisher
             {
                 s.Cancel();
             }
-        }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
         }
     }
 
@@ -395,11 +385,6 @@ namespace RxAdvancedFlow.internals.publisher
             {
                 s.Cancel();
             }
-        }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
         }
     }
 

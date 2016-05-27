@@ -121,11 +121,6 @@ namespace RxAdvancedFlow.internals.publisher
                 BackpressureHelper.Add(ref requested, n);
             }
         }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
     }
 
     sealed class RefValue<T>
@@ -162,11 +157,6 @@ namespace RxAdvancedFlow.internals.publisher
         public void OnError(Exception e)
         {
             actual.OtherError(e);
-        }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
         }
 
         public void OnNext(U t)

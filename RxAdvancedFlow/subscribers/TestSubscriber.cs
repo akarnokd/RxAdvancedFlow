@@ -505,10 +505,5 @@ namespace RxAdvancedFlow.subscribers
         {
             return subscriptions;
         }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

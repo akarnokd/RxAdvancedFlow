@@ -37,11 +37,6 @@ namespace RxAdvancedFlow.internals.publisher
             actual.OnError(e);
         }
 
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
-        }
-
         public void OnNext(T t)
         {
             ArrayQueue<T> q = queue;
@@ -154,11 +149,6 @@ namespace RxAdvancedFlow.internals.publisher
         public void Cancel()
         {
             s.Cancel();
-        }
-
-        public void OnNext(object element)
-        {
-            throw new NotImplementedException();
         }
 
         struct TimedValue

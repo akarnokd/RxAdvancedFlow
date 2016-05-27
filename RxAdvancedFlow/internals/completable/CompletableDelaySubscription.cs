@@ -201,11 +201,6 @@ namespace RxAdvancedFlow.internals.completable
                     s.Request(long.MaxValue);
                 }
             }
-
-            public void OnNext(object element)
-            {
-                throw new NotImplementedException();
-            }
         }
     }
 }

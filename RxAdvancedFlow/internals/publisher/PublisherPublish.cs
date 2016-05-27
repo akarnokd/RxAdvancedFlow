@@ -85,11 +85,6 @@ namespace RxAdvancedFlow.internals.publisher
             Interlocked.CompareExchange(ref main, null, inner);
         }
 
-        public void Subscribe(ISubscriber subscriber)
-        {
-            throw new NotImplementedException();
-        }
-
         sealed class PublisherPublishMain : ISubscriber<T>, IDisposable
         {
             readonly PublisherPublish<T> parent;
@@ -303,11 +298,6 @@ namespace RxAdvancedFlow.internals.publisher
                 }
 
                 return false;
-            }
-
-            public void OnNext(object element)
-            {
-                throw new NotImplementedException();
             }
         }
 

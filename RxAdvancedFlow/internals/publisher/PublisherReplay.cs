@@ -63,11 +63,6 @@ namespace RxAdvancedFlow.internals.publisher
             current.Subscribe(s);
         }
 
-        public void Subscribe(ISubscriber subscriber)
-        {
-            throw new NotImplementedException();
-        }
-
         sealed class PublisherReplayMain : ISubscriber<T>, IDisposable
         {
             readonly int bufferSize;
@@ -308,11 +303,6 @@ namespace RxAdvancedFlow.internals.publisher
             void Remove(PublisherReplayInner inner)
             {
                 ProcessorHelper.Remove(ref subscribers, inner, Terminated, Empty);
-            }
-
-            public void OnNext(object element)
-            {
-                throw new NotImplementedException();
             }
 
             sealed class Node
